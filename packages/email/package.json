@@ -1,0 +1,30 @@
+{
+  "name": "@gemsutopia/email",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./templates": {
+      "types": "./dist/templates.d.ts",
+      "import": "./dist/templates.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "resend": "^6.7.0"
+  },
+  "devDependencies": {
+    "@gemsutopia/tsconfig": "workspace:*",
+    "typescript": "^5.9.3"
+  }
+}

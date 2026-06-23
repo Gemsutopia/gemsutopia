@@ -1,0 +1,2 @@
+id,email,user_id,newsletter,promotions,order_updates,auction_updates,price_alerts,stock_alerts,is_verified,verification_token,verified_at,unsubscribe_token,unsubscribed_at,source,created_at,updated_at
+de19a2fc-90f3-41ed-bb4a-2250934120bb,wilson.asher00@gmail.com,,t,t,t,f,f,f,f,,,b1c1ca8f-0cb9-466d-80cb-a8aac96b245f,,footer_newsletter,2026-01-23 04:24:27.963986+00,2026-01-23 04:24:27.963986+00

@@ -1,0 +1,15 @@
+/* TEAM */
+Site: Gemsutopia
+Location: Canada
+
+/* TECHNOLOGY */
+Framework: Next.js 16
+Database: Neon (PostgreSQL)
+Styling: Tailwind CSS, HeroUI
+Payments: Stripe, PayPal
+Hosting: Vercel
+
+/* SITE */
+Last update: 2026/01/12
+Standards: HTML5, CSS3, ES6+
+Components: React 19

@@ -1,0 +1,9 @@
+{
+  "installCommand": "pnpm install",
+  "crons": [
+    {
+      "path": "/api/cron/end-auctions",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

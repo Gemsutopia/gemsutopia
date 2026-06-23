@@ -1,0 +1,33 @@
+/* Product card styling */
+.product-card {
+  will-change: transform;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.product-card img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+/* Hover effects for desktop only */
+@media (hover: hover) and (pointer: fine) {
+  .product-card:hover {
+    transform: translateY(-8px) !important;
+  }
+}
+
+/* Featured carousel animation setup */
+.featured-carousel {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+}

@@ -1,0 +1,10 @@
+.maintenance-overlay {
+  touch-action: none;
+  user-select: none;
+  overscroll-behavior: none;
+}
+
+.maintenance-background {
+  touch-action: none;
+  overflow-y: hidden;
+}

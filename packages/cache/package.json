@@ -1,0 +1,27 @@
+{
+  "name": "@gemsutopia/cache",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.36.1"
+  },
+  "devDependencies": {
+    "@gemsutopia/tsconfig": "workspace:*",
+    "typescript": "^5.9.3"
+  }
+}

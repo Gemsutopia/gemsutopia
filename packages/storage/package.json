@@ -1,0 +1,26 @@
+{
+  "name": "@gemsutopia/storage",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.90.1"
+  },
+  "devDependencies": {
+    "@gemsutopia/tsconfig": "workspace:*",
+    "typescript": "^5.9.3"
+  }
+}

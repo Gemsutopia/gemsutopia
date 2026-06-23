@@ -1,0 +1,9 @@
+id,question,answer,category,sort_order,is_active,is_featured,view_count,helpful_count,not_helpful_count,metadata,created_at,updated_at
+999f3d78-bc03-47a4-86d0-e98da8c65a1a,What is your return policy?,"If you're not satisfied with your purchase, returns are accepted within 5 business days of receiving your parcel. Return shipping is paid by the customer and must include tracking.
+",general,5,t,f,0,0,0,{},2025-10-25 18:51:19.012869+00,2025-10-25 18:51:19.012869+00
+c29f800e-ec21-4e50-b202-a10811c76ec9,Are your products authentic? ,"Yes! Everything we offer is authentic unless stated otherwise in the listing. Some pieces are collected personally during rockhounding trips, and anything sourced from other regions is purchased from reputable small miners and suppliers. Each stone is inspected and verified before being listed.",general,1,t,f,0,0,0,{},2025-09-02 00:27:29.499447+00,2025-10-25 18:45:02.303561+00
+c119d1b8-7c9d-4a24-8aa5-6ef0e0cd2c29,How long does shipping take?,"Estimated delivery (Canada): 3–15 business days 
+Estimated delivery (USA): 5–15 business days ",general,2,t,f,0,0,0,{},2025-09-02 00:33:57.049651+00,2025-10-25 18:50:05.41649+00
+93d288f9-41c2-4cac-bc5a-8b82c354959c,Do you ship internationally?,"We currently only ship within Canada and the United States.
+International shipping will return in the future once we can offer fair and reliable rates worldwide.",general,4,t,f,0,0,0,{},2025-08-11 08:05:43.016903+00,2025-10-25 18:50:17.013536+00
+73b1bc50-0fb6-4efe-ac64-05c1a5acfec7,How do I track my order?,"Once your order is shipped, you'll receive a tracking number via email. You can use this number to track your package on our shipping partner's website.",general,3,t,f,0,0,0,{},2025-09-02 00:32:41.697818+00,2025-10-25 18:50:31.843679+00

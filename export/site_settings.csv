@@ -1,0 +1,37 @@
+id,key,value,type,category,label,description,is_required,validation_rules,is_public,created_at,updated_at
+50f723e8-e5c8-4a2e-a640-62c12f1f5e12,site_tagline,"""\""Discover the beauty of natural gemstones\""""",string,general,,,f,{},f,2025-08-25 23:39:51.087694+00,2026-01-23 06:26:02.345089+00
+7eeb8886-bc0a-48bb-a6a9-8f769b3f8cb8,seo_title,"""\""Gemsutopia - Ethically sourced & Naturally found Minerals and Gems\""""",string,general,,,f,{},f,2025-08-25 23:39:51.087694+00,2026-01-23 06:26:02.58292+00
+d7e134c0-1047-43d1-bfcd-e7c53975a23e,seo_description,"""\""Beautiful minerals and gems from all over the world! Small Business from Airdrie, Alberta Canada\""""",string,general,,,f,{},f,2025-08-25 23:39:51.087694+00,2026-01-23 06:26:02.655585+00
+4fb3619e-e078-47a1-a012-30d3dbff73ac,seo_keywords,"""\""gemstones, jewelry, natural stones, precious gems, Canadian gem dealer, Alberta, ethical sourcing\""""",string,general,,,f,{},f,2025-08-25 23:39:51.087694+00,2026-01-23 06:26:02.733338+00
+825df9c4-8acc-4ec4-8aa9-cae4c46346bc,seo_author,"""\""Gemsutopia\""""",string,general,,,f,{},f,2025-08-25 23:39:51.087694+00,2026-01-23 06:26:02.805153+00
+9aaf56a9-52a6-432c-abd7-d8cb003f2964,site_favicon,"""\""/favicon.ico\""""",string,general,,,f,{},f,2025-08-25 23:39:51.087694+00,2026-01-23 06:26:02.877227+00
+5ed7cc74-832c-45b2-9f7d-13ba1fe72688,site_name,"""\""Gemsutopia - Natural Minerals & Gems\""""",string,general,,,f,{},f,2025-08-25 23:39:51.087694+00,2026-01-23 06:26:02.947709+00
+4880ba22-1f97-4352-948e-2c494674c7fc,single_item_shipping_cad,20,string,general,,,f,{},f,2025-08-26 10:41:46.738011+00,2026-01-23 06:26:03.018445+00
+f17dd9bf-c8ac-4292-92b1-4d7f15d2f0da,single_item_shipping_usd,16.5,string,general,,,f,{},f,2025-08-26 10:41:46.738011+00,2026-01-23 06:26:03.090041+00
+0ccf4c3d-5884-4631-b8bf-a486161dca8b,combined_shipping_cad,25,string,general,,,f,{},f,2025-08-26 10:41:46.738011+00,2026-01-23 06:26:03.163563+00
+b018f83b-29d5-48d9-832f-aae9dcfa3774,combined_shipping_usd,18,string,general,,,f,{},f,2025-08-26 10:41:46.738011+00,2026-01-23 06:26:03.235719+00
+c4f578c2-b846-41f8-be58-6b8a0bf2b8aa,combined_shipping_enabled,true,string,general,,,f,{},f,2025-08-26 10:41:46.738011+00,2026-01-23 06:26:03.307166+00
+83890f62-ef02-4248-bdc1-afbf8760e1f9,combined_shipping_threshold,2,string,general,,,f,{},f,2025-08-26 10:41:46.738011+00,2026-01-23 06:26:03.379078+00
+6d12de8c-571c-42cc-8d55-48de52f42736,enable_shipping,true,string,general,,,f,{},f,2025-08-26 10:41:46.738011+00,2026-01-23 06:26:03.454655+00
+e7b56e11-a2c6-48e5-92fc-ec58e8eccffe,international_shipping,false,string,general,,,f,{},f,2025-08-26 10:41:46.738011+00,2026-01-23 06:26:03.530635+00
+c88cb8ba-c286-44ab-a842-389753ff4042,open_graph_title,"""\""Gemsutopia - Premium Canadian Gemstones\""""",string,general,,,f,{},f,2025-08-25 23:39:51.087694+00,2026-01-23 06:26:03.605047+00
+aecaa655-1f9d-435b-a1d9-3fc3d51e6bf8,open_graph_description,"""\""Discover authentic gemstones, natural crystals, and precious minerals at Gemsutopia. Canada's premier gem dealer offering hand-selected stones for collectors and enthusiasts. Ethically sourced from Alberta with expert curation.\""""",string,general,,,f,{},f,2025-08-25 23:39:51.087694+00,2026-01-23 06:26:03.67753+00
+49d97d80-f14e-4cde-8cdd-03db6ee85efc,open_graph_image,"""\""https://odqcbgwakcysfluoinmn.supabase.co/storage/v1/object/public/product-images/social/1756165668987-ny5z0m5lac-wilson.asher00_at_gmail.com.png\""""",string,general,,,f,{},f,2025-08-25 23:39:51.087694+00,2026-01-23 06:26:03.751482+00
+3f65d03e-6e88-4779-a9fc-905aa7776447,twitter_title,"""\""Gemsutopia - Premium Canadian Gemstones\""""",string,general,,,f,{},f,2025-08-25 23:39:51.087694+00,2026-01-23 06:26:03.824378+00
+50ce127d-8ee9-4b58-b1ee-27bcb8f60bb6,twitter_description,"""\""Discover authentic gemstones, natural crystals, and precious minerals at Gemsutopia. Canada's premier gem dealer offering hand-selected stones for collectors and enthusiasts. Ethically sourced from Alberta with expert curation.\""""",string,general,,,f,{},f,2025-08-25 23:39:51.087694+00,2026-01-23 06:26:03.897564+00
+a9179099-a92d-4539-b301-62b4cecb7e9a,twitter_image,"""\""https://odqcbgwakcysfluoinmn.supabase.co/storage/v1/object/public/product-images/social/1756165669983-wemqgr2zm7-wilson.asher00_at_gmail.com.png\""""",string,general,,,f,{},f,2025-08-25 23:39:51.087694+00,2026-01-23 06:26:03.970833+00
+4e837d31-63b9-431b-856f-91b2b9884b81,default_currency,"""\""USD\""""",string,general,Default Currency,,f,{},f,2026-01-23 06:26:04.045006+00,2026-01-23 06:26:04.045006+00
+8a751587-8538-47b8-a75c-695aed6f081a,timezone,"""\""America/Edmonton\""""",string,general,Timezone,,f,{},f,2026-01-23 06:26:04.118455+00,2026-01-23 06:26:04.118455+00
+993d9ec7-93f3-443c-bb98-e084079bec4f,weight_unit,"""\""ct\""""",string,general,Weight Unit,,f,{},f,2026-01-23 06:26:04.191335+00,2026-01-23 06:26:04.191335+00
+b229ec0b-6a3d-473f-8304-f232fa0229e2,dimension_unit,"""\""in\""""",string,general,Dimension Unit,,f,{},f,2026-01-23 06:26:04.265592+00,2026-01-23 06:26:04.265592+00
+e7944825-f6e4-4dc9-8662-0dbe94c9d825,support_email,"""\""gemsutopia@gmail.con\""""",string,general,Support Email,,f,{},f,2026-01-23 06:26:04.338827+00,2026-01-23 06:26:04.338827+00
+dfdd6696-b87f-4b77-8e3a-655617fb92b7,contact_email,"""\""gemsutopia@gmail.con\""""",string,general,Contact Email,,f,{},f,2026-01-23 06:26:04.419104+00,2026-01-23 06:26:04.419104+00
+1daed78e-3aa9-41bd-8b59-8149ebca1af0,store_tagline,"""\""Ethically Sourced, Naturally Found Gems\""""",string,general,Store Tagline,,f,{},f,2026-01-23 06:26:04.49296+00,2026-01-23 06:26:04.49296+00
+aad99b87-f44a-4152-b97e-20af25fe6056,crypto_enabled,true,boolean,payments,Crypto Enabled,,f,{},f,2026-01-23 06:26:38.603178+00,2026-01-23 06:26:38.603178+00
+c0330d9f-0048-4962-8fa0-8bce53b52ab5,etransfer_enabled,true,boolean,payments,Etransfer Enabled,,f,{},f,2026-01-23 06:26:38.841292+00,2026-01-23 06:26:38.841292+00
+bc8c73b4-5355-4eb6-8fba-f34415ba68be,tax_enabled,false,boolean,payments,Tax Enabled,,f,{},f,2026-01-23 06:26:38.918342+00,2026-01-23 06:26:38.918342+00
+0f32f476-9e1e-4361-8e35-bb8c67a143ba,notify_new_customer,true,boolean,notifications,Notify New Customer,,f,{},f,2026-01-23 06:27:18.026479+00,2026-01-23 06:27:18.026479+00
+47d7c78c-aa63-4e82-a9b4-f5bc79e89fd4,maintenance_mode,true,boolean,store,Maintenance Mode,,f,{},f,2026-01-23 06:27:34.213478+00,2026-01-23 06:27:34.213478+00
+79461c2d-c83f-4be8-90e3-d5831f5de749,admin_name,"""\""Reese\""""",string,admin,Admin Name,,f,{},f,2026-01-23 06:28:04.495996+00,2026-01-23 06:28:27.260109+00
+fad8cc0e-759d-4f08-b5a5-19207467f18d,admin_email,"""\""gemsutopia@gmail.com\""""",string,notifications,Admin Email,,f,{},f,2026-01-23 06:27:18.261898+00,2026-01-23 06:28:27.479633+00
+f7e14161-3f5c-4dfb-a68b-6c21657d0791,two_factor_enabled,false,boolean,admin,Two Factor Enabled,,f,{},f,2026-01-23 06:28:04.784521+00,2026-01-23 06:28:27.552881+00

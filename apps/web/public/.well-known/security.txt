@@ -1,0 +1,7 @@
+# Security Policy for Gemsutopia
+# https://securitytxt.org/
+
+Contact: mailto:gemsutopia@gmail.com
+Preferred-Languages: en
+Canonical: https://gemsutopia.com/.well-known/security.txt
+Expires: 2027-01-01T00:00:00.000Z

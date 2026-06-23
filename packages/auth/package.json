@@ -1,0 +1,38 @@
+{
+  "name": "@gemsutopia/auth",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./admin": {
+      "types": "./dist/admin.d.ts",
+      "import": "./dist/admin.js"
+    },
+    "./user": {
+      "types": "./dist/user.d.ts",
+      "import": "./dist/user.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@gemsutopia/cache": "workspace:*",
+    "@gemsutopia/database": "workspace:*",
+    "better-auth": "^1.4.11",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "devDependencies": {
+    "@gemsutopia/tsconfig": "workspace:*",
+    "@types/jsonwebtoken": "^9.0.10",
+    "typescript": "^5.9.3"
+  }
+}

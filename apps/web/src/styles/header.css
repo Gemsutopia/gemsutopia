@@ -1,0 +1,4 @@
+.marquee-gradient {
+  /* Dynamic gradient will be set via CSS custom properties */
+  background: linear-gradient(to right, var(--gradient-from), var(--gradient-to));
+}

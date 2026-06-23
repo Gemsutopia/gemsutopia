@@ -1,0 +1,10 @@
+.hero-carousel {
+  /* Dynamic transform will be set via CSS custom properties */
+  transform: translateX(var(--translate-x)) translateX(var(--touch-offset));
+  width: var(--carousel-width);
+  transition: var(--transition);
+}
+
+.hero-slide {
+  width: 100vw;
+}
