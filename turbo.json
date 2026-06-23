@@ -35,15 +35,11 @@
         "NEXT_PUBLIC_SUPABASE_ANON_KEY",
         "NEXT_PUBLIC_PUSHER_KEY",
         "NEXT_PUBLIC_PUSHER_CLUSTER",
-<<<<<<< HEAD
-        "NEXT_PUBLIC_HCAPTCHA_SITE_KEY"
-=======
         "NEXT_PUBLIC_HCAPTCHA_SITE_KEY",
         "DATABASE_URL",
         "WORKSPACE_ID",
         "BETTER_AUTH_SECRET",
         "STRIPE_PUBLISHABLE_KEY"
->>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452
       ]
     },
     "dev": {
@@ -68,8 +64,4 @@
     },
     "format:check": {}
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452

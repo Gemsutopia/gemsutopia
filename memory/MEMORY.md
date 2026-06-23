@@ -19,6 +19,11 @@ Quickdash is a **headless Backend-as-a-Service** — not just ecommerce.
 ## Current Work Stream (as of 2026-02-10)
 See [workstream.md](./workstream.md) for detailed state.
 
+## Deployment Recovery (2026-06-22)
+- A prior unrelated-history merge was committed with literal conflict markers still present in nine files.
+- The markers were removed locally, including the invalid `apps/web/package.json` that blocked Vercel parsing and malformed `turbo.json`.
+- No Git commit or push was made by Codex; the user must commit and push the repair before redeploying.
+
 ## User Preferences & Rules
 - **NEVER commit or push** — user handles all git operations manually
 - Provide commit messages in chat when sections are done (no Co-Authored-By)

@@ -257,17 +257,10 @@ export default function AuctionsPage() {
           {/* Page Header */}
           <div className="mb-8 text-center xs:mb-10 md:mb-12">
             <h1 className="mb-3 font-[family-name:var(--font-bacasime)] text-3xl font-normal text-white xs:mb-4 xs:text-4xl md:text-5xl lg:text-6xl">
-<<<<<<< HEAD
               Gemsutopia Reserve Auctions
             </h1>
             <p className="mx-auto max-w-2xl text-sm text-white/60 xs:text-base md:text-lg">
               Occasional reserve auctions featuring select gemstones, minerals, and collector specimens.
-=======
-              Reserve Auctions
-            </h1>
-            <p className="mx-auto max-w-2xl text-sm text-white/60 xs:text-base md:text-lg">
-              Bid on rare and unique gemstones. Real-time bidding with live updates.
->>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452
             </p>
           </div>
 

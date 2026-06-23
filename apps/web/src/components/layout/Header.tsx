@@ -21,21 +21,8 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 
 const shopLinks = [
   { label: 'All Gems', href: '/shop' },
-<<<<<<< HEAD
   { label: 'Featured', href: '/shop/featured' },
   { label: 'Auctions', href: '/auctions' },
-=======
-  { label: 'New Arrivals', href: '/shop/new-arrivals' },
-  { label: 'Featured', href: '/shop/featured' },
-  { label: 'Rare Finds', href: '/shop/rare-finds' },
-];
-
-const auctionLinks = [
-  { label: 'All Auctions', href: '/auctions' },
-  { label: 'Live Now', href: '/auctions/live' },
-  { label: 'Ending Soon', href: '/auctions/ending-soon' },
-  { label: 'Upcoming', href: '/auctions/upcoming' },
->>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452
 ];
 
 const defaultSocials: Record<string, string> = {
@@ -67,13 +54,7 @@ export default function Header() {
   const [bagHovered, setBagHovered] = useState(false);
   const [socialsOpen, setSocialsOpen] = useState(false);
   const [shopExpanded, setShopExpanded] = useState(false);
-<<<<<<< HEAD
   const [shopDropdownOpen, setShopDropdownOpen] = useState(false);
-=======
-  const [auctionsExpanded, setAuctionsExpanded] = useState(false);
-  const [shopDropdownOpen, setShopDropdownOpen] = useState(false);
-  const [auctionsDropdownOpen, setAuctionsDropdownOpen] = useState(false);
->>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>(defaultSocials);
 
   // Fetch socials from DB
@@ -107,23 +88,10 @@ export default function Header() {
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
     setShopExpanded(false);
-<<<<<<< HEAD
-=======
-    setAuctionsExpanded(false);
->>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452
   };
 
   const handleShopClick = () => {
     setShopExpanded(!shopExpanded);
-<<<<<<< HEAD
-=======
-    setAuctionsExpanded(false);
-  };
-
-  const handleAuctionsClick = () => {
-    setAuctionsExpanded(!auctionsExpanded);
-    setShopExpanded(false);
->>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452
   };
 
   return (
@@ -213,51 +181,6 @@ export default function Header() {
                 )}
               </AnimatePresence>
             </div>
-<<<<<<< HEAD
-=======
-            <div
-              onMouseEnter={() => setAuctionsDropdownOpen(true)}
-              onMouseLeave={() => setAuctionsDropdownOpen(false)}
-              className="relative"
-            >
-              <Link
-                href="/auctions"
-                className="flex items-center gap-1 text-sm font-medium text-white/80 transition-colors hover:text-white"
-              >
-                Auctions
-                <IconChevronDown size={14} />
-              </Link>
-              <AnimatePresence>
-                {auctionsDropdownOpen && (
-                  <motion.div
-                    className="absolute top-full left-1/2 -translate-x-1/2 pt-4"
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    <div className="min-w-[160px] rounded-xl border border-white/10 bg-black/90 p-2 backdrop-blur-xl">
-                      {auctionLinks.map((link, index) => (
-                        <motion.div
-                          key={link.href}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.03 }}
-                        >
-                          <Link
-                            href={link.href}
-                            className="block rounded-lg px-3 py-2 text-sm text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-                          >
-                            {link.label}
-                          </Link>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
->>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452
             <Link
               href="/about"
               className="text-sm font-medium text-white/80 transition-colors hover:text-white"
@@ -362,10 +285,6 @@ export default function Header() {
             transition={{ duration: 0.2 }}
             onClick={() => {
               setShopExpanded(false);
-<<<<<<< HEAD
-=======
-              setAuctionsExpanded(false);
->>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452
             }}
           >
             <div className="flex h-full flex-col px-2">
@@ -418,57 +337,6 @@ export default function Header() {
                     )}
                   </AnimatePresence>
                 </motion.div>
-<<<<<<< HEAD
-=======
-
-                {/* Auctions Accordion */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAuctionsClick();
-                    }}
-                    className="flex h-12 w-full items-center justify-between rounded-2xl border border-white/[0.03] bg-white/5 px-6 text-left text-lg font-medium text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-                  >
-                    <span>Auctions</span>
-                    <IconChevronDown size={20} className="text-white/60" />
-                  </button>
-                  <AnimatePresence>
-                    {auctionsExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="flex flex-col gap-1 pt-2 pl-4">
-                          {auctionLinks.map((link, index) => (
-                            <motion.div
-                              key={link.href}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.05 }}
-                            >
-                              <Link
-                                href={link.href}
-                                className="flex h-10 w-full items-center rounded-xl px-4 text-base text-white/60 transition-colors hover:bg-white/5 hover:text-white"
-                                onClick={closeMobileMenu}
-                              >
-                                {link.label}
-                              </Link>
-                            </motion.div>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
->>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}

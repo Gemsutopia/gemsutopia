@@ -10,13 +10,9 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 const tabContent: Record<string, { label: string; href: string }[]> = {
   Shop: [
     { label: 'All Gems', href: '/shop' },
-<<<<<<< HEAD
-    { label: 'Featured', href: '/shop/featured' },
-=======
     { label: 'New Arrivals', href: '/shop/new-arrivals' },
     { label: 'Featured', href: '/shop/featured' },
     { label: 'Rare Finds', href: '/shop/rare-finds' },
->>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452
   ],
   Auctions: [
     { label: 'All Auctions', href: '/auctions' },
