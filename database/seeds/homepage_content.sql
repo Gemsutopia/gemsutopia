@@ -59,8 +59,16 @@ INSERT INTO site_content (section, key, content_type, value, is_active) VALUES
 -- Stats Seed Data (using the stats table)
 DELETE FROM stats;
 INSERT INTO stats (title, value, description, icon, data_source, is_real_time, sort_order, is_active) VALUES
+<<<<<<< HEAD
 ('Years in Business', '5+', 'Years serving gem collectors', 'calendar', 'manual', false, 1, true),
 ('Five-Star Reviews', '175+', 'Customer satisfaction rating', 'star', 'reviews', true, 2, true),
 ('Countries Served', '12+', 'International shipping', 'trending-up', 'manual', false, 3, true),
 ('Orders Shipped', '250+', 'Premium gemstones delivered', 'package', 'manual', false, 4, true),
 ('Authentic Material', '100%', 'Verified authentic material', 'package', 'manual', false, 5, true);
+=======
+('Years in Business', '3+', 'Years serving gem collectors', 'calendar', 'manual', false, 1, true),
+('Rocks Sold', '250+', 'Premium gemstones delivered', 'package', 'manual', false, 2, true),
+('5 Star Reviews', '175+', 'Customer satisfaction rating', 'star', 'reviews', true, 3, true),
+('Countries Served', '12+', 'International shipping', 'trending-up', 'manual', false, 4, true),
+('Error-Free Orders', '200+', 'Perfect order fulfillment', 'package', 'manual', false, 5, true);
+>>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452

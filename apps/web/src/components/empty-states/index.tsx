@@ -133,8 +133,13 @@ export function EmptyProducts({ category }: { category?: string }) {
 export function EmptyAuctions() {
   return (
     <EmptyState
+<<<<<<< HEAD
       title="Next Auction Coming Soon"
       description="We periodically host reserve auctions for select Gemsutopia pieces. Browse the shop or follow our socials to be notified when the next auction goes live."
+=======
+      title="No Active Auctions"
+      description="There are no auctions running right now. Check back soon for exciting new listings!"
+>>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452
       action={{ label: 'Browse Shop', href: '/shop' }}
     />
   );

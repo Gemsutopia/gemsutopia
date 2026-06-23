@@ -118,7 +118,11 @@ export default function Shop() {
               Shop
             </h1>
             <p className="mx-auto max-w-2xl font-[family-name:var(--font-inter)] text-sm text-white/60 xs:text-base md:text-lg">
+<<<<<<< HEAD
               Explore our curated collection of rare gemstones, minerals, and collector specimens
+=======
+              Explore our curated collection of premium gemstones
+>>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452
             </p>
           </div>
 

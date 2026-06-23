@@ -3,8 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+<<<<<<< HEAD
     "dev": "next dev --turbopack --port 3000",
     "dev:webpack": "next dev --port 3000",
+=======
+    "dev": "NODE_OPTIONS=\"--max_old_space_size=8192\" next dev --turbopack --port 3000",
+    "dev:webpack": "NODE_OPTIONS=\"--max_old_space_size=8192\" next dev --port 3000",
+>>>>>>> bb3ed5ed1183a5b7b1183ac4f0395192fd320452
     "build": "next build",
     "start": "next start",
     "lint": "ESLINT_USE_FLAT_CONFIG=true next lint --ignore-during-builds"
