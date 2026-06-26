@@ -8,9 +8,15 @@
 
 import { StorefrontClient } from './storefront-client'
 
+const storefrontApiKey = process.env.NEXT_PUBLIC_STOREFRONT_API_KEY
+
+if (!storefrontApiKey) {
+	throw new Error('Missing NEXT_PUBLIC_STOREFRONT_API_KEY')
+}
+
 // Create the store instance
 export const store = new StorefrontClient({
-	apiKey: process.env.NEXT_PUBLIC_STOREFRONT_API_KEY || 'sf_your_api_key_here',
+	apiKey: storefrontApiKey,
 	baseUrl: process.env.NEXT_PUBLIC_STOREFRONT_URL || 'https://app.quickdash.net',
 })
 

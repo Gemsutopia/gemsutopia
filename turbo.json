@@ -29,6 +29,8 @@
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "env": [
         "NEXT_PUBLIC_SITE_URL",
+        "NEXT_PUBLIC_STOREFRONT_API_KEY",
+        "NEXT_PUBLIC_STOREFRONT_URL",
         "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_PAYPAL_CLIENT_ID",
         "NEXT_PUBLIC_SUPABASE_URL",
