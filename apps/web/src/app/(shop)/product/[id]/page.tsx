@@ -12,6 +12,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   try {
     // Fetch from Quickdash Storefront API (supports both ID and slug)
     const { product: quickdashProduct } = await store.products.get(id);
+    const productImages = [
+      quickdashProduct.thumbnail,
+      ...(quickdashProduct.images || []),
+    ].filter((image, index, images): image is string =>
+      Boolean(image) && images.indexOf(image) === index
+    );
 
     // Map to local format expected by ProductContent
     const product = {
@@ -21,7 +27,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       price: parseFloat(quickdashProduct.price),
       salePrice: quickdashProduct.compareAtPrice ? parseFloat(quickdashProduct.compareAtPrice) : undefined,
       onSale: !!quickdashProduct.compareAtPrice && parseFloat(quickdashProduct.compareAtPrice) > parseFloat(quickdashProduct.price),
-      images: quickdashProduct.images || [],
+      images: productImages,
       inventory: 99, // TODO: Get from stock when available
       sku: (quickdashProduct as any).sku || `SKU-${quickdashProduct.id.slice(0, 8)}`,
       category: quickdashProduct.category,

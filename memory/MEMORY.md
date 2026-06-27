@@ -24,6 +24,12 @@ See [workstream.md](./workstream.md) for detailed state.
 - The markers were removed locally, including the invalid `apps/web/package.json` that blocked Vercel parsing and malformed `turbo.json`.
 - No Git commit or push was made by Codex; the user must commit and push the repair before redeploying.
 
+## Quickdash Storefront Publishing Fixes (2026-06-27)
+- Product detail pages now use media returned by Quickdash instead of hardcoded placeholder gem images.
+- `apps/web/src/app/(shop)/product/[id]/page.tsx` builds a de-duplicated product image list with the Quickdash thumbnail first.
+- `apps/web/src/app/(shop)/product/[id]/ProductContent.tsx` falls back to placeholder media only when Quickdash returns no product images.
+- Local TypeScript verification passed; lint still needs script cleanup because `next lint --ignore-during-builds` is unsupported by the current Next version.
+
 ## User Preferences & Rules
 - **NEVER commit or push** — user handles all git operations manually
 - Provide commit messages in chat when sections are done (no Co-Authored-By)

@@ -71,8 +71,7 @@ const placeholderMedia = [
 ];
 
 export default function ProductContent({ product }: ProductContentProps) {
-  // Use placeholders for testing, remove this later
-  const images = placeholderMedia;
+  const images = product.images?.length ? product.images : placeholderMedia;
   const [selectedImage, setSelectedImage] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
