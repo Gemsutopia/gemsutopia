@@ -14,7 +14,6 @@ import OrderSuccess from './OrderSuccess';
 import PaymentError from '@/components/error-states/PaymentError';
 import { IconArrowLeft, IconCheck } from '@tabler/icons-react';
 import Image from 'next/image';
-import { calculateShipping, ShippingSettings } from '@/lib/utils/shipping';
 import { getStoredReferralCode, clearStoredReferralCode } from '@/hooks/useReferralTracking';
 
 type CheckoutCurrency = 'CAD' | 'USD';
@@ -30,6 +29,20 @@ function convertCheckoutAmount(
   if (fromCurrency === toCurrency) return roundMoney(amount);
   if (fromCurrency === 'CAD' && toCurrency === 'USD') return roundMoney(amount * cadToUsdRate);
   return roundMoney(amount / cadToUsdRate);
+}
+
+function getShippingCountryCode(country: string) {
+  const normalized = country.toLowerCase().trim();
+  if (normalized === 'canada' || normalized === 'ca' || normalized === 'can') return 'CA';
+  if (
+    normalized === 'united states' ||
+    normalized === 'usa' ||
+    normalized === 'us' ||
+    normalized === 'united states of america'
+  ) {
+    return 'US';
+  }
+  return country;
 }
 
 interface CheckoutData {
@@ -302,8 +315,6 @@ export default function CheckoutFlow() {
     discountCodeId?: string;
   } | null>(null);
   const [discountError, setDiscountError] = useState<string>('');
-  const [useCombinedShipping, setUseCombinedShipping] = useState<boolean>(true); // Default to combined shipping
-
   // Calculate totals
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -320,9 +331,6 @@ export default function CheckoutFlow() {
 
   // Calculate shipping dynamically with fresh settings
   const [shipping, setShipping] = useState<number>(0); // Start at 0, will load properly
-  const [currentShippingSettings, setCurrentShippingSettings] = useState<ShippingSettings | null>(
-    null
-  );
   const [shippingCurrency, setShippingCurrency] = useState<CheckoutCurrency>('CAD');
 
   // Shipping calculation function (moved outside useEffect so it can be called manually)
@@ -334,85 +342,36 @@ export default function CheckoutFlow() {
 
     if (appliedDiscount?.free_shipping) {
       setShipping(0);
+      setShippingCurrency(currentCurrency);
       return;
     }
 
     if (items.length === 0) {
       setShipping(0);
+      setShippingCurrency(currentCurrency);
       return;
     }
 
     try {
-      // Fetch fresh shipping settings from database
-      const url = forceRefresh
-        ? `/api/shipping-settings?t=${Date.now()}` // Cache buster for force refresh
-        : '/api/shipping-settings';
-      const response = await fetch(url);
-      if (!response.ok) {
-        setShipping(-1); // Keep showing "Calculating..."
-        return;
-      }
-
-      const data = await response.json();
-      const freshSettings = data.settings;
-      setCurrentShippingSettings(freshSettings);
-
-      // Use the display currency (what the user selected) for shipping calculation
-      const shippingCurrency = currentCurrency as 'CAD' | 'USD';
-
-      // Create modified shipping settings based on user choice
-      const modifiedSettings = {
-        ...freshSettings,
-        // Force the user's checkbox choice - if they unchecked, disable combined shipping
-        combinedShippingEnabled: useCombinedShipping && freshSettings.combinedShippingEnabled,
-      };
-
-      // Pass destination country for zone-based shipping calculation
-      const destinationCountry = checkoutData.customer.country || 'Canada';
-      const calculation = calculateShipping(items.length, shippingCurrency, modifiedSettings, destinationCountry);
-      setShipping(calculation.shippingCost);
-      setShippingCurrency(calculation.currency);
+      const country = getShippingCountryCode(checkoutData.customer.country || 'Canada');
+      const ratesResult = await store.shipping.getRates({
+        country,
+        state: checkoutData.customer.state || undefined,
+        subtotal,
+      });
+      const cheapestRate = ratesResult.rates?.[0];
+      setShipping(cheapestRate?.price ?? 0);
+      setShippingCurrency('CAD');
     } catch {
-      setShipping(-1); // Keep showing "Calculating..."
-    }
-  };
-
-  // Function to calculate shipping immediately from current settings (no API call)
-  const calculateShippingFromCurrentSettings = () => {
-    if (!currentShippingSettings || shippingLocked) {
-      return;
-    }
-
-    if (appliedDiscount?.free_shipping) {
       setShipping(0);
-      return;
+      setShippingCurrency(currentCurrency);
     }
-
-    if (items.length === 0) {
-      setShipping(0);
-      return;
-    }
-
-    const shippingCurrency = currentCurrency as 'CAD' | 'USD';
-
-    const modifiedSettings = {
-      ...currentShippingSettings,
-      combinedShippingEnabled:
-        useCombinedShipping && currentShippingSettings.combinedShippingEnabled,
-    };
-
-    // Pass destination country for zone-based shipping calculation
-    const destinationCountry = checkoutData.customer.country || 'Canada';
-    const calculation = calculateShipping(items.length, shippingCurrency, modifiedSettings, destinationCountry);
-    setShipping(calculation.shippingCost);
-    setShippingCurrency(calculation.currency);
   };
 
   // Listen for settings updates
   React.useEffect(() => {
     const handleSettingsUpdate = () => {
       // Reset cached settings and force refetch shipping settings when admin updates them
-      setCurrentShippingSettings(null);
       calculateShippingCost(true); // Force refresh even if shipping is locked
     };
 
@@ -437,13 +396,6 @@ export default function CheckoutFlow() {
   React.useEffect(() => {
     calculateShippingCost();
   }, [appliedDiscount?.free_shipping, items.length, checkoutData.customer?.country]);
-
-  // Separate effect for checkbox changes - use immediate calculation but only in customer step
-  React.useEffect(() => {
-    if (currentShippingSettings && !shippingLocked && currentStep === 'customer') {
-      calculateShippingFromCurrentSettings();
-    }
-  }, [useCombinedShipping, currentStep]);
 
   const displaySubtotal = roundMoney(convertPrice(subtotal));
   const displayDiscount = roundMoney(convertPrice(discount));
@@ -769,7 +721,6 @@ export default function CheckoutFlow() {
                     subtotal={preservedSubtotal}
                     shipping={finalShipping || shipping}
                     paymentMethod={checkoutData.paymentMethod || undefined}
-                    shippingMethod={useCombinedShipping ? 'combined' : 'flat'}
                     appliedDiscount={appliedDiscount ? { ...appliedDiscount, amount: displayDiscount } : undefined}
                     shippingAddress={checkoutData.customer}
                   />

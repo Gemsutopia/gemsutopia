@@ -1,5 +1,22 @@
 # Gemsutopia Changelog
 
+## 2026-07-03 — Use Real Quickdash Shipping Rates in Checkout
+
+### Completed
+- Confirmed Quickdash production currently returns legacy simple shipping values under `/api/storefront/site`, while the real `/api/storefront/shipping/rates` endpoint returns no configured rates for CA or US.
+- Updated checkout shipping calculation to use `store.shipping.getRates()` instead of the legacy simple `site.shipping` fields exposed through `/api/shipping-settings`.
+- Checkout now charges the cheapest real Quickdash shipping rate when configured, and charges `0` when no real rates are available.
+- Removed the legacy combined/simple shipping path from checkout so hidden stale settings cannot produce automatic CAD 21 / USD 14-style charges.
+
+### Files Changed
+- `apps/web/src/components/checkout/CheckoutFlow.tsx`
+- `.Codex/changelog.md`
+- `memory/MEMORY.md`
+
+### Verification
+- `pnpm --filter @gemsutopia/web exec tsc --noEmit` passed.
+- Direct Quickdash checks confirmed `/shipping/rates` returns no CA/US rates, so checkout will calculate shipping as `0` until rates are configured.
+
 ## 2026-07-03 — Remove Hard-Coded Shipping Rate Fallbacks
 
 ### Completed

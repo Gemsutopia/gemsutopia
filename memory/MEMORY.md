@@ -51,6 +51,13 @@ See [workstream.md](./workstream.md) for detailed state.
 - `/api/shipping-settings` now uses nullish coalescing (`??`) instead of `||`, so Quickdash values of `0` are preserved instead of replaced.
 - Verification: TypeScript passed and a search confirmed the old shipping constants no longer exist as shipping rates.
 
+## Checkout Shipping Rates Correction (2026-07-03)
+- Quickdash production still exposes legacy simple shipping values under `/api/storefront/site`, currently including CAD 20, USD 16.50, CAD 25 combined, and USD 18 combined.
+- The real Quickdash `/api/storefront/shipping/rates` endpoint returns no configured rates for CA or US.
+- Checkout now uses `store.shipping.getRates()` instead of `/api/shipping-settings` / legacy `site.shipping` values.
+- If real Quickdash shipping rates are configured, checkout uses the cheapest returned rate. If no rates are configured, checkout charges `0` shipping.
+- Verification: TypeScript passed and direct Quickdash checks confirmed no real CA/US shipping rates are configured.
+
 ## User Preferences & Rules
 - **NEVER commit or push** — user handles all git operations manually
 - Provide commit messages in chat when sections are done (no Co-Authored-By)
