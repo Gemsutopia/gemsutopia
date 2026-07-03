@@ -304,12 +304,12 @@ export async function fetchShippingSettings(): Promise<ShippingSettings | null> 
  * These defaults should match the current admin panel settings
  */
 export const DEFAULT_SHIPPING_SETTINGS: ShippingSettings = {
-  enableShipping: true,
-  internationalShipping: true,
-  singleItemShippingCAD: 21.0,
-  singleItemShippingUSD: 15.0,
-  combinedShippingCAD: 25.0,
-  combinedShippingUSD: 18.0,
-  combinedShippingEnabled: true,
+  enableShipping: false,
+  internationalShipping: false,
+  singleItemShippingCAD: 0,
+  singleItemShippingUSD: 0,
+  combinedShippingCAD: 0,
+  combinedShippingUSD: 0,
+  combinedShippingEnabled: false,
   combinedShippingThreshold: 2,
 };

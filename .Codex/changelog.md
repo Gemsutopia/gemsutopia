@@ -1,5 +1,23 @@
 # Gemsutopia Changelog
 
+## 2026-07-03 — Remove Hard-Coded Shipping Rate Fallbacks
+
+### Completed
+- Confirmed the storefront had hard-coded shipping fallback rates in `apps/web/src/app/api/shipping-settings/route.ts` and `apps/web/src/lib/utils/shipping.ts`.
+- Removed the old baked-in rates: CAD 21 single, USD 15 single, CAD 25 combined, USD 18 combined.
+- Changed fallback behavior to no shipping charge when Quickdash shipping settings are missing or unavailable, instead of silently charging stale hard-coded rates.
+- Changed shipping setting mapping from `||` to `??` so intentional Quickdash `0` values are honored.
+
+### Files Changed
+- `apps/web/src/app/api/shipping-settings/route.ts`
+- `apps/web/src/lib/utils/shipping.ts`
+- `.Codex/changelog.md`
+- `memory/MEMORY.md`
+
+### Verification
+- `pnpm --filter @gemsutopia/web exec tsc --noEmit` passed.
+- Searched for the old shipping constants and confirmed no hard-coded shipping rates remain.
+
 ## 2026-07-03 — PayPal Method Visibility Fallback
 
 ### Completed

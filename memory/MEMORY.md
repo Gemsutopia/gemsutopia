@@ -45,6 +45,12 @@ See [workstream.md](./workstream.md) for detailed state.
 - Verification: TypeScript passed, and direct production API check showed fallback providers include `{ provider: "paypal", mode: "live" }`.
 - Quickdash still needs a backend fix so `/payments/methods` and `/site` return consistent payment method data.
 
+## Shipping Rate Fallback Cleanup (2026-07-03)
+- The storefront had hard-coded shipping fallback rates in both `/api/shipping-settings` and `lib/utils/shipping.ts`: CAD 21 single, USD 15 single, CAD 25 combined, USD 18 combined.
+- These were changed to zero/no-shipping fallbacks so stale frontend defaults cannot create unexpected shipping charges.
+- `/api/shipping-settings` now uses nullish coalescing (`??`) instead of `||`, so Quickdash values of `0` are preserved instead of replaced.
+- Verification: TypeScript passed and a search confirmed the old shipping constants no longer exist as shipping rates.
+
 ## User Preferences & Rules
 - **NEVER commit or push** — user handles all git operations manually
 - Provide commit messages in chat when sections are done (no Co-Authored-By)
