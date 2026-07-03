@@ -158,6 +158,23 @@ export type SiteSettings = {
 		twitterDescription: string | null
 		twitterImage: string | null
 	}
+	payments?: {
+		methods: PaymentMethod[]
+		currency: string
+		acceptedCurrencies: string[]
+	}
+}
+
+export type PaymentMethod = {
+	provider: string
+	type: string
+	publishableKey?: string
+	clientId?: string
+	projectId?: string
+	chains?: string[]
+	applicationId?: string
+	mode?: string
+	testMode?: boolean
 }
 
 export type ShippingRate = {
@@ -562,11 +579,26 @@ export class StorefrontClient {
 
 	payments = {
 		getMethods: async (): Promise<{
-			methods: { provider: string; type: string; publishableKey?: string; clientId?: string; projectId?: string; chains?: string[]; applicationId?: string; mode?: string }[]
+			methods: PaymentMethod[]
 			currency: string
 			acceptedCurrencies: string[]
 		}> => {
-			return this.request('/payments/methods')
+			const result = await this.request<{
+				methods: PaymentMethod[]
+				currency: string
+				acceptedCurrencies: string[]
+			}>('/payments/methods')
+
+			if (result.methods?.length) {
+				return result
+			}
+
+			const siteResult = await this.request<{ site: SiteSettings }>('/site')
+			if (siteResult.site.payments?.methods?.length) {
+				return siteResult.site.payments
+			}
+
+			return result
 		},
 
 		createStripeSession: async (data: {
@@ -586,7 +618,7 @@ export class StorefrontClient {
 		},
 
 		createPayPalOrder: async (data: {
-			items: { name: string; quantity: number; amount: number }[]
+			items: { name: string; quantity: number; unitAmount: number }[]
 			currency?: string
 			successUrl?: string
 			cancelUrl?: string

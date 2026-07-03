@@ -150,7 +150,7 @@ function PayPalForm({ amount, currency, customerData, items, appliedDiscount, su
         items: items.map(item => ({
           name: item.name || 'Item',
           quantity: item.quantity || 1,
-          amount: item.price,
+          unitAmount: item.price,
         })),
         currency: currency.toUpperCase(),
         successUrl: `${origin}/checkout?payment_method=paypal&status=success`,

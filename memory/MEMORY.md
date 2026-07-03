@@ -38,6 +38,13 @@ See [workstream.md](./workstream.md) for detailed state.
 - Checkout Terms link now points to `/terms`.
 - Verification: `pnpm --filter @gemsutopia/web exec tsc --noEmit` passed. Lint remains blocked by the stale `next lint --ignore-during-builds` script, and production build was stopped after hanging silently.
 
+## PayPal Method Visibility Fallback (2026-07-03)
+- Production Quickdash currently returns no methods from `/api/storefront/payments/methods`, but returns live PayPal from `/api/storefront/site` under `site.payments.methods`.
+- Gemsutopia now falls back to `site.payments` inside `StorefrontClient.payments.getMethods()` when the dedicated methods endpoint is empty.
+- PayPal checkout payload now sends `unitAmount` per item, matching Quickdash's PayPal endpoint contract.
+- Verification: TypeScript passed, and direct production API check showed fallback providers include `{ provider: "paypal", mode: "live" }`.
+- Quickdash still needs a backend fix so `/payments/methods` and `/site` return consistent payment method data.
+
 ## User Preferences & Rules
 - **NEVER commit or push** — user handles all git operations manually
 - Provide commit messages in chat when sections are done (no Co-Authored-By)
