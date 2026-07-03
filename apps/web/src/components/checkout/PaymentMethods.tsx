@@ -135,7 +135,7 @@ export default function PaymentMethods({ onSelect }: PaymentMethodsProps) {
         />
         <span className="font-[family-name:var(--font-inter)] text-xs text-white/70 xs:text-sm">
           I agree to the{' '}
-          <Link href="/terms-of-service" target="_blank" className="underline underline-offset-2 hover:text-white">
+          <Link href="/terms" target="_blank" className="underline underline-offset-2 hover:text-white">
             Terms of Service
           </Link>
           {' '}and{' '}

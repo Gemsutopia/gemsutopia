@@ -590,6 +590,9 @@ export class StorefrontClient {
 			currency?: string
 			successUrl?: string
 			cancelUrl?: string
+			shippingAmount?: number
+			discountAmount?: number
+			discountCode?: string
 			metadata?: Record<string, string>
 		}): Promise<{ orderId: string; approveUrl: string }> => {
 			return this.request('/payments/paypal/checkout', {
@@ -657,6 +660,9 @@ export class StorefrontClient {
 			items: { name: string; quantity: number; amount: number; note?: string }[]
 			currency?: string
 			successUrl?: string
+			shippingAmount?: number
+			discountAmount?: number
+			discountCode?: string
 			metadata?: Record<string, string>
 		}): Promise<{ paymentLinkId: string; url: string; orderId: string | null }> => {
 			return this.request('/payments/square/checkout', {

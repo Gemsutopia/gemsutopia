@@ -8,6 +8,7 @@ type PaymentMethodType = 'stripe' | 'paypal' | 'polar' | 'reown' | 'shopify' | '
 interface PaymentFormProps {
   paymentMethod: PaymentMethodType;
   amount: number;
+  currency: string;
   customerData: any;
   items: any[];
   appliedDiscount?: {
@@ -43,17 +44,13 @@ function getCheckoutOrigin() {
   return typeof window !== 'undefined' ? window.location.origin : '';
 }
 
-function getCurrency() {
-  return typeof window !== 'undefined' ? localStorage.getItem('currency') || 'CAD' : 'CAD';
-}
-
-function AmountDisplay({ amount }: { amount: number }) {
+function AmountDisplay({ amount, currency }: { amount: number; currency: string }) {
   return (
     <div className="py-2">
       <div className="flex items-center justify-between">
         <span className="font-[family-name:var(--font-inter)] text-sm text-white/60">Total Amount</span>
         <span className="font-[family-name:var(--font-inter)] text-lg font-semibold text-white">
-          ${amount.toFixed(2)} {getCurrency()}
+          ${amount.toFixed(2)} {currency}
         </span>
       </div>
       <p className="mt-1 font-[family-name:var(--font-inter)] text-xs text-white/40">Taxes included in price</p>
@@ -84,13 +81,12 @@ function CheckoutButton({ loading, loadingText, label, onClick, disabled }: {
   );
 }
 
-function StripeForm({ amount, customerData, items, appliedDiscount, subtotal, shipping, onError }: Omit<PaymentFormProps, 'paymentMethod' | 'onSuccess'>) {
+function StripeForm({ amount, currency, customerData, items, appliedDiscount, subtotal, shipping, onError }: Omit<PaymentFormProps, 'paymentMethod' | 'onSuccess'>) {
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      const currency = getCurrency();
       const origin = getCheckoutOrigin();
 
       const data = await store.payments.createStripeSession({
@@ -136,19 +132,18 @@ function StripeForm({ amount, customerData, items, appliedDiscount, subtotal, sh
           </p>
         </div>
       </div>
-      <AmountDisplay amount={amount} />
+      <AmountDisplay amount={amount} currency={currency} />
       <CheckoutButton loading={loading} loadingText="Redirecting to Stripe..." label="Continue to Stripe Checkout" onClick={handleCheckout} />
     </div>
   );
 }
 
-function PayPalForm({ amount, customerData, items, appliedDiscount, subtotal, shipping, onError }: Omit<PaymentFormProps, 'paymentMethod' | 'onSuccess'>) {
+function PayPalForm({ amount, currency, customerData, items, appliedDiscount, subtotal, shipping, onError }: Omit<PaymentFormProps, 'paymentMethod' | 'onSuccess'>) {
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      const currency = getCurrency();
       const origin = getCheckoutOrigin();
 
       const data = await store.payments.createPayPalOrder({
@@ -160,6 +155,9 @@ function PayPalForm({ amount, customerData, items, appliedDiscount, subtotal, sh
         currency: currency.toUpperCase(),
         successUrl: `${origin}/checkout?payment_method=paypal&status=success`,
         cancelUrl: `${origin}/checkout?payment_method=paypal&status=cancelled`,
+        shippingAmount: shipping,
+        discountAmount: appliedDiscount?.amount,
+        discountCode: appliedDiscount?.code,
         metadata: {
           customerName: `${customerData.firstName} ${customerData.lastName}`,
           customerEmail: customerData.email,
@@ -191,19 +189,18 @@ function PayPalForm({ amount, customerData, items, appliedDiscount, subtotal, sh
           </p>
         </div>
       </div>
-      <AmountDisplay amount={amount} />
+      <AmountDisplay amount={amount} currency={currency} />
       <CheckoutButton loading={loading} loadingText="Redirecting to PayPal..." label="Continue to PayPal" onClick={handleCheckout} />
     </div>
   );
 }
 
-function PolarForm({ amount, customerData, items, appliedDiscount, subtotal, shipping, onError }: Omit<PaymentFormProps, 'paymentMethod' | 'onSuccess'>) {
+function PolarForm({ amount, currency, customerData, items, appliedDiscount, subtotal, shipping, onError }: Omit<PaymentFormProps, 'paymentMethod' | 'onSuccess'>) {
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      const currency = getCurrency();
       const origin = getCheckoutOrigin();
 
       const data = await store.payments.createPolarCheckout({
@@ -241,13 +238,13 @@ function PolarForm({ amount, customerData, items, appliedDiscount, subtotal, shi
           </p>
         </div>
       </div>
-      <AmountDisplay amount={amount} />
+      <AmountDisplay amount={amount} currency={currency} />
       <CheckoutButton loading={loading} loadingText="Redirecting to Polar..." label="Continue to Polar Checkout" onClick={handleCheckout} />
     </div>
   );
 }
 
-function ReownForm({ amount, customerData, items, appliedDiscount, subtotal, shipping, onSuccess, onError }: Omit<PaymentFormProps, 'paymentMethod'>) {
+function ReownForm({ amount, currency, customerData, items, appliedDiscount, subtotal, shipping, onSuccess, onError }: Omit<PaymentFormProps, 'paymentMethod'>) {
   const [loading, setLoading] = useState(false);
   const [config, setConfig] = useState<{ projectId: string; chains: string[] } | null>(null);
   const [configLoading, setConfigLoading] = useState(true);
@@ -322,20 +319,18 @@ function ReownForm({ amount, customerData, items, appliedDiscount, subtotal, shi
           ))}
         </div>
       </div>
-      <AmountDisplay amount={amount} />
+      <AmountDisplay amount={amount} currency={currency} />
       <CheckoutButton loading={loading} loadingText="Connecting wallet..." label="Connect Wallet & Pay" onClick={handleConnect} />
     </div>
   );
 }
 
-function ShopifyForm({ amount, customerData, items, appliedDiscount, subtotal, shipping, onError }: Omit<PaymentFormProps, 'paymentMethod' | 'onSuccess'>) {
+function ShopifyForm({ amount, currency, customerData, items, appliedDiscount, subtotal, shipping, onError }: Omit<PaymentFormProps, 'paymentMethod' | 'onSuccess'>) {
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      const currency = getCurrency();
-
       const data = await store.payments.createShopifyCheckout({
         items: items.map(item => ({
           variantId: item.shopifyVariantId || item.id,
@@ -369,19 +364,18 @@ function ShopifyForm({ amount, customerData, items, appliedDiscount, subtotal, s
           </p>
         </div>
       </div>
-      <AmountDisplay amount={amount} />
+      <AmountDisplay amount={amount} currency={currency} />
       <CheckoutButton loading={loading} loadingText="Redirecting to Shopify..." label="Continue to Shopify Checkout" onClick={handleCheckout} />
     </div>
   );
 }
 
-function SquareForm({ amount, customerData, items, appliedDiscount, subtotal, shipping, onError }: Omit<PaymentFormProps, 'paymentMethod' | 'onSuccess'>) {
+function SquareForm({ amount, currency, customerData, items, appliedDiscount, subtotal, shipping, onError }: Omit<PaymentFormProps, 'paymentMethod' | 'onSuccess'>) {
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      const currency = getCurrency();
       const origin = getCheckoutOrigin();
 
       const data = await store.payments.createSquareCheckout({
@@ -392,6 +386,9 @@ function SquareForm({ amount, customerData, items, appliedDiscount, subtotal, sh
         })),
         currency: currency.toUpperCase(),
         successUrl: `${origin}/checkout?payment_method=square&status=success`,
+        shippingAmount: shipping,
+        discountAmount: appliedDiscount?.amount,
+        discountCode: appliedDiscount?.code,
         metadata: {
           customerName: `${customerData.firstName} ${customerData.lastName}`,
           customerEmail: customerData.email,
@@ -423,7 +420,7 @@ function SquareForm({ amount, customerData, items, appliedDiscount, subtotal, sh
           </p>
         </div>
       </div>
-      <AmountDisplay amount={amount} />
+      <AmountDisplay amount={amount} currency={currency} />
       <CheckoutButton loading={loading} loadingText="Redirecting to Square..." label="Continue to Square Checkout" onClick={handleCheckout} />
     </div>
   );

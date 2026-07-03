@@ -17,6 +17,21 @@ import Image from 'next/image';
 import { calculateShipping, ShippingSettings } from '@/lib/utils/shipping';
 import { getStoredReferralCode, clearStoredReferralCode } from '@/hooks/useReferralTracking';
 
+type CheckoutCurrency = 'CAD' | 'USD';
+
+const roundMoney = (amount: number) => Math.round(amount * 100) / 100;
+
+function convertCheckoutAmount(
+  amount: number,
+  fromCurrency: CheckoutCurrency,
+  toCurrency: CheckoutCurrency,
+  cadToUsdRate: number
+) {
+  if (fromCurrency === toCurrency) return roundMoney(amount);
+  if (fromCurrency === 'CAD' && toCurrency === 'USD') return roundMoney(amount * cadToUsdRate);
+  return roundMoney(amount / cadToUsdRate);
+}
+
 interface CheckoutData {
   customer: {
     email: string;
@@ -39,7 +54,7 @@ type CheckoutStep = 'cart' | 'customer' | 'payment-method' | 'payment' | 'succes
 export default function CheckoutFlow() {
   const router = useRouter();
   const { items, clearPouch } = useGemPouch();
-  const { formatPrice, formatPriceRaw, currency: currentCurrency } = useCurrency();
+  const { convertPrice, currency: currentCurrency, exchangeRate } = useCurrency();
   const { refreshShopProducts, refreshProduct } = useInventory();
 
   // Preserve items and subtotal for OrderSuccess (before clearPouch)
@@ -227,6 +242,7 @@ export default function CheckoutFlow() {
           customer: savedData.customerData,
           paymentMethod: paymentMethod as any,
         }));
+        setAppliedDiscount(savedData.appliedDiscount || null);
 
         setOrderId(orderResult.order.id);
         setPaymentInfo({
@@ -307,6 +323,7 @@ export default function CheckoutFlow() {
   const [currentShippingSettings, setCurrentShippingSettings] = useState<ShippingSettings | null>(
     null
   );
+  const [shippingCurrency, setShippingCurrency] = useState<CheckoutCurrency>('CAD');
 
   // Shipping calculation function (moved outside useEffect so it can be called manually)
   const calculateShippingCost = async (forceRefresh = false) => {
@@ -354,6 +371,7 @@ export default function CheckoutFlow() {
       const destinationCountry = checkoutData.customer.country || 'Canada';
       const calculation = calculateShipping(items.length, shippingCurrency, modifiedSettings, destinationCountry);
       setShipping(calculation.shippingCost);
+      setShippingCurrency(calculation.currency);
     } catch {
       setShipping(-1); // Keep showing "Calculating..."
     }
@@ -387,6 +405,7 @@ export default function CheckoutFlow() {
     const destinationCountry = checkoutData.customer.country || 'Canada';
     const calculation = calculateShipping(items.length, shippingCurrency, modifiedSettings, destinationCountry);
     setShipping(calculation.shippingCost);
+    setShippingCurrency(calculation.currency);
   };
 
   // Listen for settings updates
@@ -426,7 +445,17 @@ export default function CheckoutFlow() {
     }
   }, [useCombinedShipping, currentStep]);
 
-  const total = subtotalAfterDiscount + shipping; // NO TAX!
+  const displaySubtotal = roundMoney(convertPrice(subtotal));
+  const displayDiscount = roundMoney(convertPrice(discount));
+  const displaySubtotalAfterDiscount = Math.max(0, displaySubtotal - displayDiscount);
+  const displayShipping = roundMoney(
+    convertCheckoutAmount(shipping, shippingCurrency, currentCurrency, exchangeRate)
+  );
+  const displayItems = items.map(item => ({
+    ...item,
+    price: roundMoney(convertPrice(item.price)),
+  }));
+  const total = roundMoney(displaySubtotalAfterDiscount + displayShipping); // NO TAX!
 
   // TAX REMOVED - NO CALCULATION NEEDED
 
@@ -538,10 +567,10 @@ export default function CheckoutFlow() {
         });
 
         // PRESERVE items, subtotal, tax, and shipping for OrderSuccess BEFORE clearing pouch
-        setPreservedItems(items);
-        setPreservedSubtotal(subtotal);
+        setPreservedItems(displayItems);
+        setPreservedSubtotal(displaySubtotal);
         // NO TAX
-        setFinalShipping(shipping);
+        setFinalShipping(displayShipping);
 
         setCurrentStep('success');
         clearPouch();
@@ -714,11 +743,12 @@ export default function CheckoutFlow() {
               <PaymentForm
                 paymentMethod={checkoutData.paymentMethod!}
                 amount={total}
+                currency={currentCurrency}
                 customerData={checkoutData.customer}
-                items={items}
-                appliedDiscount={appliedDiscount}
-                subtotal={subtotal}
-                shipping={shipping}
+                items={displayItems}
+                appliedDiscount={appliedDiscount ? { ...appliedDiscount, amount: displayDiscount } : null}
+                subtotal={displaySubtotal}
+                shipping={displayShipping}
                 onSuccess={data => handleStepComplete('payment', data)}
                 onError={handleError}
               />
@@ -740,7 +770,7 @@ export default function CheckoutFlow() {
                     shipping={finalShipping || shipping}
                     paymentMethod={checkoutData.paymentMethod || undefined}
                     shippingMethod={useCombinedShipping ? 'combined' : 'flat'}
-                    appliedDiscount={appliedDiscount || undefined}
+                    appliedDiscount={appliedDiscount ? { ...appliedDiscount, amount: displayDiscount } : undefined}
                     shippingAddress={checkoutData.customer}
                   />
                 </div>

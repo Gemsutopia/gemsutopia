@@ -30,6 +30,14 @@ See [workstream.md](./workstream.md) for detailed state.
 - `apps/web/src/app/(shop)/product/[id]/ProductContent.tsx` falls back to placeholder media only when Quickdash returns no product images.
 - Local TypeScript verification passed; lint still needs script cleanup because `next lint --ignore-during-builds` is unsupported by the current Next version.
 
+## Live Payment Checkout Safety Pass (2026-07-02)
+- Before live Stripe/PayPal testing, checkout totals were normalized so the selected currency is used consistently for provider checkout payloads, redirect recovery data, Quickdash order creation totals, and the success receipt.
+- `PaymentForm` now receives explicit currency/converted totals from `CheckoutFlow` instead of reading currency independently from browser storage.
+- Shipping currency is tracked separately from display currency so Canada/USA shipping rates convert correctly before payment.
+- PayPal and Square client payload types now allow optional shipping/discount fields for backend support.
+- Checkout Terms link now points to `/terms`.
+- Verification: `pnpm --filter @gemsutopia/web exec tsc --noEmit` passed. Lint remains blocked by the stale `next lint --ignore-during-builds` script, and production build was stopped after hanging silently.
+
 ## User Preferences & Rules
 - **NEVER commit or push** — user handles all git operations manually
 - Provide commit messages in chat when sections are done (no Co-Authored-By)
