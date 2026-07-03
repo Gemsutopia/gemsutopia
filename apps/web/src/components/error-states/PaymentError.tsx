@@ -11,6 +11,9 @@ interface PaymentErrorProps {
 export default function PaymentError({ message, onBack, onRetry }: PaymentErrorProps) {
   // Context-aware default messages
   const getDefaultMessage = () => {
+    if (message?.toLowerCase().includes('payment was successful')) {
+      return message;
+    }
     if (message?.toLowerCase().includes('stripe')) {
       return 'Unable to connect to our payment processor.';
     }

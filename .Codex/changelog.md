@@ -1,5 +1,23 @@
 # Gemsutopia Changelog
 
+## 2026-07-03 — Preserve Post-Payment Checkout Errors
+
+### Completed
+- Investigated the path where PayPal payment succeeds but Gemsutopia shows the payment error screen after redirect.
+- Updated checkout return handling to show durable, specific post-payment errors instead of relying on a fast toast.
+- Added PayPal order/capture identifiers to the Quickdash order creation payload metadata/payment record.
+- Treated PayPal as paid when a capture ID is present, even if the returned status string is unexpected.
+- Stored the last checkout error in `localStorage.lastCheckoutError` for debugging after a failed return.
+
+### Files Changed
+- `apps/web/src/components/checkout/CheckoutFlow.tsx`
+- `apps/web/src/components/error-states/PaymentError.tsx`
+- `.Codex/changelog.md`
+- `memory/MEMORY.md`
+
+### Verification
+- `pnpm --filter @gemsutopia/web exec tsc --noEmit` passed.
+
 ## 2026-07-03 — Use Real Quickdash Shipping Rates in Checkout
 
 ### Completed

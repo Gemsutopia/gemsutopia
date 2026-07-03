@@ -58,6 +58,13 @@ See [workstream.md](./workstream.md) for detailed state.
 - If real Quickdash shipping rates are configured, checkout uses the cheapest returned rate. If no rates are configured, checkout charges `0` shipping.
 - Verification: TypeScript passed and direct Quickdash checks confirmed no real CA/US shipping rates are configured.
 
+## Post-Payment Checkout Error Visibility (2026-07-03)
+- A live PayPal payment succeeded but Gemsutopia showed the payment error screen after redirect, meaning the failure happened after provider approval/capture in the order-recording path.
+- Checkout now preserves detailed post-payment errors on the visible error screen and writes them to `localStorage.lastCheckoutError`.
+- PayPal capture/order IDs are included in the Quickdash order creation payload so support/admin can reconcile paid orders more easily.
+- PayPal capture handling now accepts a capture ID as evidence of payment even if the returned status string is unexpected.
+- Verification: TypeScript passed.
+
 ## User Preferences & Rules
 - **NEVER commit or push** — user handles all git operations manually
 - Provide commit messages in chat when sections are done (no Co-Authored-By)

@@ -45,6 +45,12 @@ function getShippingCountryCode(country: string) {
   return country;
 }
 
+function getCheckoutErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) return error.message;
+  if (typeof error === 'string') return error;
+  return 'Unknown checkout error';
+}
+
 interface CheckoutData {
   customer: {
     email: string;
@@ -148,8 +154,10 @@ export default function CheckoutFlow() {
       try {
         const checkoutDataStr = sessionStorage.getItem(storageKey);
         if (!checkoutDataStr) {
-          toast.error('Checkout data not found. Please try again.');
-          setCurrentStep('payment-method');
+          const missingDataMessage = 'Checkout data was not found after returning from payment. If PayPal charged the customer, contact support with the PayPal confirmation.';
+          toast.error(missingDataMessage);
+          setError(missingDataMessage);
+          setCurrentStep('error');
           return;
         }
 
@@ -173,12 +181,16 @@ export default function CheckoutFlow() {
         } else if (paymentMethod === 'paypal') {
           // Capture the PayPal order via storefront API
           const captureResult = await store.payments.capturePayPalOrder(savedData.orderId);
-          if (captureResult.status !== 'COMPLETED') {
-            toast.error('PayPal payment not completed');
-            setCurrentStep('payment-method');
+          if (captureResult.status !== 'COMPLETED' && !captureResult.captureId) {
+            const paypalMessage = `PayPal payment was not completed. Status: ${captureResult.status || 'unknown'}`;
+            toast.error(paypalMessage);
+            setError(paypalMessage);
+            setCurrentStep('error');
             return;
           }
           paymentRecord.captureID = captureResult.captureId;
+          paymentRecord.externalId = captureResult.captureId || savedData.orderId;
+          paymentRecord.orderId = savedData.orderId;
         } else if (paymentMethod === 'polar') {
           paymentRecord.checkoutId = savedData.checkoutId;
         } else if (paymentMethod === 'shopify') {
@@ -223,6 +235,11 @@ export default function CheckoutFlow() {
             total: savedData.amount,
           },
           discountCode: savedData.appliedDiscount || null,
+          metadata: {
+            paymentProvider: paymentMethod,
+            paypalOrderId: paymentMethod === 'paypal' ? savedData.orderId : undefined,
+            paypalCaptureId: paymentRecord.captureID,
+          },
         });
 
         // Apply referral if applicable
@@ -279,9 +296,20 @@ export default function CheckoutFlow() {
         toast.success('Payment successful! Order created.');
       } catch (err) {
         console.error('Checkout error:', err);
-        toast.error('Payment processed but order creation failed. Please contact support.');
+        const detail = getCheckoutErrorMessage(err);
+        const supportMessage = `Your payment was successful but we had trouble recording the order. Please contact support with this detail: ${detail}`;
+        try {
+          localStorage.setItem('lastCheckoutError', JSON.stringify({
+            message: detail,
+            paymentMethod,
+            at: new Date().toISOString(),
+          }));
+        } catch {
+          // Ignore storage failures.
+        }
+        toast.error(supportMessage);
         setCurrentStep('error');
-        setError('Your payment was successful but we had trouble recording the order. Please contact support with your payment confirmation.');
+        setError(supportMessage);
       }
     };
 
