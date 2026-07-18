@@ -4,7 +4,7 @@ import { apiSuccess } from '@/lib/api';
 const API_VERSION = '1.0.0';
 
 /**
- * /connect endpoint - Placeholder for future integration
+ * Public storefront capability manifest.
  *
  * GET - Returns connection status and API information
  * POST - Acknowledges connection requests
@@ -18,8 +18,8 @@ export async function GET() {
     endpoints: {
       products: '/api/products',
       categories: '/api/categories',
-      orders: '/api/orders',
       auctions: '/api/auctions',
+      health: '/api/health',
     },
   });
 }

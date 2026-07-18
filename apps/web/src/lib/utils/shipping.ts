@@ -225,17 +225,16 @@ export async function convertCurrency(
   }
 
   try {
-    // Try to get live exchange rate from your existing crypto-prices API
-    const response = await fetch('/api/crypto-prices');
+    const response = await fetch(
+      `https://api.frankfurter.app/latest?from=${fromCurrency}&to=${toCurrency}`,
+      { cache: 'no-store' }
+    );
+    if (!response.ok) throw new Error('Exchange-rate service unavailable');
     const data = await response.json();
 
-    if (data.success && data.exchangeRates) {
-      const rate =
-        fromCurrency === 'CAD' ? data.exchangeRates.CAD_TO_USD : data.exchangeRates.USD_TO_CAD;
-
-      if (rate && rate > 0) {
-        return parseFloat((amount * rate).toFixed(2));
-      }
+    const rate = Number(data.rates?.[toCurrency]);
+    if (Number.isFinite(rate) && rate > 0) {
+      return parseFloat((amount * rate).toFixed(2));
     }
   } catch {
     // Failed to fetch live exchange rate, using fallback

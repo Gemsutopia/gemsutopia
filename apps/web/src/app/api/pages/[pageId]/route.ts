@@ -5,6 +5,12 @@ import { apiSuccess, ApiError } from '@/lib/api';
 export const dynamic = 'force-dynamic';
 
 export async function GET(_request: NextRequest, context: { params: Promise<{ pageId: string }> }) {
+  // Frontend copy is authoritative while the storefront is being rebuilt.
+  // Re-enable deliberately once QuickDash content has been migrated and verified.
+  if (process.env.NEXT_PUBLIC_QUICKDASH_PAGE_CONTENT !== 'true') {
+    return apiSuccess({ content: {} });
+  }
+
   const params = await context.params;
   try {
     const { content } = await store.siteContent.list();

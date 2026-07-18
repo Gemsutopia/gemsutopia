@@ -14,9 +14,40 @@ export async function POST(request: NextRequest) {
       return ApiError.validation('Missing code');
     }
 
-    const result = await store.referrals.validate(code, customerEmail, orderTotal);
-    return apiSuccess(result);
-  } catch (error) {
-    return ApiError.internal('Failed to validate referral code');
+    const normalizedCode = String(code).trim().toUpperCase();
+    const subtotal = Number(orderTotal);
+    if (!Number.isFinite(subtotal) || subtotal < 0) {
+      return ApiError.validation('Invalid order total');
+    }
+
+    try {
+      const referral = await store.referrals.validate(normalizedCode, customerEmail, subtotal);
+      if (referral.valid && referral.discount) {
+        return apiSuccess({ ...referral, type: 'referral', code: normalizedCode });
+      }
+    } catch {
+      // A referral lookup failure should not prevent validating a normal discount code.
+    }
+
+    const discountResult = await store.discounts.validate(normalizedCode, subtotal);
+    if (!discountResult.valid || !discountResult.discount) {
+      return apiSuccess({ valid: false, type: 'discount', code: normalizedCode });
+    }
+
+    return apiSuccess({
+      valid: true,
+      type: 'discount',
+      code: normalizedCode,
+      discount: {
+        ...discountResult.discount,
+        amount: Math.min(
+          subtotal,
+          Math.max(0, Number(discountResult.discount.discountAmount) || 0)
+        ),
+        free_shipping: false,
+      },
+    });
+  } catch {
+    return ApiError.externalService('QuickDash', 'Discount validation is currently unavailable');
   }
 }
