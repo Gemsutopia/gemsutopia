@@ -124,6 +124,31 @@ export const signOut = async () => {
   return { error: null };
 };
 
+export const changePassword = async (data: { currentPassword: string; newPassword: string }) => {
+  try {
+    const result = await store.auth.changePassword(data);
+    return { data: result, error: null };
+  } catch (error) {
+    return {
+      data: null,
+      error: { message: error instanceof Error ? error.message : 'Failed to change password' },
+    };
+  }
+};
+
+export const deleteAccount = async () => {
+  try {
+    const result = await store.auth.deleteAccount();
+    saveSession(null, null);
+    return { data: result, error: null };
+  } catch (error) {
+    return {
+      data: null,
+      error: { message: error instanceof Error ? error.message : 'Failed to delete account' },
+    };
+  }
+};
+
 // Get current session
 export const getSession = async () => {
   if (!currentSession.token) {
@@ -182,4 +207,6 @@ export const authClient = {
   signOut,
   useSession,
   getSession,
+  changePassword,
+  deleteAccount,
 };
