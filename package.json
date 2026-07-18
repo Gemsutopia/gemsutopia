@@ -20,7 +20,7 @@
     "check": "biome check .",
     "format": "biome format . --write",
     "format:check": "biome format .",
-    "typecheck": "pnpm --filter @gemsutopia/web exec tsc --noEmit",
+    "typecheck": "turbo run build --filter=@gemsutopia/web^... && pnpm --filter @gemsutopia/web exec tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
