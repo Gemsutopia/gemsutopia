@@ -1,5 +1,31 @@
 # Gemsutopia Changelog
 
+## 2026-07-17 — Dead Link and Simulated Action Cleanup
+
+### Completed
+- Audited literal internal links against the complete Next.js page-route tree.
+- Fixed the navigation link to the nonexistent `/social` route by pointing it to the existing Facebook page.
+- Removed Google and Apple sign-in buttons that only displayed "coming soon" messages.
+- Removed the nonfunctional invoice-download action from customer order history.
+- Deleted the unused simulated auction bidding component; the rendered auction detail page already uses the real Quickdash-backed `BiddingModal`.
+- Confirmed remaining customer-facing literal internal links resolve to existing routes.
+
+### Files Changed
+- `apps/web/src/components/layout/Dropdown.tsx`
+- `apps/web/src/components/modals/AuthModal.tsx`
+- `apps/web/src/components/user-dashboard/UserOrders.tsx`
+- `apps/web/src/app/(auctions)/auctions/[id]/AuctionBidding.tsx` (deleted)
+- `.Codex/changelog.md`
+- `memory/MEMORY.md`
+
+### Verification
+- `pnpm --filter @gemsutopia/web exec tsc --noEmit` passed.
+- Searched storefront app/components for nonexistent `/social`, fake OAuth, simulated bidding, and invoice-download controls; no active matches remain.
+
+### What's Next
+- Close the functional-state branch after CI, then begin the separate visual-polish pass.
+- Add a focused checkout test harness and address the existing dependency-security backlog as dedicated follow-up work rather than mixing either into visual polish.
+
 ## 2026-07-17 — Remove Unsupported Account Controls
 
 ### Completed

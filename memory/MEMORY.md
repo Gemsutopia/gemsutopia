@@ -1,5 +1,10 @@
 # Gemsutopia Project Memory
 
+## Dead Link and Simulated Action Audit (2026-07-17)
+- Fixed the missing `/social` navigation target, removed fake Google/Apple auth controls and invoice download, and deleted the unused simulated auction bidding component.
+- The active auction detail page uses the real Quickdash-backed `BiddingModal`.
+- Literal customer-facing internal links were checked against the Next.js route tree and now resolve to existing pages.
+
 ## Unsupported Account Controls Removed (2026-07-17)
 - Removed address edit/default, 2FA, login history, account export, and fake Profile security controls because Quickdash has no backing contracts for them.
 - Address add/delete and password change/account deletion remain available because they have real requests.

@@ -1,10 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingBag, faEye, faDownload, faFilter, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faShoppingBag, faEye, faFilter, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useBetterAuth } from '@/contexts/BetterAuthContext';
+import { getCommerceErrorMessage } from '@/lib/commerce-error';
 
 interface OrderItem {
   id?: string;
@@ -56,13 +57,13 @@ export default function UserOrders() {
         date: o.createdAt,
         status: o.status,
         total: Number(o.total),
-        currency: 'USD', // Default currency
+        currency: o.currency || 'CAD',
         items: [], // Items not returned in list endpoint
         trackingNumber: o.trackingNumber || undefined,
         trackingUrl: o.trackingUrl || undefined,
       })));
-    } catch {
-      setError('Failed to load orders');
+    } catch (error) {
+      setError(getCommerceErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
@@ -246,13 +247,6 @@ export default function UserOrders() {
                     <FontAwesomeIcon icon={faEye} className="h-4 w-4" />
                     <span>View Details</span>
                   </Link>
-
-                  {(order.status?.toLowerCase() === 'delivered' || order.status?.toLowerCase() === 'completed') && (
-                    <button className="flex items-center justify-center space-x-2 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50">
-                      <FontAwesomeIcon icon={faDownload} className="h-4 w-4" />
-                      <span>Download Invoice</span>
-                    </button>
-                  )}
 
                   {order.trackingNumber && order.trackingUrl && (
                     <a
