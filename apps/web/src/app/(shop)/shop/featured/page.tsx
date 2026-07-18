@@ -28,7 +28,7 @@ interface Product {
   stock: number;
 }
 
-import { useEvent } from '@/lib/pusher-client';
+import { CHANNELS, EVENTS, useEvent } from '@/lib/pusher-client';
 import { getCommerceErrorMessage } from '@/lib/commerce-error';
 
 const sortOptions = [
@@ -124,8 +124,11 @@ export default function FeaturedPage() {
 
   useEffect(() => { fetchProducts(); }, [retryKey]);
 
-  // Real-time updates via Pusher
-  useEvent('content', 'featured-products-updated', fetchProducts);
+  // Product mutations in QuickDash invalidate this view.
+  useEvent(CHANNELS.PRODUCTS, EVENTS.PRODUCT_CREATED, fetchProducts);
+  useEvent(CHANNELS.PRODUCTS, EVENTS.PRODUCT_UPDATED, fetchProducts);
+  useEvent(CHANNELS.PRODUCTS, EVENTS.PRODUCT_DELETED, fetchProducts);
+  useEvent(CHANNELS.PRODUCTS, EVENTS.PRODUCT_BULK_UPDATED, fetchProducts);
 
   // Filter and sort products
   const filteredProducts = products

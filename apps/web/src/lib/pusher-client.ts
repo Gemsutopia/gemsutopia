@@ -6,51 +6,79 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 // Channel names (mirror server-side)
 export const CHANNELS = {
   AUCTIONS: 'auctions',
-  AUCTION: (id: string) => `auction-${id}`,
+  AUCTION: (_id: string) => 'auctions',
   INVENTORY: 'inventory',
-  ORDERS: 'private-orders',
-  ADMIN: 'private-admin',
+  PRODUCTS: 'products',
+  CONTENT: 'content',
 } as const;
 
 // Event names (mirror server-side)
 export const EVENTS = {
-  BID_PLACED: 'bid-placed',
-  AUCTION_ENDED: 'auction-ended',
-  AUCTION_CREATED: 'auction-created',
-  AUCTION_UPDATED: 'auction-updated',
-  STOCK_UPDATED: 'stock-updated',
-  PRODUCT_SOLD_OUT: 'product-sold-out',
-  LOW_STOCK_ALERT: 'low-stock-alert',
-  ORDER_CREATED: 'order-created',
-  ORDER_STATUS_UPDATED: 'order-status-updated',
-  PAYMENT_RECEIVED: 'payment-received',
-  NEW_ORDER: 'new-order',
-  NEW_BID: 'new-bid',
-  INVENTORY_ALERT: 'inventory-alert',
+  BID_PLACED: 'auction:bid-placed',
+  AUCTION_ENDED: 'auction:ended',
+  AUCTION_CREATED: 'auction:created',
+  AUCTION_UPDATED: 'auction:extended',
+  STOCK_UPDATED: 'inventory:updated',
+  PRODUCT_SOLD_OUT: 'inventory:out-of-stock',
+  LOW_STOCK_ALERT: 'inventory:low-stock',
+  PRODUCT_CREATED: 'product:created',
+  PRODUCT_UPDATED: 'product:updated',
+  PRODUCT_DELETED: 'product:deleted',
+  PRODUCT_BULK_UPDATED: 'product:bulk-updated',
+  CONTENT_UPDATED: 'content:updated',
+  CONTENT_BULK_UPDATED: 'content:bulk-updated',
+  COLLECTIONS_UPDATED: 'collections:updated',
 } as const;
 
 // Singleton Pusher instance
 let pusherClient: Pusher | null = null;
+let pusherInitialization: Promise<Pusher> | null = null;
+let workspaceChannelPrefix = '';
+
+type RealtimeConfig = {
+  key: string;
+  cluster: string;
+  channelPrefix: string;
+};
+
+async function initializePusher(): Promise<Pusher> {
+  if (pusherClient) return pusherClient;
+  if (pusherInitialization) return pusherInitialization;
+
+  pusherInitialization = fetch('/api/realtime/config', { cache: 'no-store' })
+    .then(async response => {
+      if (!response.ok) throw new Error('Realtime configuration is unavailable');
+      const payload = await response.json();
+      const config = (payload.data || payload) as RealtimeConfig;
+      if (!config.key || !config.cluster || !config.channelPrefix) {
+        throw new Error('Realtime configuration is incomplete');
+      }
+
+      workspaceChannelPrefix = config.channelPrefix;
+      pusherClient = new Pusher(config.key, {
+        cluster: config.cluster,
+        channelAuthorization: {
+          endpoint: '/api/realtime/auth',
+          transport: 'ajax',
+        },
+      });
+      return pusherClient;
+    })
+    .catch(error => {
+      pusherInitialization = null;
+      throw error;
+    });
+
+  return pusherInitialization;
+}
+
+function resolveChannelName(channelName: string) {
+  if (channelName.startsWith('private-workspace-')) return channelName;
+  return `${workspaceChannelPrefix}-${channelName}`;
+}
 
 export function getPusherClient(): Pusher | null {
-  if (typeof window === 'undefined') return null;
-
-  if (pusherClient) return pusherClient;
-
-  const key = process.env.NEXT_PUBLIC_PUSHER_KEY;
-  const cluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER;
-
-  if (!key || !cluster) {
-    console.warn('Pusher not configured - missing environment variables');
-    return null;
-  }
-
-  pusherClient = new Pusher(key, {
-    cluster,
-    authEndpoint: '/api/pusher/auth',
-  });
-
-  return pusherClient;
+  return typeof window === 'undefined' ? null : pusherClient;
 }
 
 // Connection status type
@@ -62,11 +90,8 @@ export function usePusherConnection() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const pusher = getPusherClient();
-    if (!pusher) {
-      setStatus('unavailable');
-      return;
-    }
+    let disposed = false;
+    let pusher: Pusher | null = null;
 
     const handleStateChange = (states: { current: string; previous: string }) => {
       switch (states.current) {
@@ -93,15 +118,25 @@ export function usePusherConnection() {
       setError(err.error?.message || 'Unknown error');
     };
 
-    pusher.connection.bind('state_change', handleStateChange);
-    pusher.connection.bind('error', handleError);
-
-    // Set initial status
-    setStatus(pusher.connection.state as ConnectionStatus);
+    setStatus('connecting');
+    void initializePusher()
+      .then(client => {
+        if (disposed) return;
+        pusher = client;
+        client.connection.bind('state_change', handleStateChange);
+        client.connection.bind('error', handleError);
+        setStatus(client.connection.state as ConnectionStatus);
+      })
+      .catch(error => {
+        if (disposed) return;
+        setStatus('unavailable');
+        setError(error instanceof Error ? error.message : 'Realtime connection is unavailable');
+      });
 
     return () => {
-      pusher.connection.unbind('state_change', handleStateChange);
-      pusher.connection.unbind('error', handleError);
+      disposed = true;
+      pusher?.connection.unbind('state_change', handleStateChange);
+      pusher?.connection.unbind('error', handleError);
     };
   }, []);
 
@@ -111,38 +146,51 @@ export function usePusherConnection() {
 // Generic hook to subscribe to a channel and listen for events
 export function useChannel(channelName: string) {
   const channelRef = useRef<Channel | null>(null);
+  const resolvedNameRef = useRef('');
+  const bindingsRef = useRef(new Map<string, Set<(data: unknown) => void>>());
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
-    const pusher = getPusherClient();
-    if (!pusher) return;
+    if (!channelName) return;
+    let disposed = false;
 
-    const channel = pusher.subscribe(channelName);
-    channelRef.current = channel;
-
-    channel.bind('pusher:subscription_succeeded', () => {
-      setIsSubscribed(true);
-    });
-
-    channel.bind('pusher:subscription_error', () => {
-      setIsSubscribed(false);
-    });
+    void initializePusher().then(pusher => {
+      if (disposed) return;
+      const resolvedName = resolveChannelName(channelName);
+      const channel = pusher.subscribe(resolvedName);
+      resolvedNameRef.current = resolvedName;
+      channelRef.current = channel;
+      bindingsRef.current.forEach((callbacks, eventName) => {
+        callbacks.forEach(callback => channel.bind(eventName, callback));
+      });
+      channel.bind('pusher:subscription_succeeded', () => setIsSubscribed(true));
+      channel.bind('pusher:subscription_error', () => setIsSubscribed(false));
+    }).catch(() => setIsSubscribed(false));
 
     return () => {
-      pusher.unsubscribe(channelName);
+      disposed = true;
+      const pusher = getPusherClient();
+      if (pusher && resolvedNameRef.current) pusher.unsubscribe(resolvedNameRef.current);
       channelRef.current = null;
+      resolvedNameRef.current = '';
       setIsSubscribed(false);
     };
   }, [channelName]);
 
   const bind = useCallback(
     <T = unknown>(eventName: string, callback: (data: T) => void) => {
+      const genericCallback = callback as (data: unknown) => void;
+      const callbacks = bindingsRef.current.get(eventName) || new Set();
+      callbacks.add(genericCallback);
+      bindingsRef.current.set(eventName, callbacks);
       const channel = channelRef.current;
-      if (channel) {
-        channel.bind(eventName, callback);
-        return () => channel.unbind(eventName, callback);
-      }
-      return () => {};
+      channel?.bind(eventName, genericCallback);
+      return () => {
+        channelRef.current?.unbind(eventName, genericCallback);
+        const currentCallbacks = bindingsRef.current.get(eventName);
+        currentCallbacks?.delete(genericCallback);
+        if (currentCallbacks?.size === 0) bindingsRef.current.delete(eventName);
+      };
     },
     []
   );
@@ -265,48 +313,6 @@ export function useAuctionsUpdates(callbacks?: {
       return unbind;
     }
   }, [bind, callbacks?.onAuctionCreated]);
-
-  return { isSubscribed };
-}
-
-// Admin notifications hook
-export function useAdminNotifications(callbacks?: {
-  onNewOrder?: (data: {
-    orderId: string;
-    orderNumber: string;
-    total: number;
-    itemCount: number;
-  }) => void;
-  onNewBid?: (data: { auctionId: string; bidAmount: number; bidderName?: string }) => void;
-  onInventoryAlert?: (data: {
-    productId: string;
-    productName: string;
-    newStock: number;
-    alertType: 'low-stock' | 'sold-out';
-  }) => void;
-}) {
-  const { isSubscribed, bind } = useChannel(CHANNELS.ADMIN);
-
-  useEffect(() => {
-    if (callbacks?.onNewOrder) {
-      const unbind = bind(EVENTS.NEW_ORDER, callbacks.onNewOrder);
-      return unbind;
-    }
-  }, [bind, callbacks?.onNewOrder]);
-
-  useEffect(() => {
-    if (callbacks?.onNewBid) {
-      const unbind = bind(EVENTS.NEW_BID, callbacks.onNewBid);
-      return unbind;
-    }
-  }, [bind, callbacks?.onNewBid]);
-
-  useEffect(() => {
-    if (callbacks?.onInventoryAlert) {
-      const unbind = bind(EVENTS.INVENTORY_ALERT, callbacks.onInventoryAlert);
-      return unbind;
-    }
-  }, [bind, callbacks?.onInventoryAlert]);
 
   return { isSubscribed };
 }
