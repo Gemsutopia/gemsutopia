@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { store } from '@/lib/store';
 import { apiSuccess, ApiError } from '@/lib/api';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       { success: true, data: { reviews, count: reviews.length } },
-      { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } }
+      { headers: { 'Cache-Control': 'no-store, max-age=0' } }
     );
   } catch {
     return ApiError.internal('Failed to fetch reviews');

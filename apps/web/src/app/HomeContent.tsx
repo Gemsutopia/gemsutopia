@@ -107,7 +107,7 @@ export default function HomeContent({
         return [...prev, { id: '', section: eventData.section!, key: eventData.key!, value: eventData.value!, content_type: 'text', is_active: true }];
       });
     } else {
-      fetch('/api/site-content-public')
+      fetch('/api/site-content-public', { cache: 'no-store' })
         .then(res => res.ok ? res.json() : null)
         .then(data => { if (data?.success) setContent(data.data?.content || []); })
         .catch(() => {});
@@ -116,7 +116,7 @@ export default function HomeContent({
 
   const refetchStats = useCallback(async () => {
     try {
-      const res = await fetch('/api/stats');
+      const res = await fetch('/api/stats', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         const arr = data.data?.stats || data.stats || [];
@@ -127,7 +127,7 @@ export default function HomeContent({
 
   const refetchFeatured = useCallback(async () => {
     try {
-      const res = await fetch('/api/featured-products');
+      const res = await fetch('/api/featured-products', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         const products = data.data?.featuredProducts || [];
@@ -138,7 +138,7 @@ export default function HomeContent({
 
   const refetchReviews = useCallback(async () => {
     try {
-      const res = await fetch('/api/reviews?featured=true');
+      const res = await fetch('/api/reviews?featured=true', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         const reviews = data.data?.reviews || [];
@@ -153,7 +153,7 @@ export default function HomeContent({
 
   const refetchFaq = useCallback(async () => {
     try {
-      const res = await fetch('/api/faq');
+      const res = await fetch('/api/faq', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         const items = data.data?.faq || [];
@@ -246,11 +246,11 @@ export default function HomeContent({
 
       {/* Stats Section */}
       {stats.length > 0 && (
-        <div className="relative z-10 bg-black px-2 py-4 sm:px-8 sm:py-6 md:px-16 lg:px-32">
+        <div className="relative z-10 bg-black px-4 py-4 xs:px-5 sm:px-6 sm:py-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
           <div className="flex w-full justify-between">
             {stats.map(stat => (
               <div key={stat.id} className="p-1 text-center sm:p-4">
-                <p className="font-[family-name:var(--font-cormorant)] text-xl font-semibold text-white sm:text-4xl">
+                <p className="font-[family-name:var(--font-bacasime)] text-xl font-semibold text-white sm:text-4xl">
                   <AnimatedCounter value={stat.value} />
                 </p>
                 <p className="mt-1 font-[family-name:var(--font-inter)] text-[8px] text-white/60 sm:mt-2 sm:text-xs">
@@ -360,7 +360,7 @@ export default function HomeContent({
 
       {/* FAQ Section */}
       {(faqTitle || faqItems.length > 0) && (
-        <div className="relative z-30 px-4 py-12 sm:px-16 sm:py-20 lg:px-24 xl:px-32">
+        <div className="relative z-30 px-4 py-12 xs:px-5 sm:px-6 sm:py-20 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
           {faqTitle && (
             <h2 className="mb-10 text-center font-[family-name:var(--font-bacasime)] text-3xl text-white sm:text-4xl md:text-5xl" style={{ textShadow: '0 0 40px rgba(255,255,255,0.5)' }}>
               {faqTitle}

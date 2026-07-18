@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { store } from '@/lib/store';
 import { ApiError } from '@/lib/api';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -19,7 +19,7 @@ export async function GET() {
 
     return NextResponse.json(
       { success: true, data: { stats: mappedStats } },
-      { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } }
+      { headers: { 'Cache-Control': 'no-store, max-age=0' } }
     );
   } catch {
     return ApiError.internal('Failed to fetch stats');

@@ -33,7 +33,7 @@ export function useCMSContent() {
   const fetchContent = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/site-content-public');
+      const response = await fetch('/api/site-content-public', { cache: 'no-store' });
 
       if (!response.ok) {
         throw new Error('Failed to fetch content');
@@ -42,7 +42,7 @@ export function useCMSContent() {
       const data = await response.json();
 
       if (data.success) {
-        setContent(data.content);
+        setContent(data.data?.content || []);
         setError(null);
       } else {
         setError(data.message || 'Failed to load content');
