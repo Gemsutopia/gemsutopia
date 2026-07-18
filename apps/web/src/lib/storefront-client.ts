@@ -188,6 +188,12 @@ export type SiteSettings = {
 		currency: string
 		acceptedCurrencies: string[]
 	}
+	pusher?: {
+		key: string
+		cluster: string
+		channelPrefix: string
+		authEndpoint: string
+	} | null
 }
 
 export type PaymentMethod = {

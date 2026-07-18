@@ -11,13 +11,13 @@ import {
 // Connection status indicator
 export function useRealtimeConnection() {
   const { status, error, isConnected } = usePusherConnection();
-  const pusherAvailable = !!getPusherClient();
+  const pusherAvailable = Boolean(getPusherClient());
 
   return {
-    status: pusherAvailable ? status : 'polling',
+    status: pusherAvailable ? status : status === 'unavailable' ? 'polling' : status,
     error,
-    isConnected: pusherAvailable ? isConnected : true,
-    mode: pusherAvailable ? 'websocket' : 'polling',
+    isConnected,
+    mode: pusherAvailable && isConnected ? 'websocket' : 'polling',
   };
 }
 
@@ -142,32 +142,35 @@ export function useRealtimeAuction(id: string) {
     // Listen for bid updates
     const unbindBid = bind(
       EVENTS.BID_PLACED,
-      (bidData: { bidAmount: number; bidCount: number }) => {
+      (bidData: { auctionId: string; amount: string; bidCount: number }) => {
+        if (bidData.auctionId !== id) return;
+        const bidAmount = Number(bidData.amount);
         setData(prev =>
           prev
             ? {
                 ...prev,
-                currentBid: String(bidData.bidAmount),
+                currentBid: String(bidAmount),
                 bidCount: bidData.bidCount,
                 updatedAt: new Date().toISOString(),
               }
             : null
         );
-        lastBidRef.current = bidData.bidAmount;
+        lastBidRef.current = bidAmount;
       }
     );
 
     // Listen for auction end
     const unbindEnd = bind(
       EVENTS.AUCTION_ENDED,
-      (endData: { finalBid: number; endedByBuyNow?: boolean }) => {
+      (endData: { auctionId: string; winningBid?: string; status: string }) => {
+        if (endData.auctionId !== id) return;
         setData(prev =>
           prev
             ? {
                 ...prev,
-                status: 'ended',
+                status: endData.status,
                 isActive: false,
-                currentBid: String(endData.finalBid),
+                currentBid: endData.winningBid || prev.currentBid,
               }
             : null
         );
@@ -184,7 +187,7 @@ export function useRealtimeAuction(id: string) {
   useEffect(() => {
     if (mode === 'websocket') return;
 
-    const interval = setInterval(fetchAuction, 10000); // 10 seconds
+    const interval = setInterval(fetchAuction, 300000); // five-minute disconnected fallback
     return () => clearInterval(interval);
   }, [mode, fetchAuction]);
 
@@ -238,13 +241,13 @@ export function useRealtimeAuctions() {
     // Listen for bid updates across all auctions
     const unbindBid = bind(
       EVENTS.BID_PLACED,
-      (bidData: { auctionId: string; bidAmount: number; bidCount: number }) => {
+      (bidData: { auctionId: string; amount: string; bidCount: number }) => {
         setData(prev =>
           prev?.map(auction =>
             auction.id === bidData.auctionId
               ? {
                   ...auction,
-                  currentBid: String(bidData.bidAmount),
+                  currentBid: bidData.amount,
                   bidCount: bidData.bidCount,
                 }
               : auction
@@ -269,7 +272,7 @@ export function useRealtimeAuctions() {
   useEffect(() => {
     if (mode === 'websocket') return;
 
-    const interval = setInterval(fetchAuctions, 30000); // 30 seconds
+    const interval = setInterval(fetchAuctions, 300000); // five-minute disconnected fallback
     return () => clearInterval(interval);
   }, [mode, fetchAuctions]);
 
@@ -284,7 +287,7 @@ export function useRealtimeAuctions() {
 
 export function useRealtimeProduct(id: string) {
   return useRealtimeData<Record<string, unknown>>('products', id, {
-    pollInterval: 60000, // 1 minute fallback
+    pollInterval: 300000, // five-minute disconnected fallback
     channel: CHANNELS.INVENTORY,
     events: [EVENTS.STOCK_UPDATED],
   });
@@ -315,48 +318,48 @@ export function useRealtimeProducts() {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Subscribe to inventory channel
-  const { bind, isSubscribed } = useChannel(CHANNELS.INVENTORY);
+  const { bind: bindInventory, isSubscribed: inventorySubscribed } = useChannel(CHANNELS.INVENTORY);
+  const { bind: bindProducts, isSubscribed: productsSubscribed } = useChannel(CHANNELS.PRODUCTS);
 
   useEffect(() => {
     if (mode !== 'websocket') return;
 
-    const unbind = bind(
+    const unbindInventory = bindInventory(
       EVENTS.STOCK_UPDATED,
-      (stockData: { productId: string; newStock: number }) => {
-        setData(prev =>
-          prev?.map(product =>
-            product.id === stockData.productId
-              ? { ...product, inventory: stockData.newStock }
-              : product
-          ) || null
-        );
-      }
+      () => fetchProducts()
     );
+    const productEvents = [
+      EVENTS.PRODUCT_CREATED,
+      EVENTS.PRODUCT_UPDATED,
+      EVENTS.PRODUCT_DELETED,
+      EVENTS.PRODUCT_BULK_UPDATED,
+    ];
+    const unbindProducts = productEvents.map(event => bindProducts(event, fetchProducts));
 
-    return unbind;
-  }, [bind, mode]);
+    return () => {
+      unbindInventory();
+      unbindProducts.forEach(unbind => unbind());
+    };
+  }, [bindInventory, bindProducts, mode, fetchProducts]);
 
   return {
     data,
     loading,
     error,
-    isConnected: mode === 'websocket' ? isSubscribed : true,
+    isConnected: mode === 'websocket' ? inventorySubscribed && productsSubscribed : false,
     refetch: fetchProducts,
   };
 }
 
 export function useRealtimeCategories() {
   return useRealtimeData<Record<string, unknown>[]>('categories', undefined, {
-    pollInterval: 300000, // 5 minutes fallback (categories rarely change)
+    pollInterval: 900000, // fifteen-minute disconnected fallback
   });
 }
 
 export function useRealtimeOrders() {
   return useRealtimeData<Record<string, unknown>[]>('orders', undefined, {
-    pollInterval: 30000, // 30 seconds fallback
-    channel: CHANNELS.ORDERS,
-    events: [EVENTS.ORDER_STATUS_UPDATED],
+    pollInterval: 300000,
   });
 }
 
@@ -388,7 +391,7 @@ export function useRealtimeBids(auctionId?: string) {
 
     // Fallback polling when WebSocket not available
     if (mode !== 'websocket') {
-      const interval = setInterval(fetchBids, 5000);
+      const interval = setInterval(fetchBids, 300000);
       return () => clearInterval(interval);
     }
   }, [auctionId, mode]);

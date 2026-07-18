@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { useEvent } from '@/lib/pusher-client';
+import { CHANNELS, EVENTS, useEvent } from '@/lib/pusher-client';
 import dynamic from 'next/dynamic';
 import GemCarousel from '@/components/home/GemCarousel';
 import Link from 'next/link';
@@ -162,15 +162,18 @@ export default function HomeContent({
     } catch { /* silent */ }
   }, []);
 
+  const refetchCollections = useCallback(() => {
+    void Promise.all([refetchStats(), refetchReviews(), refetchFaq()]);
+  }, [refetchFaq, refetchReviews, refetchStats]);
+
   // Pusher real-time listeners
-  useEvent('content', 'content-updated', handleContentUpdate);
-  useEvent('content', 'hero-updated', handleContentUpdate);
-  useEvent('content', 'stats-updated', refetchStats);
-  useEvent('content', 'stats-created', refetchStats);
-  useEvent('content', 'stats-deleted', refetchStats);
-  useEvent('content', 'featured-products-updated', refetchFeatured);
-  useEvent('content', 'reviews-updated', refetchReviews);
-  useEvent('content', 'faq-updated', refetchFaq);
+  useEvent(CHANNELS.CONTENT, EVENTS.CONTENT_UPDATED, handleContentUpdate);
+  useEvent(CHANNELS.CONTENT, EVENTS.CONTENT_BULK_UPDATED, handleContentUpdate);
+  useEvent(CHANNELS.CONTENT, EVENTS.COLLECTIONS_UPDATED, refetchCollections);
+  useEvent(CHANNELS.PRODUCTS, EVENTS.PRODUCT_CREATED, refetchFeatured);
+  useEvent(CHANNELS.PRODUCTS, EVENTS.PRODUCT_UPDATED, refetchFeatured);
+  useEvent(CHANNELS.PRODUCTS, EVENTS.PRODUCT_DELETED, refetchFeatured);
+  useEvent(CHANNELS.PRODUCTS, EVENTS.PRODUCT_BULK_UPDATED, refetchFeatured);
 
   // Derived content values
   const heroImages = getJsonContent<{ id: number | string; name: string; image: string }[]>('hero', 'images') || [];
