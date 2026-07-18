@@ -1,13 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useBetterAuth } from '@/contexts/BetterAuthContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import {
+  IconArrowLeft,
+  IconCheck,
+  IconClock,
+  IconCopy,
+  IconPackage,
+  IconPrinter,
+  IconTruck,
+} from '@tabler/icons-react';
 import Link from 'next/link';
-import { IconArrowLeft, IconPackage, IconTruck, IconCheck, IconClock, IconCopy } from '@tabler/icons-react';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
+import { useBetterAuth } from '@/contexts/BetterAuthContext';
 import { getCommerceErrorMessage } from '@/lib/commerce-error';
 
 interface OrderItem {
@@ -74,7 +81,9 @@ function StatusBadge({ status }: { status: string }) {
   };
 
   return (
-    <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium capitalize ${colors[status] || 'bg-gray-100 text-gray-800'}`}>
+    <span
+      className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium capitalize ${colors[status] || 'bg-gray-100 text-gray-800'}`}
+    >
       {status.replace('_', ' ')}
     </span>
   );
@@ -84,7 +93,6 @@ export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user, isLoading: authLoading } = useBetterAuth();
-  const { formatPrice } = useCurrency();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -112,7 +120,8 @@ export default function OrderDetailPage() {
           orderNumber: quickdashOrder.orderNumber,
           status: quickdashOrder.status,
           paymentStatus: quickdashOrder.payment?.status || 'unknown',
-          paymentMethod: quickdashOrder.payment?.method || quickdashOrder.payment?.provider || 'unknown',
+          paymentMethod:
+            quickdashOrder.payment?.method || quickdashOrder.payment?.provider || 'unknown',
           customerName: user.name || user.email || '',
           customerEmail: user.email || '',
           customerPhone: quickdashOrder.shippingAddress?.phone || '',
@@ -133,7 +142,7 @@ export default function OrderDetailPage() {
           discountCode: '',
           total: quickdashOrder.total,
           currency: quickdashOrder.payment?.currency || quickdashOrder.currency || 'CAD',
-          items: quickdashOrder.items.map(item => ({
+          items: quickdashOrder.items.map((item) => ({
             id: item.id,
             name: item.variantName ? `${item.productName} — ${item.variantName}` : item.productName,
             price: Number(item.unitPrice),
@@ -168,6 +177,12 @@ export default function OrderDetailPage() {
     }
   };
 
+  const formatOrderPrice = (amount: number) =>
+    new Intl.NumberFormat('en-CA', {
+      style: 'currency',
+      currency: order?.currency || 'CAD',
+    }).format(amount);
+
   if (loading || authLoading) {
     return (
       <div className="flex min-h-screen flex-col bg-gray-50">
@@ -188,11 +203,16 @@ export default function OrderDetailPage() {
           <Link href="/dashboard" className="mt-4 text-purple-600 hover:underline">
             Back to Dashboard
           </Link>
-          {error && error !== 'Order not found' && error !== 'You do not have permission to view this order' && (
-            <button onClick={() => setRetryKey((key) => key + 1)} className="mt-3 text-purple-600 hover:underline">
-              Try Again
-            </button>
-          )}
+          {error &&
+            error !== 'Order not found' &&
+            error !== 'You do not have permission to view this order' && (
+              <button
+                onClick={() => setRetryKey((key) => key + 1)}
+                className="mt-3 text-purple-600 hover:underline"
+              >
+                Try Again
+              </button>
+            )}
         </div>
         <Footer />
       </div>
@@ -207,20 +227,38 @@ export default function OrderDetailPage() {
 
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
         {/* Back link */}
-        <Link href="/dashboard" className="mb-6 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
+        <Link
+          href="/dashboard"
+          className="mb-6 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+        >
           <IconArrowLeft size={16} />
           Back to Dashboard
         </Link>
 
         {/* Header */}
-        <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Order #{order.orderNumber}</h1>
             <p className="mt-1 text-sm text-gray-500">
-              Placed on {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              Placed on{' '}
+              {new Date(order.createdAt).toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+              })}
             </p>
           </div>
-          <StatusBadge status={order.status} />
+          <div className="flex items-center gap-3 print:hidden">
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              <IconPrinter size={16} />
+              Print receipt
+            </button>
+            <StatusBadge status={order.status} />
+          </div>
         </div>
 
         {/* Progress tracker */}
@@ -229,14 +267,20 @@ export default function OrderDetailPage() {
             <div className="flex items-center justify-between">
               {STATUS_STEPS.map((step, i) => (
                 <div key={step} className="flex flex-1 flex-col items-center">
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm ${
-                    i <= statusIndex ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-500'
-                  }`}>
+                  <div
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm ${
+                      i <= statusIndex ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-500'
+                    }`}
+                  >
                     {i < statusIndex ? <IconCheck size={16} /> : i + 1}
                   </div>
-                  <span className="mt-2 text-xs capitalize text-gray-600 hidden sm:block">{step}</span>
+                  <span className="mt-2 text-xs capitalize text-gray-600 hidden sm:block">
+                    {step}
+                  </span>
                   {i < STATUS_STEPS.length - 1 && (
-                    <div className={`absolute h-0.5 w-full ${i < statusIndex ? 'bg-purple-600' : 'bg-gray-200'}`} />
+                    <div
+                      className={`absolute h-0.5 w-full ${i < statusIndex ? 'bg-purple-600' : 'bg-gray-200'}`}
+                    />
                   )}
                 </div>
               ))}
@@ -248,10 +292,15 @@ export default function OrderDetailPage() {
           {/* Items */}
           <div className="lg:col-span-2">
             <div className="rounded-lg bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold text-gray-900">Items ({order.itemCount})</h2>
+              <h2 className="mb-4 text-lg font-semibold text-gray-900">
+                Items ({order.itemCount})
+              </h2>
               <div className="divide-y divide-gray-100">
                 {order.items.map((item, i) => (
-                  <div key={item.id || i} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
+                  <div
+                    key={item.id || i}
+                    className="flex items-center gap-4 py-4 first:pt-0 last:pb-0"
+                  >
                     {item.image && (
                       <img
                         src={item.image}
@@ -260,13 +309,11 @@ export default function OrderDetailPage() {
                       />
                     )}
                     <div className="min-w-0 flex-1">
-                      <Link href={`/product/${item.id}`} className="font-medium text-gray-900 hover:text-purple-600">
-                        {item.name}
-                      </Link>
+                      <p className="font-medium text-gray-900">{item.name}</p>
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
                     <p className="font-medium text-gray-900">
-                      {formatPrice(item.price * item.quantity)}
+                      {formatOrderPrice(item.price * item.quantity)}
                     </p>
                   </div>
                 ))}
@@ -282,7 +329,11 @@ export default function OrderDetailPage() {
                 </h2>
                 <div className="flex items-center gap-3">
                   <p className="font-mono text-sm text-gray-700">{order.trackingNumber}</p>
-                  <button onClick={copyTracking} className="text-gray-400 hover:text-gray-600" title="Copy">
+                  <button
+                    onClick={copyTracking}
+                    className="text-gray-400 hover:text-gray-600"
+                    title="Copy"
+                  >
                     <IconCopy size={16} />
                   </button>
                 </div>
@@ -319,31 +370,40 @@ export default function OrderDetailPage() {
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <dt className="text-gray-500">Subtotal</dt>
-                  <dd className="text-gray-900">{formatPrice(parseFloat(order.subtotal))}</dd>
+                  <dd className="text-gray-900">{formatOrderPrice(parseFloat(order.subtotal))}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-gray-500">Shipping</dt>
                   <dd className="text-gray-900">
-                    {parseFloat(order.shippingCost) === 0 ? 'Free' : formatPrice(parseFloat(order.shippingCost))}
+                    {parseFloat(order.shippingCost) === 0
+                      ? 'Free'
+                      : formatOrderPrice(parseFloat(order.shippingCost))}
                   </dd>
                 </div>
                 {parseFloat(order.taxAmount || '0') > 0 && (
                   <div className="flex justify-between">
                     <dt className="text-gray-500">Tax</dt>
-                    <dd className="text-gray-900">{formatPrice(parseFloat(order.taxAmount))}</dd>
+                    <dd className="text-gray-900">
+                      {formatOrderPrice(parseFloat(order.taxAmount))}
+                    </dd>
                   </div>
                 )}
                 {parseFloat(order.discountAmount || '0') > 0 && (
                   <div className="flex justify-between">
                     <dt className="text-gray-500">
-                      Discount {order.discountCode && <span className="font-mono">({order.discountCode})</span>}
+                      Discount{' '}
+                      {order.discountCode && (
+                        <span className="font-mono">({order.discountCode})</span>
+                      )}
                     </dt>
-                    <dd className="text-green-600">-{formatPrice(parseFloat(order.discountAmount))}</dd>
+                    <dd className="text-green-600">
+                      -{formatOrderPrice(parseFloat(order.discountAmount))}
+                    </dd>
                   </div>
                 )}
                 <div className="flex justify-between border-t border-gray-100 pt-2 text-base font-semibold">
                   <dt className="text-gray-900">Total</dt>
-                  <dd className="text-gray-900">{formatPrice(parseFloat(order.total))}</dd>
+                  <dd className="text-gray-900">{formatOrderPrice(parseFloat(order.total))}</dd>
                 </div>
               </dl>
             </div>

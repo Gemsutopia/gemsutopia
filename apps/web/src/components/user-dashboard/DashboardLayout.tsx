@@ -1,148 +1,158 @@
 'use client';
-import { useState } from 'react';
-import { useBetterAuth } from '@/contexts/BetterAuthContext';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faUser,
-  faShoppingBag,
-  faCog,
-  faHeart,
-  faSignOutAlt,
-  faBars,
-  faTimes,
-  faDashboard,
-  faGift,
-  faGavel,
-  faMapMarkerAlt,
-} from '@fortawesome/free-solid-svg-icons';
-import DashboardOverview from './DashboardOverview';
-import UserProfile from './UserProfile';
-import UserOrders from './UserOrders';
-import UserWishlist from './UserWishlist';
-import UserSettings from './UserSettings';
-import UserReferrals from './UserReferrals';
-import UserBids from './UserBids';
-import UserAddresses from './UserAddresses';
 
-type DashboardSection = 'overview' | 'profile' | 'orders' | 'bids' | 'wishlist' | 'addresses' | 'referrals' | 'settings';
+import {
+  faBars,
+  faDashboard,
+  faHeart,
+  faMapMarkerAlt,
+  faShoppingBag,
+  faSignOutAlt,
+  faTimes,
+  faUser,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { useBetterAuth } from '@/contexts/BetterAuthContext';
+import DashboardOverview from './DashboardOverview';
+import UserAddresses from './UserAddresses';
+import UserOrders from './UserOrders';
+import UserProfile from './UserProfile';
+import UserWishlist from './UserWishlist';
+
+type DashboardSection = 'overview' | 'profile' | 'orders' | 'wishlist' | 'addresses';
+
+const menuItems = [
+  { id: 'overview', label: 'Overview', icon: faDashboard },
+  { id: 'orders', label: 'Orders', icon: faShoppingBag },
+  { id: 'wishlist', label: 'Wishlist', icon: faHeart },
+  { id: 'addresses', label: 'Addresses', icon: faMapMarkerAlt },
+  { id: 'profile', label: 'Profile', icon: faUser },
+] satisfies Array<{ id: DashboardSection; label: string; icon: typeof faUser }>;
+
+const validSections = new Set<DashboardSection>(menuItems.map((item) => item.id));
 
 export default function DashboardLayout() {
   const { user, signOut } = useBetterAuth();
-  const [activeSection, setActiveSection] = useState<DashboardSection>('overview');
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const requestedSection = searchParams.get('section') as DashboardSection | null;
+  const activeSection =
+    requestedSection && validSections.has(requestedSection) ? requestedSection : 'overview';
+
+  const activeLabel = useMemo(
+    () => menuItems.find((item) => item.id === activeSection)?.label ?? 'Overview',
+    [activeSection]
+  );
+
+  const selectSection = (section: DashboardSection) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (section === 'overview') params.delete('section');
+    else params.set('section', section);
+    const query = params.toString();
+    router.replace(query ? `/dashboard?${query}` : '/dashboard', { scroll: false });
+    setSidebarOpen(false);
+  };
 
   const handleSignOut = async () => {
     await signOut();
+    router.replace('/');
   };
-
-  const menuItems = [
-    { id: 'overview' as DashboardSection, label: 'Overview', icon: faDashboard },
-    { id: 'profile' as DashboardSection, label: 'Profile', icon: faUser },
-    { id: 'orders' as DashboardSection, label: 'Orders', icon: faShoppingBag },
-    { id: 'bids' as DashboardSection, label: 'My Bids', icon: faGavel },
-    { id: 'wishlist' as DashboardSection, label: 'Wishlist', icon: faHeart },
-    { id: 'addresses' as DashboardSection, label: 'Addresses', icon: faMapMarkerAlt },
-    { id: 'referrals' as DashboardSection, label: 'Referrals', icon: faGift },
-    { id: 'settings' as DashboardSection, label: 'Settings', icon: faCog },
-  ];
 
   const renderContent = () => {
     switch (activeSection) {
-      case 'overview':
-        return <DashboardOverview />;
       case 'profile':
         return <UserProfile />;
       case 'orders':
         return <UserOrders />;
-      case 'bids':
-        return <UserBids />;
       case 'wishlist':
         return <UserWishlist />;
       case 'addresses':
         return <UserAddresses />;
-      case 'referrals':
-        return <UserReferrals />;
-      case 'settings':
-        return <UserSettings />;
       default:
-        return <DashboardOverview />;
+        return <DashboardOverview onNavigate={selectSection} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile menu button */}
-      <div className="bg-white p-4 shadow-sm lg:hidden">
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="text-gray-600 hover:text-gray-900"
-        >
-          <FontAwesomeIcon icon={sidebarOpen ? faTimes : faBars} className="h-6 w-6" />
-        </button>
-      </div>
-
-      <div className="flex">
-        {/* Sidebar */}
-        <div
-          className={`${
+    <div className="customer-dashboard min-h-screen bg-black text-white">
+      <div className="mx-auto flex min-h-screen max-w-[1600px] pt-20 sm:pt-24">
+        <aside
+          className={`fixed inset-y-0 left-0 z-50 w-[min(19rem,88vw)] border-r border-white/10 bg-[#080808] px-5 pb-6 pt-24 transition-transform duration-300 lg:sticky lg:top-0 lg:z-10 lg:h-screen lg:w-72 lg:translate-x-0 lg:pt-8 ${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } fixed z-30 h-screen w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0`}
+          }`}
+          aria-label="Customer account navigation"
         >
-          <div className="p-6">
-            <div className="mb-8 flex items-center space-x-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-pink-600">
-                <FontAwesomeIcon icon={faUser} className="text-lg text-white" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-gray-900">Welcome back!</h2>
-                <p className="truncate text-sm text-gray-600">{user?.email}</p>
-              </div>
-            </div>
-
-            <nav className="space-y-2">
-              {menuItems.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveSection(item.id);
-                    setSidebarOpen(false);
-                  }}
-                  className={`flex w-full items-center space-x-3 rounded-lg px-4 py-3 text-left transition-colors ${
-                    activeSection === item.id
-                      ? 'border-r-2 border-purple-700 bg-purple-100 text-purple-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <FontAwesomeIcon icon={item.icon} className="h-5 w-5" />
-                  <span className="font-medium">{item.label}</span>
-                </button>
-              ))}
-            </nav>
-
-            <div className="absolute right-6 bottom-6 left-6">
-              <button
-                onClick={handleSignOut}
-                className="flex w-full items-center space-x-3 rounded-lg px-4 py-3 text-red-600 transition-colors hover:bg-red-50"
-              >
-                <FontAwesomeIcon icon={faSignOutAlt} className="h-5 w-5" />
-                <span className="font-medium">Sign Out</span>
-              </button>
-            </div>
+          <div className="mb-8 border-b border-white/10 pb-6">
+            <p className="text-xs tracking-[0.18em] text-white/35 uppercase">Your account</p>
+            <p className="mt-3 truncate font-[family-name:var(--font-bacasime)] text-2xl text-white">
+              {user?.name || 'Gem collector'}
+            </p>
+            <p className="mt-1 truncate text-xs text-white/45">{user?.email}</p>
           </div>
-        </div>
 
-        {/* Mobile overlay */}
+          <nav className="space-y-1">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => selectSection(item.id)}
+                aria-current={activeSection === item.id ? 'page' : undefined}
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition-colors ${
+                  activeSection === item.id
+                    ? 'bg-white text-black'
+                    : 'text-white/55 hover:bg-white/[0.06] hover:text-white'
+                }`}
+              >
+                <FontAwesomeIcon icon={item.icon} className="h-4 w-4" />
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="mt-8 flex w-full items-center gap-3 rounded-xl border border-white/10 px-3 py-3 text-sm text-white/45 transition-colors hover:border-red-400/30 hover:bg-red-500/10 hover:text-red-300 lg:absolute lg:bottom-8 lg:left-5 lg:right-5 lg:w-[calc(100%-2.5rem)]"
+          >
+            <FontAwesomeIcon icon={faSignOutAlt} className="h-4 w-4" />
+            <span>Sign out</span>
+          </button>
+        </aside>
+
         {sidebarOpen && (
-          <div
-            className="bg-opacity-50 fixed inset-0 z-20 bg-black lg:hidden"
+          <button
+            type="button"
+            aria-label="Close account navigation"
+            className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
-        {/* Main content */}
-        <div className="flex-1 lg:ml-0">
-          <div className="p-6 lg:p-8">{renderContent()}</div>
-        </div>
+        <main className="min-w-0 flex-1 px-4 pb-20 sm:px-8 lg:px-12 xl:px-16">
+          <div className="sticky top-20 z-30 -mx-4 flex items-center justify-between border-b border-white/10 bg-black/90 px-4 py-4 backdrop-blur-xl sm:-mx-8 sm:px-8 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:py-8">
+            <div>
+              <p className="text-[10px] tracking-[0.2em] text-white/30 uppercase lg:hidden">
+                Account
+              </p>
+              <h1 className="font-[family-name:var(--font-bacasime)] text-2xl lg:text-4xl">
+                {activeLabel}
+              </h1>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen((open) => !open)}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/70 lg:hidden"
+              aria-label={sidebarOpen ? 'Close account navigation' : 'Open account navigation'}
+              aria-expanded={sidebarOpen}
+            >
+              <FontAwesomeIcon icon={sidebarOpen ? faTimes : faBars} className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="dashboard-content py-6 lg:py-2">{renderContent()}</div>
+        </main>
       </div>
     </div>
   );
