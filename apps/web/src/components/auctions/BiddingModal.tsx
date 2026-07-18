@@ -162,7 +162,7 @@ export default function BiddingModal({ auction, isOpen, onClose, onBidPlaced }: 
 
         {/* Header */}
         <div className="mb-4 text-center sm:mb-6">
-          <h3 className="mb-1 font-[family-name:var(--font-cormorant)] text-2xl text-white sm:mb-2 sm:text-3xl">
+          <h3 className="mb-1 font-[family-name:var(--font-bacasime)] text-2xl text-white sm:mb-2 sm:text-3xl">
             Place Your Bid
           </h3>
           <p className="text-xs text-white/60 sm:text-sm">

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono, Playfair_Display, Inter, Cormorant_Garamond } from 'next/font/google';
+import { Geist_Mono, Inter } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
@@ -9,22 +9,8 @@ import { getSEOMetadataFromDB } from '@/lib/utils/seoMetadata';
 
 config.autoAddCss = false;
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-  display: 'swap',
-  preload: true,
-});
-
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
-  subsets: ['latin'],
-  display: 'swap',
-  preload: true,
-});
-
-const playfair = Playfair_Display({
-  variable: '--font-playfair',
   subsets: ['latin'],
   display: 'swap',
   preload: true,
@@ -44,13 +30,6 @@ const inter = Inter({
   preload: true,
 });
 
-const cormorant = Cormorant_Garamond({
-  variable: '--font-cormorant',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-  preload: true,
-});
 
 // Dynamic metadata from database
 export async function generateMetadata(): Promise<Metadata> {
@@ -160,7 +139,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${bacasime.variable} ${inter.variable} ${cormorant.variable} bg-black antialiased`}
+        className={`${geistMono.variable} ${bacasime.variable} ${inter.variable} bg-black font-sans antialiased`}
       >
         <div id="scroll-wrapper">
           <ClientLayout>{children}</ClientLayout>
