@@ -361,6 +361,7 @@ export default function CheckoutFlow() {
   const [shipping, setShipping] = useState<number>(0); // Start at 0, will load properly
   const [shippingCurrency, setShippingCurrency] = useState<CheckoutCurrency>('CAD');
   const [shippingError, setShippingError] = useState<string | null>(null);
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
 
   // Shipping calculation function (moved outside useEffect so it can be called manually)
   const calculateShippingCost = async (
@@ -386,6 +387,7 @@ export default function CheckoutFlow() {
       return true;
     }
 
+    setIsCalculatingShipping(true);
     try {
       const country = getShippingCountryCode(customer.country || 'Canada');
       const ratesResult = await store.shipping.getRates({
@@ -406,37 +408,10 @@ export default function CheckoutFlow() {
     } catch {
       setShippingError('Shipping could not be calculated. Check the address or try again.');
       return false;
+    } finally {
+      setIsCalculatingShipping(false);
     }
   };
-
-  // Listen for settings updates
-  React.useEffect(() => {
-    const handleSettingsUpdate = () => {
-      // Reset cached settings and force refetch shipping settings when admin updates them
-      calculateShippingCost(true); // Force refresh even if shipping is locked
-    };
-
-    // Listen for custom events from Settings component
-    window.addEventListener('settings-updated', handleSettingsUpdate);
-
-    // Also listen for storage events (cross-tab updates)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'site-settings-updated') {
-        handleSettingsUpdate();
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('settings-updated', handleSettingsUpdate);
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
-  // UseEffect to trigger shipping calculation when dependencies change
-  React.useEffect(() => {
-    calculateShippingCost();
-  }, [appliedDiscount?.free_shipping, items.length, checkoutData.customer?.country]);
 
   const displaySubtotal = roundMoney(convertPrice(subtotal));
   const displayDiscount = roundMoney(convertPrice(discount));
@@ -538,6 +513,7 @@ export default function CheckoutFlow() {
         setCurrentStep('customer');
         break;
       case 'customer':
+        if (isCalculatingShipping) return;
         updateCheckoutData({ customer: data });
         if (!(await calculateShippingCost(false, data))) {
           toast.error('Shipping could not be calculated for this address');
@@ -740,10 +716,11 @@ export default function CheckoutFlow() {
               <CustomerInfo
                 data={checkoutData.customer}
                 onContinue={customerData => handleStepComplete('customer', customerData)}
+                isCalculatingShipping={isCalculatingShipping}
+                shippingError={shippingError}
                 onAddressChange={customerData => {
                   updateCheckoutData({ customer: customerData });
-                  // TRIGGER SHIPPING RECALCULATION IMMEDIATELY
-                  calculateShippingCost();
+                  setShippingError(null);
                 }}
               />
             )}

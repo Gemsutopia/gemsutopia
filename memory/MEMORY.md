@@ -1,5 +1,10 @@
 # Gemsutopia Project Memory
 
+## Shipping Rate State (2026-07-17)
+- Shipping-rate lookup now runs on valid address submission rather than incomplete background address changes.
+- Checkout shows a persistent inline error and retry action, disables duplicate submissions while calculating, and cannot advance without a current rate.
+- The repository has no configured test runner. Checkout automation will require a new focused harness.
+
 ## PayPal Checkout Recovery States (2026-07-17)
 - PayPal return processing now has an explicit full-page confirmation loader.
 - Cancelled PayPal attempts clear stale redirect session data but preserve the Gem Pouch.

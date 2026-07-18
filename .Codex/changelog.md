@@ -1,5 +1,28 @@
 # Gemsutopia Changelog
 
+## 2026-07-17 — Shipping Rate Loading and Retry State
+
+### Completed
+- Shipping rates are now calculated only after the customer submits a valid shipping address instead of firing background requests from partial address changes.
+- Added a visible calculating state and disabled repeat submission while Quickdash resolves rates.
+- Added a persistent inline shipping error with address guidance and an explicit retry action.
+- Address changes clear stale shipping errors, and checkout cannot advance to payment methods without a valid current rate.
+- Removed obsolete storefront listeners that could recalculate and overwrite shipping while the customer was already paying.
+
+### Files Changed
+- `apps/web/src/components/checkout/CheckoutFlow.tsx`
+- `apps/web/src/components/checkout/CustomerInfo.tsx`
+- `.Codex/changelog.md`
+- `memory/MEMORY.md`
+
+### Verification
+- `pnpm --filter @gemsutopia/web exec tsc --noEmit` passed.
+- Confirmed the repository currently has no configured unit or end-to-end test runner; focused checkout automation requires introducing a test harness rather than extending existing coverage.
+
+### What's Next
+- Add a focused Playwright checkout harness for cancellation, missing return state, interrupted finalization, and inventory/price preflight failures.
+- Continue functional state coverage for tracking, contact/review submission, and remaining silent account mutations.
+
 ## 2026-07-17 — PayPal Checkout Recovery States
 
 ### Completed
