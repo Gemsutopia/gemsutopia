@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22 <25"
+  },
   "scripts": {
     "dev": "turbo run dev --concurrency=15",
     "dev:web": "turbo run dev --filter=@gemsutopia/web",
@@ -11,21 +14,36 @@
     "build:web": "turbo run build --filter=@gemsutopia/web",
     "build:admin": "turbo run build --filter=@gemsutopia/admin",
     "build:packages": "turbo run build --filter=./packages/*",
-    "lint": "turbo run lint",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "prepare": "husky",
+    "lint": "biome lint .",
+    "lint:all": "biome lint . --config-path=biome.strict.json --max-diagnostics=1000",
+    "check": "biome check .",
+    "format": "biome format . --write",
+    "format:check": "biome format .",
+    "typecheck": "pnpm --filter @gemsutopia/web exec tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,jsonc,css}": "biome check --write --no-errors-on-unmatched"
+  },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.4",
     "@neondatabase/serverless": "^1.0.2",
+    "@playwright/test": "^1.61.1",
     "@types/node": "^25.0.6",
     "drizzle-kit": "^0.31.8",
     "drizzle-orm": "^0.45.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
     "pg": "^8.17.1",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "^2.10.5",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   }
 }
