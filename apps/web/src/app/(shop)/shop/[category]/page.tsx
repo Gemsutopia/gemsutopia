@@ -12,7 +12,7 @@ import {
   IconHeart,
 } from '@tabler/icons-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { EmptyProducts, EmptySearchResults } from '@/components/empty-states';
+import { EmptyProducts, EmptySearchResults, LoadError } from '@/components/empty-states';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { PageLoader } from '@/components/ui/page-loader';
@@ -22,6 +22,7 @@ import { useGemPouch } from '@/contexts/GemPouchContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { toast } from 'sonner';
 import { store } from '@/lib/store';
+import { getCommerceErrorMessage } from '@/lib/commerce-error';
 
 // Product interface
 interface Product {
@@ -80,6 +81,8 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [categoryMissing, setCategoryMissing] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
@@ -133,6 +136,7 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
       try {
         setLoading(true);
         setError('');
+        setCategoryMissing(false);
 
         // Fetch categories from Quickdash
         const { categories: categoriesList } = await store.categories.list({ count: true });
@@ -140,7 +144,7 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
           (cat) => cat.slug === categorySlug
         );
         if (!foundCategory) {
-          setError('Category not found');
+          setCategoryMissing(true);
           setLoading(false);
           return;
         }
@@ -172,20 +176,20 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
           image: product.thumbnail || product.images?.[0] || '/images/placeholder.jpg',
           images: product.images || [],
           featuredImageIndex: 0,
-          stock: 99, // TODO: Add inventory to storefront API
+          stock: product.stock?.reduce((total, item) => total + Math.max(0, item.quantity), 0) ?? 0,
         }));
 
         setProducts(transformedProducts);
       } catch (error) {
         console.error('Failed to fetch category:', error);
-        setError(error instanceof Error ? error.message : 'Failed to load category');
+        setError(getCommerceErrorMessage(error));
       } finally {
         setLoading(false);
       }
     };
 
     fetchCategoryData();
-  }, [categorySlug, shopRefreshTrigger]);
+  }, [categorySlug, shopRefreshTrigger, retryKey]);
 
   // Filter and sort products
   const filteredProducts = products
@@ -241,6 +245,18 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
       <div className="flex min-h-screen flex-col bg-black">
         <Header />
         <main className="flex h-screen flex-col items-center justify-center">
+          <LoadError message={error} onRetry={() => setRetryKey((key) => key + 1)} />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (categoryMissing) {
+    return (
+      <div className="flex min-h-screen flex-col bg-black">
+        <Header />
+        <main className="flex h-screen flex-col items-center justify-center">
           <EmptyProducts category={categorySlug?.replace(/-/g, ' ')} />
         </main>
         <Footer />
@@ -265,7 +281,7 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-12 md:pt-32 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
+<main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-6 md:pt-32 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
         <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
           {/* Back Button */}
           <div className="mb-4 xs:mb-5 md:mb-6">

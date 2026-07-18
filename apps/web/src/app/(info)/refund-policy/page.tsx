@@ -7,9 +7,11 @@ export default function RefundPolicy() {
   const [content, setContent] = useState<any>({});
 
   useEffect(() => {
+    if (process.env.NEXT_PUBLIC_QUICKDASH_PAGE_CONTENT !== 'true') return;
+
     fetch('/api/pages/refund-policy')
       .then(res => res.json())
-      .then(data => setContent(data))
+      .then(data => setContent(data?.data?.content || {}))
       .catch(() => {});
   }, []);
 
@@ -41,25 +43,25 @@ export default function RefundPolicy() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <div className="min-h-screen flex-1 px-4 py-32 sm:px-8 md:px-16 lg:px-32">
+      <div className="min-h-screen flex-1 px-4 py-32 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
         <div className="w-full">
-          <h1 className="mb-2 text-center font-(family-name:--font-cormorant)] text-4xl text-white sm:text-5xl md:text-6xl">
+          <h1 className="mb-2 text-center font-[family-name:var(--font-bacasime)] text-4xl text-white sm:text-5xl md:text-6xl">
             {getContent('title')}
           </h1>
-          <p className="mb-8 text-center font-(family-name:--font-inter)] text-sm text-white/50">
+          <p className="mb-8 text-center font-[family-name:var(--font-inter)] text-sm text-white/50">
             {getContent('subtitle')}
           </p>
 
-          <div className="space-y-8 text-left font-(family-name:--font-inter)] text-sm leading-relaxed text-white/80 sm:text-base">
+          <div className="space-y-8 text-left font-[family-name:var(--font-inter)] text-sm leading-relaxed text-white/80 sm:text-base">
             <section>
-              <h2 className="mb-3 font-(family-name:--font-cormorant)] text-2xl text-white sm:text-3xl">
+              <h2 className="mb-3 font-[family-name:var(--font-bacasime)] text-2xl text-white sm:text-3xl">
                 {getContent('guarantee_title')}
               </h2>
               <p>{getContent('guarantee_content')}</p>
             </section>
 
             <section>
-              <h2 className="mb-3 font-(family-name:--font-cormorant)] text-2xl text-white sm:text-3xl">
+              <h2 className="mb-3 font-[family-name:var(--font-bacasime)] text-2xl text-white sm:text-3xl">
                 {getContent('process_title')}
               </h2>
               <ul className="ml-6 list-disc space-y-2 text-white/70">
@@ -71,21 +73,21 @@ export default function RefundPolicy() {
             </section>
 
             <section>
-              <h2 className="mb-3 font-(family-name:--font-cormorant)] text-2xl text-white sm:text-3xl">
+              <h2 className="mb-3 font-[family-name:var(--font-bacasime)] text-2xl text-white sm:text-3xl">
                 {getContent('exceptions_title')}
               </h2>
               <p>{getContent('exceptions_content')}</p>
             </section>
 
             <section>
-              <h2 className="mb-3 font-(family-name:--font-cormorant)] text-2xl text-white sm:text-3xl">
+              <h2 className="mb-3 font-[family-name:var(--font-bacasime)] text-2xl text-white sm:text-3xl">
                 {getContent('damaged_title')}
               </h2>
               <p>{getContent('damaged_content')}</p>
             </section>
 
             <section>
-              <h2 className="mb-3 font-(family-name:--font-cormorant)] text-2xl text-white sm:text-3xl">
+              <h2 className="mb-3 font-[family-name:var(--font-bacasime)] text-2xl text-white sm:text-3xl">
                 {getContent('contact_title')}
               </h2>
               <p>{getContent('contact_content')}</p>

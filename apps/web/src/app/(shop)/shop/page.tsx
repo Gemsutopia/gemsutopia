@@ -8,8 +8,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { PageLoader } from '@/components/ui/page-loader';
-import { EmptyState } from '@/components/empty-states';
+import { EmptyState, LoadError } from '@/components/empty-states';
 import { store, type Category as StorefrontCategory } from '@/lib/store';
+import { getCommerceErrorMessage } from '@/lib/commerce-error';
 
 // Extended category type for UI display
 interface Category extends Omit<StorefrontCategory, 'sortOrder'> {
@@ -31,6 +32,8 @@ const sortOptions = [
 export default function Shop() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [retryKey, setRetryKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
@@ -85,6 +88,8 @@ export default function Shop() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        setLoading(true);
+        setLoadError('');
         // Fetch from Quickdash Storefront API
         const { categories: cats } = await store.categories.list({ count: true });
         // Map to local format
@@ -98,19 +103,20 @@ export default function Shop() {
       } catch (error) {
         console.error('Failed to fetch categories:', error);
         setCategories([]);
+        setLoadError(getCommerceErrorMessage(error));
       } finally {
         setLoading(false);
       }
     };
 
     fetchCategories();
-  }, []);
+  }, [retryKey]);
 
   return (
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-12 md:pt-32 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
+<main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-6 md:pt-32 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
         <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
           {/* Page Header */}
           <div className="mb-6 text-center xs:mb-8 md:mb-10 lg:mb-12">
@@ -208,8 +214,12 @@ export default function Shop() {
           {/* Loading State */}
           {loading && <PageLoader fullScreen={false} />}
 
+          {!loading && loadError && (
+            <LoadError message={loadError} onRetry={() => setRetryKey((key) => key + 1)} />
+          )}
+
           {/* Categories Grid - 4 columns on desktop, 2 on mobile */}
-          {!loading && (
+          {!loading && !loadError && (
             <div className="grid grid-cols-2 gap-3 xs:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
               {filteredCategories.map((category) => (
                 <Link
@@ -258,7 +268,7 @@ export default function Shop() {
           )}
 
           {/* Empty State */}
-          {!loading && filteredCategories.length === 0 && (
+          {!loading && !loadError && filteredCategories.length === 0 && (
             <EmptyState
               title={searchQuery ? 'No Results Found' : 'No Categories Available'}
               description={

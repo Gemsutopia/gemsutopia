@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -28,18 +27,6 @@ export default function FacebookPage() {
       <Header />
 
       <main className="relative flex min-h-screen grow items-center justify-center overflow-hidden px-4 py-24">
-        {/* Background gem logo */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <Image
-            src="/logos/gem2.svg"
-            alt=""
-            width={800}
-            height={800}
-            className="h-[120vw] w-[120vw] animate-[spin_60s_linear_infinite] opacity-[0.06] drop-shadow-[0_0_80px_rgba(255,255,255,0.3)] sm:h-[600px] sm:w-[600px]"
-            aria-hidden="true"
-          />
-        </div>
-
         <div className="relative z-10 flex flex-col items-center gap-6">
           <div className="mb-2 text-center">
             <FontAwesomeIcon icon={faFacebook} className="mb-3 text-4xl text-white/80" />

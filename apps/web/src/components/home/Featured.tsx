@@ -182,7 +182,7 @@ export default function Featured() {
   if (isLoading) {
     return (
       <section className="py-10 xs:py-12 md:py-16 lg:py-20">
-        <div className="mx-auto max-w-7xl px-4 xs:px-5 sm:px-6 md:px-12 lg:px-8 3xl:max-w-[1600px]">
+        <div className="mx-auto max-w-7xl px-4 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:max-w-[1600px] 3xl:px-6">
           <div className="mb-5 text-center xs:mb-6 md:mb-10 lg:mb-12">
             <h2 className="mb-3 font-[family-name:var(--font-bacasime)] text-2xl text-white xs:mb-4 xs:text-3xl md:text-4xl lg:text-5xl">
               {getContent('featured', 'section_title') || 'Featured Gems'}
@@ -203,7 +203,7 @@ export default function Featured() {
   if (featuredProducts.length === 0) {
     return (
       <section className="py-10 xs:py-12 md:py-16 lg:py-20">
-        <div className="mx-auto max-w-7xl px-4 xs:px-5 sm:px-6 md:px-12 lg:px-8 3xl:max-w-[1600px]">
+        <div className="mx-auto max-w-7xl px-4 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:max-w-[1600px] 3xl:px-6">
           <div className="text-center">
             <h2 className="mb-3 font-[family-name:var(--font-bacasime)] text-2xl text-white xs:mb-4 xs:text-3xl md:text-4xl lg:text-5xl">
               {getContent('featured', 'section_title') || 'Featured Gems'}
@@ -219,7 +219,7 @@ export default function Featured() {
 
   return (
     <section className="py-10 xs:py-12 md:py-16 lg:py-20">
-      <div className="mx-auto max-w-7xl px-4 xs:px-5 sm:px-6 md:px-12 lg:px-8 3xl:max-w-[1600px]">
+      <div className="mx-auto max-w-7xl px-4 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:max-w-[1600px] 3xl:px-6">
         <div className="mb-5 text-center xs:mb-6 md:mb-10 lg:mb-12">
           <h2 className="mb-3 font-[family-name:var(--font-bacasime)] text-2xl text-white xs:mb-4 xs:text-3xl md:text-4xl lg:text-5xl">
             {getContent('featured', 'section_title') || 'Featured Gems'}
