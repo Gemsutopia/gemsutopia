@@ -1,5 +1,17 @@
 # Gemsutopia Project Memory
 
+## PayPal Checkout Recovery States (2026-07-17)
+- PayPal return processing now has an explicit full-page confirmation loader.
+- Cancelled PayPal attempts clear stale redirect session data but preserve the Gem Pouch.
+- Checkout errors are recovery-aware: inventory/price changes return to cart, ordinary pre-payment failures retry payment, and captured/interrupted returns retry the saved idempotent finalization instead of initiating a duplicate payment.
+- Missing PayPal redirect state escalates to support because the browser no longer has enough information to safely reconstruct the order.
+
+## Cart Inventory and CMS Freshness (2026-07-17)
+- Gem Pouch inventory monitoring now fetches each cart product directly from Quickdash, respects variant stock, clamps reduced quantities, removes confirmed sold-out items, and preserves the cart on API failures.
+- The fresh-then-old content flash was caused by real-time client refetches consuming CDN-cached editable-content responses after the server had rendered fresh Quickdash data.
+- Editable site content, stats, and reviews API responses are now `no-store`; homepage event refetches also bypass cache.
+- `useCMSContent` now reads `data.data.content`, matching the standardized API response envelope.
+
 ## Project Architecture
 - **Quickdash** (`/Users/ash/Desktop/quickdash`) = Headless BaaS admin panel
 - **Gemsutopia** (`/Users/ash/Desktop/gemsutopia`) = First storefront / proof-of-concept running on Quickdash
@@ -65,6 +77,22 @@ See [workstream.md](./workstream.md) for detailed state.
 - PayPal capture handling now accepts a capture ID as evidence of payment even if the returned status string is unexpected.
 - Verification: TypeScript passed.
 
+## Inventory Depletion Follow-Up (2026-07-03)
+- Successful provider payment does not currently guarantee inventory depletion because Quickdash's storefront order POST route creates order/payment rows but does not update `inventory.quantity` or `inventoryLogs`.
+- Quickdash inventory is variant-based, so the storefront must send `variantId`; Gemsutopia now preserves `variantId`/`sku` in Gem Pouch items and checkout order payloads when product detail data provides them.
+- Product detail pages now read primary variant price/SKU and returned stock quantity from Quickdash detail responses.
+- Product/shop grid list pages still need Quickdash product list responses to expose default variant + stock data; otherwise those views have to fall back or fetch each product detail individually.
+- Verification: `pnpm --filter @gemsutopia/web exec tsc --noEmit` passed.
+
+## Ecommerce Frontend Readiness Audit (2026-07-17)
+- Gemsutopia has most visible storefront surfaces, but it is not yet production-complete as an ecommerce application.
+- Highest-risk architecture issue: payment approval/capture is followed by order creation in the browser. Quickengine should own a server-authoritative, idempotent checkout/order/payment state machine finalized from verified provider webhooks.
+- Checkout currently sends tax as `0`; inventory is not atomically reserved/decremented; shipping automatically chooses the cheapest returned rate and falls back to free when none exist.
+- Quickdash product list responses still need variant/stock data. Order list/detail contracts need currency and line items for a complete customer account experience.
+- Missing or incomplete user-facing functions include password reset/email verification, address edit/default, invoice/receipt download, cancellation/return/refund requests, and simulated auction bidding.
+- There is no meaningful automated test suite for catalog/cart/checkout/payment/order flows, and the current lint script is invalid for the installed Next.js version.
+- Recommended delivery order: server checkout contract and payment reconciliation; inventory/tax/shipping correctness; post-purchase/account features; automated E2E/contract tests; accessibility/performance/analytics hardening; auctions only if required for launch.
+
 ## User Preferences & Rules
 - **NEVER commit or push** — user handles all git operations manually
 - Provide commit messages in chat when sections are done (no Co-Authored-By)
@@ -85,3 +113,14 @@ See [workstream.md](./workstream.md) for detailed state.
 - `apps/web/src/lib/contexts/ModeContext.tsx` — Site mode (live/maintenance/sandbox)
 - `apps/web/src/components/layout/MaintenanceOverlay.tsx` — Maintenance overlay
 - `apps/web/next.config.ts` — CSP headers, rewrites
+# 2026-07-17 functional state and customer-order contract
+
+- Catalog and auction API failures now render retryable load errors instead of false empty states.
+- Account address/referral/order/bid failures are no longer silently swallowed.
+- Gemsutopia order details now expect Quickdash to return payment, currency, items, addresses, discounts, and tracking.
+- Quickdash must deploy the paired order JWT ownership changes before signed-in order history can be validated.
+- Visual polish remains intentionally deferred until commerce behavior is complete.
+- Authentication/customer management is a launch workstream: registration and login exist, but Quickdash currently has no storefront/workspace customer-membership record and only shows users as customers after an order.
+- Required auth work: workspace-scoped customer membership, signup collection in Quickdash, membership-aware login, email verification, password reset, session expiry/revocation, complete profile/address CRUD, and verified linkage of wishlist/orders/referrals to the customer.
+- Reese has already completed a successful live PayPal purchase as a guest and received the funds. Basic live payment processing is proven; remaining checkout work is integrity, idempotency, inventory, recovery, and order visibility.
+- Transactional email is currently not arriving despite Resend integration code. Treat email delivery as a separate launch-critical workstream for guests and account holders: production credentials/domain/from-address, delivery logging, retry behavior, order confirmation, shipping/tracking, password reset, and email verification.
