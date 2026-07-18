@@ -1,8 +1,8 @@
 'use client';
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
+import { useEffect, useState } from 'react';
 import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 
 export default function Support() {
   const [content, setContent] = useState<any>({});
@@ -12,8 +12,8 @@ export default function Support() {
     if (process.env.NEXT_PUBLIC_QUICKDASH_PAGE_CONTENT !== 'true') return;
 
     fetch('/api/pages/support')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setContent(data?.data?.content || {});
         setLoading(false);
       })
@@ -45,7 +45,7 @@ export default function Support() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
+      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-32">
         <div className="relative z-10 mx-auto max-w-2xl">
           {/* Header */}
           <div className="mb-8 text-center">

@@ -1,20 +1,20 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import { IconArrowLeft, IconCheck } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
-import { useGemPouch } from '@/contexts/GemPouchContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import PaymentError from '@/components/error-states/PaymentError';
+import { PageLoader } from '@/components/ui/page-loader';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { useGemPouch } from '@/contexts/GemPouchContext';
 import { useInventory } from '@/contexts/InventoryContext';
+import { clearStoredReferralCode, getStoredReferralCode } from '@/hooks/useReferralTracking';
 import { store } from '@/lib/store';
 import CartReview from './CartReview';
 import CustomerInfo from './CustomerInfo';
-import PaymentMethods from './PaymentMethods';
-import PaymentForm from './PaymentForm';
 import OrderSuccess from './OrderSuccess';
-import PaymentError from '@/components/error-states/PaymentError';
-import { PageLoader } from '@/components/ui/page-loader';
-import { IconArrowLeft, IconCheck } from '@tabler/icons-react';
-import { getStoredReferralCode, clearStoredReferralCode } from '@/hooks/useReferralTracking';
+import PaymentForm from './PaymentForm';
+import PaymentMethods from './PaymentMethods';
 
 type CheckoutCurrency = 'CAD' | 'USD';
 
@@ -106,7 +106,7 @@ export default function CheckoutFlow() {
     if (savedCustomerData) {
       try {
         const parsed = JSON.parse(savedCustomerData);
-        setCheckoutData(prev => ({
+        setCheckoutData((prev) => ({
           ...prev,
           customer: parsed,
         }));
@@ -145,7 +145,7 @@ export default function CheckoutFlow() {
       if (status === 'cancelled') {
         sessionStorage.removeItem('paypalCheckoutData');
         toast.info('Payment cancelled');
-        setCheckoutData(prev => ({ ...prev, paymentMethod: null }));
+        setCheckoutData((prev) => ({ ...prev, paymentMethod: null }));
         setCurrentStep('payment-method');
         window.history.replaceState({}, '', '/checkout');
         return;
@@ -158,7 +158,8 @@ export default function CheckoutFlow() {
       try {
         const checkoutDataStr = sessionStorage.getItem(storageKey);
         if (!checkoutDataStr) {
-          const missingDataMessage = 'Checkout data was not found after returning from payment. If PayPal charged the customer, contact support with the PayPal confirmation.';
+          const missingDataMessage =
+            'Checkout data was not found after returning from payment. If PayPal charged the customer, contact support with the PayPal confirmation.';
           toast.error(missingDataMessage);
           setError(missingDataMessage);
           setErrorAction('support');
@@ -175,8 +176,8 @@ export default function CheckoutFlow() {
           status: 'paid',
         };
 
-        const captureResult = savedData.captureResult ||
-          await store.payments.capturePayPalOrder(savedData.orderId);
+        const captureResult =
+          savedData.captureResult || (await store.payments.capturePayPalOrder(savedData.orderId));
         if (captureResult.status !== 'COMPLETED' && !captureResult.captureId) {
           const paypalMessage = `PayPal payment was not completed. Status: ${captureResult.status || 'unknown'}`;
           toast.error(paypalMessage);
@@ -206,7 +207,8 @@ export default function CheckoutFlow() {
           shippingAddress: {
             firstName: savedData.customerData.firstName,
             lastName: savedData.customerData.lastName,
-            addressLine1: savedData.customerData.addressLine1 || savedData.customerData.address || '',
+            addressLine1:
+              savedData.customerData.addressLine1 || savedData.customerData.address || '',
             addressLine2: savedData.customerData.addressLine2 || '',
             city: savedData.customerData.city || '',
             state: savedData.customerData.state || savedData.customerData.province || '',
@@ -265,7 +267,7 @@ export default function CheckoutFlow() {
         sessionStorage.removeItem(storageKey);
 
         // Update state
-        setCheckoutData(prev => ({
+        setCheckoutData((prev) => ({
           ...prev,
           customer: savedData.customerData,
           paymentMethod: 'paypal',
@@ -299,11 +301,14 @@ export default function CheckoutFlow() {
           ? `Your payment was successful, but we could not finish recording the order. It is safe to retry this confirmation. Detail: ${detail}`
           : `We could not finish confirming the PayPal payment. No new payment will be started when you retry. Detail: ${detail}`;
         try {
-          localStorage.setItem('lastCheckoutError', JSON.stringify({
-            message: detail,
-            paymentMethod,
-            at: new Date().toISOString(),
-          }));
+          localStorage.setItem(
+            'lastCheckoutError',
+            JSON.stringify({
+              message: detail,
+              paymentMethod,
+              at: new Date().toISOString(),
+            })
+          );
         } catch {
           // Ignore storage failures.
         }
@@ -396,7 +401,7 @@ export default function CheckoutFlow() {
         subtotal,
       });
       const cheapestRate = ratesResult.rates
-        ?.filter(rate => Number.isFinite(rate.price) && rate.price >= 0)
+        ?.filter((rate) => Number.isFinite(rate.price) && rate.price >= 0)
         .sort((a, b) => a.price - b.price)[0];
       if (!cheapestRate) {
         throw new Error('No shipping rate is available for this address');
@@ -419,7 +424,7 @@ export default function CheckoutFlow() {
   const displayShipping = roundMoney(
     convertCheckoutAmount(shipping, shippingCurrency, currentCurrency, exchangeRate)
   );
-  const displayItems = items.map(item => ({
+  const displayItems = items.map((item) => ({
     ...item,
     price: roundMoney(convertPrice(item.price)),
   }));
@@ -430,7 +435,7 @@ export default function CheckoutFlow() {
   // TAX REMOVED - NO CURRENCY EFFECT NEEDED
 
   const updateCheckoutData = (updates: Partial<CheckoutData>) => {
-    setCheckoutData(prev => ({ ...prev, ...updates }));
+    setCheckoutData((prev) => ({ ...prev, ...updates }));
   };
 
   const validateDiscountCode = async () => {
@@ -550,7 +555,7 @@ export default function CheckoutFlow() {
         refreshShopProducts(); // Trigger real-time inventory update
 
         // Also refresh individual product pages for items that were purchased
-        items.forEach(item => {
+        items.forEach((item) => {
           refreshProduct(item.id);
         });
         break;
@@ -621,11 +626,19 @@ export default function CheckoutFlow() {
   };
 
   // Don't redirect if we're completing a payment return, showing success, or showing an error
-  const isPaymentReturn = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('payment_method');
+  const isPaymentReturn =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).has('payment_method');
   if (isFinalizingPayment) {
     return <PageLoader message="Confirming your PayPal payment and securing your order…" />;
   }
-  if (items.length === 0 && currentStep !== 'success' && currentStep !== 'error' && !isPaymentReturn && preservedItems.length === 0) {
+  if (
+    items.length === 0 &&
+    currentStep !== 'success' &&
+    currentStep !== 'error' &&
+    !isPaymentReturn &&
+    preservedItems.length === 0
+  ) {
     if (typeof window !== 'undefined') {
       window.location.href = '/gem-pouch';
     }
@@ -634,7 +647,7 @@ export default function CheckoutFlow() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
-      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-20 xs:px-5 xs:pt-24 sm:px-6 md:px-6 md:pt-24 lg:px-6 lg:pb-20 lg:pt-28 xl:px-6 3xl:px-6">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-20 xs:px-5 xs:pt-24 sm:px-6 md:px-12 md:pt-24 lg:px-24 lg:pb-20 lg:pt-28 xl:px-32 3xl:px-40">
         {/* Back Button */}
         {currentStep !== 'success' && (
           <button
@@ -668,18 +681,18 @@ export default function CheckoutFlow() {
                             : 'border border-white/20 bg-transparent text-white/40'
                       }`}
                     >
-                      {isCompleted ? (
-                        <IconCheck size={14} />
-                      ) : (
-                        index + 1
-                      )}
+                      {isCompleted ? <IconCheck size={14} /> : index + 1}
                     </div>
-                    <span className={`mt-1 font-[family-name:var(--font-inter)] text-[10px] xs:text-xs ${isCurrent ? 'text-white' : 'text-white/40'}`}>
+                    <span
+                      className={`mt-1 font-[family-name:var(--font-inter)] text-[10px] xs:text-xs ${isCurrent ? 'text-white' : 'text-white/40'}`}
+                    >
                       {stepLabels[index]}
                     </span>
                   </div>
                   {index < 3 && (
-                    <div className={`mx-1.5 mb-4 h-px w-6 xs:mx-2 xs:w-8 sm:w-12 ${index < currentIndex ? 'bg-white' : 'bg-white/20'}`} />
+                    <div
+                      className={`mx-1.5 mb-4 h-px w-6 xs:mx-2 xs:w-8 sm:w-12 ${index < currentIndex ? 'bg-white' : 'bg-white/20'}`}
+                    />
                   )}
                 </div>
               );
@@ -715,10 +728,10 @@ export default function CheckoutFlow() {
             {currentStep === 'customer' && (
               <CustomerInfo
                 data={checkoutData.customer}
-                onContinue={customerData => handleStepComplete('customer', customerData)}
+                onContinue={(customerData) => handleStepComplete('customer', customerData)}
                 isCalculatingShipping={isCalculatingShipping}
                 shippingError={shippingError}
-                onAddressChange={customerData => {
+                onAddressChange={(customerData) => {
                   updateCheckoutData({ customer: customerData });
                   setShippingError(null);
                 }}
@@ -726,7 +739,7 @@ export default function CheckoutFlow() {
             )}
 
             {currentStep === 'payment-method' && (
-              <PaymentMethods onSelect={method => handleStepComplete('payment-method', method)} />
+              <PaymentMethods onSelect={(method) => handleStepComplete('payment-method', method)} />
             )}
 
             {currentStep === 'payment' && (
@@ -737,10 +750,12 @@ export default function CheckoutFlow() {
                 customerData={checkoutData.customer}
                 items={displayItems}
                 validationItems={items}
-                appliedDiscount={appliedDiscount ? { ...appliedDiscount, amount: displayDiscount } : null}
+                appliedDiscount={
+                  appliedDiscount ? { ...appliedDiscount, amount: displayDiscount } : null
+                }
                 subtotal={displaySubtotal}
                 shipping={displayShipping}
-                onSuccess={data => handleStepComplete('payment', data)}
+                onSuccess={(data) => handleStepComplete('payment', data)}
                 onError={handleError}
               />
             )}
@@ -757,7 +772,9 @@ export default function CheckoutFlow() {
                     items={preservedItems}
                     subtotal={preservedSubtotal}
                     shipping={finalShipping || shipping}
-                    appliedDiscount={appliedDiscount ? { ...appliedDiscount, amount: displayDiscount } : undefined}
+                    appliedDiscount={
+                      appliedDiscount ? { ...appliedDiscount, amount: displayDiscount } : undefined
+                    }
                     shippingAddress={checkoutData.customer}
                   />
                 </div>
@@ -768,8 +785,22 @@ export default function CheckoutFlow() {
               <PaymentError
                 message={error}
                 title={errorAction === 'return' ? 'Order Confirmation Interrupted' : undefined}
-                backLabel={errorAction === 'return' || errorAction === 'support' ? 'Contact Support' : errorAction === 'cart' ? 'Review Cart' : 'Back'}
-                retryLabel={errorAction === 'return' ? 'Retry Confirmation' : errorAction === 'support' ? 'Contact Support' : errorAction === 'cart' ? 'Review Cart' : 'Try Again'}
+                backLabel={
+                  errorAction === 'return' || errorAction === 'support'
+                    ? 'Contact Support'
+                    : errorAction === 'cart'
+                      ? 'Review Cart'
+                      : 'Back'
+                }
+                retryLabel={
+                  errorAction === 'return'
+                    ? 'Retry Confirmation'
+                    : errorAction === 'support'
+                      ? 'Contact Support'
+                      : errorAction === 'cart'
+                        ? 'Review Cart'
+                        : 'Try Again'
+                }
                 onBack={handleErrorBack}
                 onRetry={handleErrorRetry}
               />

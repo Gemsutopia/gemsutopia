@@ -1,20 +1,26 @@
 'use client';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import { IconTrash } from '@tabler/icons-react';
-import { EmptyWishlist } from '@/components/empty-states';
-import { useWishlist } from '@/contexts/WishlistContext';
-import { useGemPouch } from '@/contexts/GemPouchContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
-import { toast } from 'sonner';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback } from 'react';
+import { toast } from 'sonner';
+import { EmptyWishlist } from '@/components/empty-states';
+import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { useGemPouch } from '@/contexts/GemPouchContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 import { useInventoryUpdates } from '@/lib/pusher-client';
 
 export default function Wishlist() {
   const { items, removeItem, addItem: addToWishlist, clearWishlist } = useWishlist();
-  const { items: pouchItems, addItem: addToGemPouch, removeItem: removeFromPouch, updateQuantity, isInPouch } = useGemPouch();
+  const {
+    items: pouchItems,
+    addItem: addToGemPouch,
+    removeItem: removeFromPouch,
+    updateQuantity,
+    isInPouch,
+  } = useGemPouch();
   const { formatPrice } = useCurrency();
 
   // Real-time inventory updates via WebSocket
@@ -26,7 +32,7 @@ export default function Wishlist() {
 
   // Get quantity of item in pouch
   const getItemQuantity = (itemId: string) => {
-    const item = pouchItems.find(i => i.id === itemId);
+    const item = pouchItems.find((i) => i.id === itemId);
     return item?.quantity || 0;
   };
 
@@ -38,7 +44,7 @@ export default function Wishlist() {
   };
 
   const handleDecrementPouch = (item: any) => {
-    const pouchItem = pouchItems.find(i => i.id === item.id);
+    const pouchItem = pouchItems.find((i) => i.id === item.id);
     if (pouchItem) {
       const previousQuantity = pouchItem.quantity;
       const newQuantity = previousQuantity - 1;
@@ -72,7 +78,7 @@ export default function Wishlist() {
       return;
     }
     const wishlistItem = { ...item };
-    const existingPouchItem = pouchItems.find(i => i.id === item.id);
+    const existingPouchItem = pouchItems.find((i) => i.id === item.id);
     const previousPouchQuantity = existingPouchItem?.quantity || 0;
 
     addToGemPouch({
@@ -119,12 +125,12 @@ export default function Wishlist() {
     }
     // Capture state before changes
     const wishlistItemsToRestore = [...availableItems];
-    const pouchStateBeforeAdd = availableItems.map(item => ({
+    const pouchStateBeforeAdd = availableItems.map((item) => ({
       id: item.id,
-      previousQuantity: pouchItems.find(i => i.id === item.id)?.quantity || 0,
+      previousQuantity: pouchItems.find((i) => i.id === item.id)?.quantity || 0,
     }));
 
-    availableItems.forEach(item => {
+    availableItems.forEach((item) => {
       addToGemPouch({
         id: item.id,
         name: item.name,
@@ -139,7 +145,7 @@ export default function Wishlist() {
       action: {
         label: 'Undo',
         onClick: () => {
-          wishlistItemsToRestore.forEach(item => addToWishlist(item));
+          wishlistItemsToRestore.forEach((item) => addToWishlist(item));
           pouchStateBeforeAdd.forEach(({ id, previousQuantity }) => {
             if (previousQuantity === 0) {
               removeFromPouch(id);
@@ -159,7 +165,7 @@ export default function Wishlist() {
       description: `${itemsToRestore.length} ${itemsToRestore.length === 1 ? 'item' : 'items'} removed`,
       action: {
         label: 'Undo',
-        onClick: () => itemsToRestore.forEach(item => addToWishlist(item)),
+        onClick: () => itemsToRestore.forEach((item) => addToWishlist(item)),
       },
     });
   };
@@ -183,7 +189,7 @@ export default function Wishlist() {
     <div className="flex flex-col bg-black">
       <Header />
 
-<main className="min-h-screen flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-6 md:pt-32 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
+      <main className="min-h-screen flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-12 md:pt-32 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
         <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
           {/* Page Header */}
           <div className="mb-6 text-center xs:mb-8 md:mb-10 lg:mb-12">
@@ -200,13 +206,16 @@ export default function Wishlist() {
             {/* Products Grid - 2 columns on all sizes, left side on desktop */}
             <div className="flex-1">
               <div className="grid grid-cols-2 gap-3 xs:gap-4 md:gap-5 lg:gap-6">
-                {items.map(item => (
+                {items.map((item) => (
                   <div
                     key={item.id}
                     className="group flex flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-all duration-300 hover:border-white/20 hover:bg-white/10 xs:rounded-2xl"
                   >
                     {/* Product Image */}
-                    <Link href={`/product/${item.id}`} className="relative aspect-square overflow-hidden bg-neutral-900">
+                    <Link
+                      href={`/product/${item.id}`}
+                      className="relative aspect-square overflow-hidden bg-neutral-900"
+                    >
                       {/* Remove from Wishlist Button - Top Right */}
                       <button
                         onClick={(e) => {
@@ -379,7 +388,9 @@ export default function Wishlist() {
           {/* Breadcrumbs */}
           <div className="mt-10 flex justify-center xs:mt-12 md:mt-16 lg:mt-20">
             <nav className="flex items-center gap-2 font-[family-name:var(--font-inter)] text-xs text-white/40 xs:text-sm">
-              <Link href="/" className="transition-colors hover:text-white/60">Home</Link>
+              <Link href="/" className="transition-colors hover:text-white/60">
+                Home
+              </Link>
               <span>/</span>
               <span className="text-white/60">Wishlist</span>
             </nav>

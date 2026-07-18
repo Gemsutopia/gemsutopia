@@ -1,7 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
-import Header from '@/components/layout/Header';
+import { useEffect, useState } from 'react';
 import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 
 export default function RefundPolicy() {
   const [content, setContent] = useState<any>({});
@@ -10,8 +10,8 @@ export default function RefundPolicy() {
     if (process.env.NEXT_PUBLIC_QUICKDASH_PAGE_CONTENT !== 'true') return;
 
     fetch('/api/pages/refund-policy')
-      .then(res => res.json())
-      .then(data => setContent(data?.data?.content || {}))
+      .then((res) => res.json())
+      .then((data) => setContent(data?.data?.content || {}))
       .catch(() => {});
   }, []);
 
@@ -43,7 +43,7 @@ export default function RefundPolicy() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <div className="min-h-screen flex-1 px-4 py-32 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
+      <div className="min-h-screen flex-1 px-4 py-32 sm:px-8 md:px-16 lg:px-32">
         <div className="w-full">
           <h1 className="mb-2 text-center font-[family-name:var(--font-bacasime)] text-4xl text-white sm:text-5xl md:text-6xl">
             {getContent('title')}

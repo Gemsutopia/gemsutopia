@@ -1,15 +1,19 @@
+import { IconClock } from '@tabler/icons-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import { EmptyAuctions } from '@/components/empty-states';
+import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 import { store } from '@/lib/store';
-import { IconClock } from '@tabler/icons-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function LiveAuctions() {
-  const { auctions } = await store.auctions.list({ status: 'active', sort: 'endsAt', order: 'asc' });
+  const { auctions } = await store.auctions.list({
+    status: 'active',
+    sort: 'endsAt',
+    order: 'asc',
+  });
 
   // Map Quickdash auctions to local format
   const mappedAuctions = auctions.map((auction) => ({
@@ -29,7 +33,7 @@ export default async function LiveAuctions() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-<main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-6 md:pt-32 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
+      <main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-12 md:pt-32 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
         <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
           {/* Page Header */}
           <div className="mb-8 text-center xs:mb-10 md:mb-12">
@@ -83,10 +87,14 @@ export default async function LiveAuctions() {
                   <div className="p-2.5 xs:p-3">
                     <h2 className="text-xs font-semibold text-white xs:text-sm">
                       <span className="xs:hidden">
-                        {auction.title.length > 18 ? `${auction.title.slice(0, 18)}...` : auction.title}
+                        {auction.title.length > 18
+                          ? `${auction.title.slice(0, 18)}...`
+                          : auction.title}
                       </span>
                       <span className="hidden xs:inline">
-                        {auction.title.length > 24 ? `${auction.title.slice(0, 24)}...` : auction.title}
+                        {auction.title.length > 24
+                          ? `${auction.title.slice(0, 24)}...`
+                          : auction.title}
                       </span>
                     </h2>
 

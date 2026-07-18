@@ -1,9 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import { useEffect, useState } from 'react';
 import { EmptyState } from '@/components/empty-states';
+import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 
 export default function EthicalSourcing() {
   const [content, setContent] = useState<any>({});
@@ -14,8 +14,8 @@ export default function EthicalSourcing() {
     if (process.env.NEXT_PUBLIC_QUICKDASH_PAGE_CONTENT !== 'true') return;
 
     fetch('/api/pages/sourcing')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         const remoteContent = data?.data?.content;
         if (remoteContent && Object.keys(remoteContent).length > 0) {
           setContent(remoteContent);
@@ -30,15 +30,20 @@ export default function EthicalSourcing() {
     title: 'Ethical Sourcing',
     subtitle: 'Integrity in every specimen',
     section_1_title: 'Our Commitment',
-    section_1_content: 'We believe beautiful gemstones shouldn\'t come at the cost of environmental damage or unfair labor practices. Every specimen in our collection is sourced with careful consideration for both people and planet.',
+    section_1_content:
+      "We believe beautiful gemstones shouldn't come at the cost of environmental damage or unfair labor practices. Every specimen in our collection is sourced with careful consideration for both people and planet.",
     section_2_title: 'Direct Relationships',
-    section_2_content: 'We work directly with small-scale miners and family-operated businesses whenever possible. These partnerships ensure fair compensation reaches the people who actually extract these treasures from the earth.',
+    section_2_content:
+      'We work directly with small-scale miners and family-operated businesses whenever possible. These partnerships ensure fair compensation reaches the people who actually extract these treasures from the earth.',
     section_3_title: 'Canadian Specimens',
-    section_3_content: 'Many pieces in our collection are personally collected during rockhounding expeditions across Alberta and other Canadian locations. These firsthand discoveries allow us to offer specimens with complete provenance.',
+    section_3_content:
+      'Many pieces in our collection are personally collected during rockhounding expeditions across Alberta and other Canadian locations. These firsthand discoveries allow us to offer specimens with complete provenance.',
     section_4_title: 'Transparency',
-    section_4_content: 'We provide detailed origin information for our specimens whenever available. If we don\'t know exactly where a stone came from, we\'ll tell you. Honesty builds the trust that lasting relationships require.',
+    section_4_content:
+      "We provide detailed origin information for our specimens whenever available. If we don't know exactly where a stone came from, we'll tell you. Honesty builds the trust that lasting relationships require.",
     section_5_title: 'Sustainable Practices',
-    section_5_content: 'We prioritize suppliers who employ sustainable extraction methods and rehabilitate mining sites. The mineral world has existed for millions of years—we\'re committed to practices that honor that legacy.',
+    section_5_content:
+      "We prioritize suppliers who employ sustainable extraction methods and rehabilitate mining sites. The mineral world has existed for millions of years—we're committed to practices that honor that legacy.",
   };
 
   const getContent = (key: string): string => content[key] || defaultContent[key] || '';
@@ -75,7 +80,7 @@ export default function EthicalSourcing() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
+      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-32">
         <div className="relative z-10 mx-auto max-w-2xl">
           {/* Header */}
           <div className="mb-8 text-center">

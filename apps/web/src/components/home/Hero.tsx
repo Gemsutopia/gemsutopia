@@ -1,6 +1,6 @@
 'use client';
-import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
 import { useCMSContent } from '@/hooks/useCMSContent';
 import '../../styles/hero.css';
 
@@ -118,7 +118,9 @@ export default function Hero() {
           ) : (
             <div className="text-center text-white">
               <p className="mb-2 text-lg xs:text-xl">No hero images available</p>
-              <p className="text-sm text-slate-400 xs:text-base">Upload images from the admin dashboard</p>
+              <p className="text-sm text-slate-400 xs:text-base">
+                Upload images from the admin dashboard
+              </p>
             </div>
           )}
         </div>
@@ -205,7 +207,7 @@ export default function Hero() {
 
               {/* Active Image - Center, focused */}
               <div className="absolute inset-0 z-20 flex items-center justify-center">
-                <div className="h-full w-full px-0 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
+                <div className="h-full w-full px-0 md:px-12 lg:px-24 xl:px-32 3xl:px-40">
                   <div className="relative h-full w-full overflow-hidden rounded-2xl bg-neutral-700 lg:rounded-3xl">
                     <Image
                       src={images[currentIndex]}

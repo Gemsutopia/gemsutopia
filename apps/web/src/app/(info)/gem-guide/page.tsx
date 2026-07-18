@@ -1,9 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import { useEffect, useState } from 'react';
 import { EmptyState } from '@/components/empty-states';
+import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 
 export default function GemGuide() {
   const [content, setContent] = useState<any>({});
@@ -14,8 +14,8 @@ export default function GemGuide() {
     if (process.env.NEXT_PUBLIC_QUICKDASH_PAGE_CONTENT !== 'true') return;
 
     fetch('/api/pages/gem-guide')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         const remoteContent = data?.data?.content;
         if (remoteContent && Object.keys(remoteContent).length > 0) {
           setContent(remoteContent);
@@ -28,17 +28,22 @@ export default function GemGuide() {
 
   const defaultContent: Record<string, string> = {
     title: 'Gem Guide',
-    subtitle: 'Understanding nature\'s treasures',
+    subtitle: "Understanding nature's treasures",
     section_1_title: 'What Makes a Gemstone Valuable',
-    section_1_content: 'The value of a gemstone is determined by the four Cs: color, clarity, cut, and carat weight. However, rarity and origin also play significant roles. A stone\'s provenance can dramatically affect its desirability among collectors.',
+    section_1_content:
+      "The value of a gemstone is determined by the four Cs: color, clarity, cut, and carat weight. However, rarity and origin also play significant roles. A stone's provenance can dramatically affect its desirability among collectors.",
     section_2_title: 'Color & Clarity',
-    section_2_content: 'Color is often the most important factor. The most prized specimens exhibit vivid, saturated hues with even distribution. Clarity refers to the absence of inclusions—though some inclusions, like rutile needles in quartz, can actually enhance a stone\'s beauty and value.',
+    section_2_content:
+      "Color is often the most important factor. The most prized specimens exhibit vivid, saturated hues with even distribution. Clarity refers to the absence of inclusions—though some inclusions, like rutile needles in quartz, can actually enhance a stone's beauty and value.",
     section_3_title: 'Natural vs. Enhanced',
-    section_3_content: 'We specialize in natural, untreated specimens. While heat treatment and other enhancements are common in the industry, our collection focuses on stones that showcase nature\'s artistry without artificial modification.',
+    section_3_content:
+      "We specialize in natural, untreated specimens. While heat treatment and other enhancements are common in the industry, our collection focuses on stones that showcase nature's artistry without artificial modification.",
     section_4_title: 'Identifying Authenticity',
-    section_4_content: 'Authentic gemstones often contain natural inclusions, growth patterns, and slight imperfections that distinguish them from synthetics. We provide detailed photographs and honest descriptions so you know exactly what you\'re acquiring.',
+    section_4_content:
+      "Authentic gemstones often contain natural inclusions, growth patterns, and slight imperfections that distinguish them from synthetics. We provide detailed photographs and honest descriptions so you know exactly what you're acquiring.",
     section_5_title: 'Building Your Collection',
-    section_5_content: 'Start with stones that speak to you personally. Whether drawn to the flash of labradorite or the ancient beauty of ammolite, collecting should be a journey of discovery. Quality over quantity is the collector\'s golden rule.',
+    section_5_content:
+      "Start with stones that speak to you personally. Whether drawn to the flash of labradorite or the ancient beauty of ammolite, collecting should be a journey of discovery. Quality over quantity is the collector's golden rule.",
   };
 
   const getContent = (key: string): string => content[key] || defaultContent[key] || '';
@@ -75,7 +80,7 @@ export default function GemGuide() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
+      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-32">
         <div className="relative z-10 mx-auto max-w-2xl">
           {/* Header */}
           <div className="mb-8 text-center">

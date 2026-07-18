@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
+import { useEffect, useState } from 'react';
 import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 
 const defaultContent: Record<string, string> = {
   subtitle: 'A small Canadian passion project',
@@ -25,8 +25,8 @@ export default function About() {
     if (process.env.NEXT_PUBLIC_QUICKDASH_PAGE_CONTENT !== 'true') return;
 
     fetch('/api/pages/about')
-      .then(response => response.json())
-      .then(data => {
+      .then((response) => response.json())
+      .then((data) => {
         if (data?.data?.content && Object.keys(data.data.content).length > 0) {
           setContent(data.data.content);
         }
@@ -40,7 +40,7 @@ export default function About() {
     <div className="flex min-h-screen flex-col bg-black text-white">
       <Header />
 
-      <main className="grow px-4 pb-24 pt-28 xs:px-5 sm:px-6 sm:pt-32 md:px-6 lg:px-6 lg:pb-32 xl:px-6 3xl:px-6">
+      <main className="grow px-4 pb-24 pt-28 sm:px-8 sm:pt-32 md:px-16 lg:px-32 lg:pb-32">
         <article className="mx-auto max-w-5xl">
           <header className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
             <p className="mb-4 text-xs font-medium tracking-[0.22em] text-white/40 uppercase">
