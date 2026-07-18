@@ -8,9 +8,7 @@ interface OrderSuccessProps {
   customerEmail: string;
   customerName?: string;
   amount: number;
-  cryptoAmount?: number;
   currency?: string;
-  cryptoCurrency?: string;
   items?: Array<{
     id: string;
     name: string;
@@ -20,7 +18,6 @@ interface OrderSuccessProps {
   }>;
   subtotal?: number;
   shipping?: number;
-  paymentMethod?: string;
   shippingMethod?: 'flat' | 'combined';
   appliedDiscount?: {
     code: string;
@@ -50,13 +47,10 @@ export default function OrderSuccess({
   customerEmail,
   customerName,
   amount,
-  cryptoAmount,
   currency = 'CAD',
-  cryptoCurrency,
   items = [],
   subtotal,
   shipping = 0,
-  paymentMethod,
   shippingMethod,
   appliedDiscount,
   shippingAddress,
@@ -157,15 +151,7 @@ export default function OrderSuccess({
             {/* Payment Method */}
             <div className="flex justify-between">
               <span className="text-gray-600">Payment Method:</span>
-              <span className="text-sm">
-                {cryptoCurrency
-                  ? `Crypto (${cryptoCurrency})`
-                  : paymentMethod === 'stripe'
-                    ? 'Credit/Debit Card'
-                    : paymentMethod === 'paypal'
-                      ? 'PayPal'
-                      : 'Card Payment'}
-              </span>
+              <span className="text-sm">PayPal</span>
             </div>
 
             {/* Order Breakdown */}
@@ -180,11 +166,6 @@ export default function OrderSuccess({
                     <div className="mb-6 space-y-4">
                       {items.map((item, index) => {
                         const itemTotal = item.price * item.quantity;
-                        const itemCryptoTotal =
-                          cryptoCurrency && cryptoAmount
-                            ? itemTotal * (cryptoAmount / actualSubtotal)
-                            : itemTotal;
-
                         return (
                           <div
                             key={`order-success-${item.id || `item-${index}`}`}
@@ -204,9 +185,7 @@ export default function OrderSuccess({
                               <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                             </div>
                             <span className="text-sm font-medium text-gray-900">
-                              {cryptoCurrency
-                                ? `${itemCryptoTotal.toFixed(8)} ${cryptoCurrency}`
-                                : `$${itemTotal.toFixed(2)} ${currency}`}
+                              ${itemTotal.toFixed(2)} {currency}
                             </span>
                           </div>
                         );
@@ -222,9 +201,7 @@ export default function OrderSuccess({
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal:</span>
                     <span>
-                      {cryptoCurrency
-                        ? `${((actualSubtotal * (cryptoAmount || 1)) / amount).toFixed(8)} ${cryptoCurrency}`
-                        : `$${actualSubtotal.toFixed(2)} ${currency}`}
+                      ${actualSubtotal.toFixed(2)} {currency}
                     </span>
                   </div>
 
@@ -234,9 +211,7 @@ export default function OrderSuccess({
                       <span>Discount ({appliedDiscount.code}):</span>
                       <span>
                         -
-                        {cryptoCurrency
-                          ? `${((appliedDiscount.amount * (cryptoAmount || 1)) / amount).toFixed(8)} ${cryptoCurrency}`
-                          : `$${appliedDiscount.amount.toFixed(2)} ${currency}`}
+                        ${appliedDiscount.amount.toFixed(2)} {currency}
                       </span>
                     </div>
                   )}
@@ -252,8 +227,6 @@ export default function OrderSuccess({
                     <span>
                       {appliedDiscount?.free_shipping ? (
                         <span className="text-green-600">FREE</span>
-                      ) : cryptoCurrency ? (
-                        `${((actualShipping * (cryptoAmount || 1)) / amount).toFixed(8)} ${cryptoCurrency}`
                       ) : (
                         `$${actualShipping.toFixed(2)} ${currency}`
                       )}
@@ -267,18 +240,7 @@ export default function OrderSuccess({
             <div className="mt-3 flex justify-between border-t border-gray-300 pt-3">
               <span className="font-semibold text-gray-900">Total Paid:</span>
               <span className="text-lg font-bold">
-                {cryptoCurrency && cryptoAmount ? (
-                  <div className="text-right">
-                    <div>
-                      {cryptoAmount.toFixed(6)} {cryptoCurrency}
-                    </div>
-                    <div className="text-sm font-normal text-gray-500">
-                      (${amount.toFixed(2)} {currency})
-                    </div>
-                  </div>
-                ) : (
-                  `$${amount.toFixed(2)} ${currency}`
-                )}
+                ${amount.toFixed(2)} {currency}
               </span>
             </div>
 
