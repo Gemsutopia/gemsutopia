@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { IconBrandPaypal, IconLock } from '@tabler/icons-react';
+import { useState } from 'react';
 import { store } from '@/lib/store';
 
 interface PaymentFormProps {
@@ -33,11 +33,8 @@ export default function PaymentForm({
   amount,
   currency,
   customerData,
-  items,
   validationItems,
   appliedDiscount,
-  subtotal,
-  shipping,
   onError,
 }: PaymentFormProps) {
   const [loading, setLoading] = useState(false);
@@ -46,21 +43,21 @@ export default function PaymentForm({
     setLoading(true);
     try {
       const currentProducts = await Promise.all(
-        validationItems.map(item => store.products.get(item.id))
+        validationItems.map((item) => store.products.get(item.id))
       );
 
       for (let index = 0; index < validationItems.length; index += 1) {
         const cartItem = validationItems[index];
         const product = currentProducts[index].product;
         const variant = cartItem.variantId
-          ? product.variants?.find(candidate => candidate.id === cartItem.variantId)
+          ? product.variants?.find((candidate) => candidate.id === cartItem.variantId)
           : product.variants?.[0];
         const currentPrice = Number(variant?.price || product.price);
         const availableStock = product.stock?.length
           ? cartItem.variantId
             ? Math.max(
                 0,
-                product.stock.find(stock => stock.variantId === cartItem.variantId)?.quantity ?? 0
+                product.stock.find((stock) => stock.variantId === cartItem.variantId)?.quantity ?? 0
               )
             : product.stock.reduce((total, stock) => total + Math.max(0, stock.quantity), 0)
           : 0;
@@ -68,7 +65,10 @@ export default function PaymentForm({
         if (availableStock < cartItem.quantity) {
           throw new Error(`${product.name} no longer has enough stock for this order.`);
         }
-        if (!Number.isFinite(currentPrice) || Math.abs(currentPrice - Number(cartItem.price)) > 0.009) {
+        if (
+          !Number.isFinite(currentPrice) ||
+          Math.abs(currentPrice - Number(cartItem.price)) > 0.009
+        ) {
           throw new Error(`${product.name} has changed price. Return to your cart to review it.`);
         }
       }
@@ -76,24 +76,29 @@ export default function PaymentForm({
       const origin = window.location.origin;
       const checkoutAttemptId = crypto.randomUUID();
       const data = await store.payments.createPayPalOrder({
-        items: items.map((item, index) => ({
-          name: item.name || 'Item',
-          quantity: item.quantity || 1,
-          unitAmount: item.price,
-          productId: validationItems[index]?.id,
-          variantId: validationItems[index]?.variantId,
+        items: validationItems.map((item) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
         })),
-        currency: currency.toUpperCase(),
         successUrl: `${origin}/checkout?payment_method=paypal&status=success`,
         cancelUrl: `${origin}/checkout?payment_method=paypal&status=cancelled`,
-        shippingAmount: shipping,
-        discountAmount: appliedDiscount?.amount,
+        country: customerData.country === 'United States' ? 'US' : 'CA',
+        state: customerData.state,
         discountCode: appliedDiscount?.code,
-        metadata: {
-          customerName: `${customerData.firstName} ${customerData.lastName}`,
-          customerEmail: customerData.email,
-          checkoutAttemptId,
-        },
+        customerEmail: customerData.email,
+        checkoutAttemptId,
+      });
+
+      const authoritativeItems = data.quote.items.map((quotedItem) => {
+        const cartItem = validationItems.find((item) => item.variantId === quotedItem.variantId);
+        return {
+          ...cartItem,
+          id: quotedItem.productId,
+          variantId: quotedItem.variantId,
+          name: quotedItem.name,
+          price: quotedItem.unitAmount,
+          quantity: quotedItem.quantity,
+        };
       });
 
       sessionStorage.setItem(
@@ -102,13 +107,15 @@ export default function PaymentForm({
           orderId: data.orderId,
           checkoutAttemptId,
           customerData,
-          items,
-          subtotal,
-          shipping,
-          appliedDiscount,
-          amount,
-          currency,
-        }),
+          items: authoritativeItems,
+          subtotal: data.quote.subtotal,
+          shipping: data.quote.shippingAmount,
+          appliedDiscount: appliedDiscount
+            ? { ...appliedDiscount, amount: data.quote.discountAmount }
+            : null,
+          amount: data.quote.total,
+          currency: data.quote.currency,
+        })
       );
 
       window.location.href = data.approveUrl;
@@ -133,14 +140,17 @@ export default function PaymentForm({
         <div className="flex items-start gap-3">
           <IconLock size={18} className="mt-0.5 shrink-0 text-white/60" />
           <p className="text-sm leading-6 text-white/60">
-            You&apos;ll be redirected to PayPal to securely complete your payment, then returned here for confirmation.
+            You&apos;ll be redirected to PayPal to securely complete your payment, then returned
+            here for confirmation.
           </p>
         </div>
       </div>
 
       <div className="flex items-center justify-between py-2">
         <span className="text-sm text-white/60">Total amount</span>
-        <span className="text-lg font-semibold text-white">${amount.toFixed(2)} {currency}</span>
+        <span className="text-lg font-semibold text-white">
+          ${amount.toFixed(2)} {currency}
+        </span>
       </div>
 
       <button
@@ -153,7 +163,9 @@ export default function PaymentForm({
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/20 border-t-black" />
             Redirecting to PayPal...
           </span>
-        ) : 'Continue to PayPal'}
+        ) : (
+          'Continue to PayPal'
+        )}
       </button>
     </div>
   );

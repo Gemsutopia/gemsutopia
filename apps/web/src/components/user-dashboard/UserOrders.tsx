@@ -1,19 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { faEye, faFilter, faShoppingBag, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingBag, faEye, faFilter, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
-import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { useBetterAuth } from '@/contexts/BetterAuthContext';
 import { getCommerceErrorMessage } from '@/lib/commerce-error';
-
-interface OrderItem {
-  id?: string;
-  name: string;
-  quantity: number;
-  price: number;
-  image?: string;
-}
 
 interface Order {
   id: string;
@@ -22,7 +13,6 @@ interface Order {
   status: string;
   total: number;
   currency: string;
-  items: OrderItem[];
   trackingNumber?: string;
   trackingUrl?: string;
 }
@@ -51,17 +41,18 @@ export default function UserOrders() {
       const { store } = await import('@/lib/store');
       const { orders: ordersList } = await store.orders.list(user.id);
 
-      setOrders(ordersList.map(o => ({
-        id: o.id,
-        orderNumber: o.orderNumber,
-        date: o.createdAt,
-        status: o.status,
-        total: Number(o.total),
-        currency: o.currency || 'CAD',
-        items: [], // Items not returned in list endpoint
-        trackingNumber: o.trackingNumber || undefined,
-        trackingUrl: o.trackingUrl || undefined,
-      })));
+      setOrders(
+        ordersList.map((o) => ({
+          id: o.id,
+          orderNumber: o.orderNumber,
+          date: o.createdAt,
+          status: o.status,
+          total: Number(o.total),
+          currency: o.currency || 'CAD',
+          trackingNumber: o.trackingNumber || undefined,
+          trackingUrl: o.trackingUrl || undefined,
+        }))
+      );
     } catch (error) {
       setError(getCommerceErrorMessage(error));
     } finally {
@@ -107,7 +98,7 @@ export default function UserOrders() {
   const filteredOrders =
     filterStatus === 'all'
       ? orders
-      : orders.filter(order => order.status?.toLowerCase() === filterStatus);
+      : orders.filter((order) => order.status?.toLowerCase() === filterStatus);
 
   if (isLoading) {
     return (
@@ -145,7 +136,7 @@ export default function UserOrders() {
           <FontAwesomeIcon icon={faFilter} className="text-gray-500" />
           <select
             value={filterStatus}
-            onChange={e => setFilterStatus(e.target.value)}
+            onChange={(e) => setFilterStatus(e.target.value)}
             className="rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none"
           >
             <option value="all">All Orders</option>
@@ -177,7 +168,7 @@ export default function UserOrders() {
             </Link>
           </div>
         ) : (
-          filteredOrders.map(order => (
+          filteredOrders.map((order) => (
             <div key={order.id} className="overflow-hidden rounded-lg bg-white shadow-md">
               {/* Order Header */}
               <div className="border-b border-gray-200 p-6">
@@ -206,46 +197,15 @@ export default function UserOrders() {
                 )}
               </div>
 
-              {/* Order Items */}
               <div className="p-6">
-                <div className="space-y-4">
-                  {order.items.map((item, index) => (
-                    <div key={index} className="flex items-center space-x-4">
-                      <div className="relative h-16 w-16 overflow-hidden rounded-lg bg-gray-200">
-                        {item.image ? (
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center">
-                            <FontAwesomeIcon icon={faShoppingBag} className="text-gray-400" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{item.name}</h4>
-                        <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium text-gray-900">
-                          {formatCurrency(item.price, order.currency)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
                 {/* Order Actions */}
-                <div className="mt-6 flex flex-col space-y-2 border-t border-gray-200 pt-6 sm:flex-row sm:space-y-0 sm:space-x-4">
+                <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-4">
                   <Link
                     href={`/orders/${order.id}`}
                     className="flex items-center justify-center space-x-2 rounded-lg border border-purple-600 px-4 py-2 text-purple-600 transition-colors hover:bg-purple-50"
                   >
                     <FontAwesomeIcon icon={faEye} className="h-4 w-4" />
-                    <span>View Details</span>
+                    <span>View order &amp; receipt</span>
                   </Link>
 
                   {order.trackingNumber && order.trackingUrl && (

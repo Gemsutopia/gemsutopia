@@ -1,216 +1,186 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useBetterAuth } from '@/contexts/BetterAuthContext';
-import { useWishlist } from '@/contexts/WishlistContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingBag, faHeart, faGavel } from '@fortawesome/free-solid-svg-icons';
-import Link from 'next/link';
 
-interface Order {
+import { faHeart, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useBetterAuth } from '@/contexts/BetterAuthContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { useWishlist } from '@/contexts/WishlistContext';
+import { store } from '@/lib/store';
+
+interface OrderSummary {
   id: string;
   orderNumber: string;
   createdAt: string;
   status: string;
   total: number;
-  items?: { name: string }[];
-  itemCount?: number;
 }
 
-export default function DashboardOverview() {
+type DashboardOverviewProps = {
+  onNavigate?: (section: 'orders' | 'wishlist') => void;
+};
+
+export default function DashboardOverview({ onNavigate }: DashboardOverviewProps) {
   const { user } = useBetterAuth();
   const { items: wishlistItems } = useWishlist();
   const { formatPrice } = useCurrency();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [orderCount, setOrderCount] = useState(0);
-  const [bidCount, setBidCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
     const fetchData = async () => {
-      if (!user?.id) {
-        setLoading(false);
-        return;
-      }
-
+      setLoading(true);
+      setLoadError(false);
       try {
-        const { store } = await import('@/lib/store');
-
-        // Fetch orders from Quickdash
-        const { orders: ordersList, pagination } = await store.orders.list(user.id, { limit: 3 });
-        setOrders(ordersList.map(o => ({
-          id: o.id,
-          orderNumber: o.orderNumber,
-          createdAt: o.createdAt,
-          status: o.status,
-          total: Number(o.total),
-        })));
-        setOrderCount(pagination?.totalCount || ordersList.length);
-
-        // TODO: Bids endpoint not yet implemented in Quickdash Storefront API
-        setBidCount(0);
+        const orderData = await store.orders.list(user.id, { limit: 3 });
+        if (cancelled) return;
+        setOrders(
+          orderData.orders.map((order) => ({
+            id: order.id,
+            orderNumber: order.orderNumber,
+            createdAt: order.createdAt,
+            status: order.status,
+            total: Number(order.total),
+          }))
+        );
+        setOrderCount(orderData.pagination?.totalCount || orderData.orders.length);
       } catch {
-        // Silent fail
+        if (!cancelled) setLoadError(true);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
-
-    if (user) fetchData();
-  }, [user]);
+    void fetchData();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   const stats = [
+    { title: 'Total orders', value: orderCount, icon: faShoppingBag, section: 'orders' as const },
     {
-      title: 'Total Orders',
-      value: orderCount,
-      icon: faShoppingBag,
-      color: 'bg-blue-500',
-    },
-    {
-      title: 'Wishlist Items',
+      title: 'Wishlist items',
       value: wishlistItems.length,
       icon: faHeart,
-      color: 'bg-pink-500',
-    },
-    {
-      title: 'Active Bids',
-      value: bidCount,
-      icon: faGavel,
-      color: 'bg-amber-500',
+      section: 'wishlist' as const,
     },
   ];
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'delivered':
-        return 'bg-green-100 text-green-800';
-      case 'shipped':
-        return 'bg-blue-100 text-blue-800';
-      case 'processing':
-      case 'confirmed':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
-      case 'refunded':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const formatDate = (dateStr: string) => {
-    try {
-      return new Date(dateStr).toLocaleDateString('en-CA', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      });
-    } catch {
-      return dateStr;
-    }
-  };
-
   return (
-    <div className="space-y-8">
-      {/* Welcome Header */}
-      <div className="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 p-6 text-white">
-        <h1 className="mb-2 text-2xl font-bold">
-          Welcome back, {user?.name || user?.email?.split('@')[0] || 'there'}!
-        </h1>
-        <p className="opacity-90">Here&apos;s what&apos;s happening with your account</p>
-      </div>
+    <div className="space-y-6 sm:space-y-8">
+      <section className="overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_45%)] p-6 sm:p-8">
+        <p className="mb-5 text-xs tracking-[0.18em] text-white/35 uppercase">
+          Gemsutopia collection
+        </p>
+        <h2 className="font-[family-name:var(--font-bacasime)] text-4xl leading-none sm:text-5xl">
+          Welcome back, {user?.name || user?.email?.split('@')[0] || 'there'}.
+        </h2>
+        <p className="mt-4 max-w-xl text-sm leading-6 text-white/50 sm:text-base">
+          Review your orders, saved specimens, and account details in one place.
+        </p>
+      </section>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {stats.map((stat, index) => (
-          <div key={index} className="rounded-lg bg-white p-6 shadow-md">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                <p className="mt-1 text-3xl font-bold text-gray-900">
-                  {loading ? '—' : stat.value}
-                </p>
-              </div>
-              <div
-                className={`${stat.color} flex h-12 w-12 items-center justify-center rounded-lg`}
-              >
-                <FontAwesomeIcon icon={stat.icon} className="text-xl text-white" />
-              </div>
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+        {stats.map((stat) => (
+          <button
+            key={stat.title}
+            type="button"
+            onClick={() => onNavigate?.(stat.section)}
+            className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.035] p-5 text-left transition-colors hover:bg-white/[0.07] sm:p-6"
+          >
+            <div>
+              <p className="text-[11px] tracking-[0.12em] text-white/35 uppercase">{stat.title}</p>
+              <p className="mt-2 font-[family-name:var(--font-bacasime)] text-4xl text-white">
+                {loading ? '—' : stat.value}
+              </p>
             </div>
-          </div>
+            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/55">
+              <FontAwesomeIcon icon={stat.icon} className="h-4 w-4" />
+            </span>
+          </button>
         ))}
-      </div>
+      </section>
 
-      {/* Recent Orders */}
-      <div className="rounded-lg bg-white shadow-md">
-        <div className="border-b border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900">Recent Orders</h2>
+      <section className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.025]">
+        <div className="flex items-center justify-between border-b border-white/10 p-6">
+          <h2 className="font-[family-name:var(--font-bacasime)] text-2xl">Recent orders</h2>
+          <button
+            type="button"
+            onClick={() => onNavigate?.('orders')}
+            className="text-xs text-white/40 hover:text-white"
+          >
+            View all
+          </button>
         </div>
-        <div className="p-6">
+        <div className="p-5 sm:p-6">
           {loading ? (
-            <div className="animate-pulse space-y-4">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-16 rounded-lg bg-gray-100" />
+            <div className="space-y-3" aria-label="Loading recent orders">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="h-16 animate-pulse rounded-xl bg-white/5" />
               ))}
             </div>
+          ) : loadError ? (
+            <p className="py-8 text-center text-sm text-white/45">
+              Recent orders are temporarily unavailable.
+            </p>
           ) : orders.length === 0 ? (
             <div className="py-8 text-center">
-              <FontAwesomeIcon icon={faShoppingBag} className="mb-3 text-3xl text-gray-300" />
-              <p className="text-gray-500">No orders yet</p>
-              <Link href="/shop" className="mt-2 inline-block text-sm text-purple-600 hover:text-purple-800">
-                Start Shopping
+              <FontAwesomeIcon icon={faShoppingBag} className="mb-3 text-3xl text-white/20" />
+              <p className="text-white/45">No orders yet</p>
+              <Link
+                href="/shop"
+                className="mt-3 inline-block text-sm text-white underline underline-offset-4"
+              >
+                Explore the shop
               </Link>
             </div>
           ) : (
-            <div className="space-y-4">
-              {orders.map(order => (
+            <div className="space-y-3">
+              {orders.map((order) => (
                 <Link
                   key={order.id}
                   href={`/orders/${order.id}`}
-                  className="flex items-center justify-between rounded-lg bg-gray-50 p-4 transition-colors hover:bg-gray-100"
+                  className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.035] p-4 transition-colors hover:bg-white/[0.07]"
                 >
                   <div>
-                    <p className="font-semibold text-gray-900">
+                    <p className="text-sm font-medium text-white">
                       Order #{order.orderNumber || order.id.slice(0, 8)}
                     </p>
-                    <p className="text-sm text-gray-500">{formatDate(order.createdAt)}</p>
+                    <p className="mt-1 text-xs text-white/35">
+                      {new Date(order.createdAt).toLocaleDateString('en-CA', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900">{formatPrice(Number(order.total))}</p>
-                    <span
-                      className={`inline-block rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(order.status)}`}
-                    >
-                      {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
-                    </span>
+                    <p className="text-sm font-medium text-white">{formatPrice(order.total)}</p>
+                    <p className="mt-1 text-[11px] capitalize text-white/35">{order.status}</p>
                   </div>
                 </Link>
               ))}
             </div>
           )}
         </div>
-      </div>
+      </section>
 
-      {/* Account Info */}
-      <div className="rounded-lg bg-white p-6 shadow-md">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">Account</h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600">Email</span>
-            <span className="font-medium text-gray-900">{user?.email}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600">Email Verified</span>
-            <span className={`font-medium ${user?.emailVerified ? 'text-green-600' : 'text-amber-600'}`}>
-              {user?.emailVerified ? 'Verified' : 'Not Verified'}
-            </span>
-          </div>
-          {user?.createdAt && (
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Member Since</span>
-              <span className="font-medium text-gray-900">{formatDate(String(user.createdAt))}</span>
-            </div>
-          )}
+      <section className="rounded-3xl border border-white/10 bg-white/[0.025] p-6">
+        <h2 className="font-[family-name:var(--font-bacasime)] text-2xl">Account details</h2>
+        <div className="mt-5 flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-white/40">Email</span>
+          <span className="break-all text-white">{user?.email}</span>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

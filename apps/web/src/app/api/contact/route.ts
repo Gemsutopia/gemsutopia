@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
+import { ApiError, apiSuccess } from '@/lib/api';
 import { store } from '@/lib/store';
-import { apiSuccess, ApiError } from '@/lib/api';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -21,17 +21,9 @@ export async function POST(request: NextRequest) {
       return ApiError.validation('Message must be between 10 and 5,000 characters');
     }
 
-    const { entry } = await store.collections.submit('contact-submissions', {
-      name,
-      email,
-      subject,
-      message,
-      status: 'new',
-      source: 'storefront',
-      submittedAt: new Date().toISOString(),
-    });
+    const { submissionId } = await store.contact.submit({ name, email, subject, message });
 
-    return apiSuccess({ submissionId: entry.id }, undefined, 201);
+    return apiSuccess({ submissionId }, undefined, 201);
   } catch {
     return ApiError.externalService('QuickDash', 'Your message could not be submitted right now');
   }
