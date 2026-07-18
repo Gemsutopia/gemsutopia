@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Link from 'next/link';
 import { IconArrowLeft, IconPackage, IconTruck, IconCheck, IconClock, IconCopy } from '@tabler/icons-react';
+import { getCommerceErrorMessage } from '@/lib/commerce-error';
 
 interface OrderItem {
   id: string;
@@ -87,6 +88,7 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [retryKey, setRetryKey] = useState(0);
 
   const orderId = params.id as string;
 
@@ -99,6 +101,8 @@ export default function OrderDetailPage() {
 
     const fetchOrder = async () => {
       try {
+        setLoading(true);
+        setError('');
         const { store } = await import('@/lib/store');
         const { order: quickdashOrder } = await store.orders.get(orderId);
 
@@ -107,17 +111,17 @@ export default function OrderDetailPage() {
           id: quickdashOrder.id,
           orderNumber: quickdashOrder.orderNumber,
           status: quickdashOrder.status,
-          paymentStatus: 'paid', // Default since not exposed
-          paymentMethod: 'stripe', // Default since not exposed
+          paymentStatus: quickdashOrder.payment?.status || 'unknown',
+          paymentMethod: quickdashOrder.payment?.method || quickdashOrder.payment?.provider || 'unknown',
           customerName: user.name || user.email || '',
           customerEmail: user.email || '',
-          customerPhone: '',
-          shippingAddressLine1: '',
-          shippingAddressLine2: '',
-          shippingCity: '',
-          shippingProvince: '',
-          shippingPostalCode: '',
-          shippingCountry: '',
+          customerPhone: quickdashOrder.shippingAddress?.phone || '',
+          shippingAddressLine1: quickdashOrder.shippingAddress?.addressLine1 || '',
+          shippingAddressLine2: quickdashOrder.shippingAddress?.addressLine2 || '',
+          shippingCity: quickdashOrder.shippingAddress?.city || '',
+          shippingProvince: quickdashOrder.shippingAddress?.state || '',
+          shippingPostalCode: quickdashOrder.shippingAddress?.postalCode || '',
+          shippingCountry: quickdashOrder.shippingAddress?.country || '',
           shippingMethod: '',
           trackingNumber: quickdashOrder.trackingNumber || '',
           carrier: '',
@@ -125,13 +129,18 @@ export default function OrderDetailPage() {
           subtotal: quickdashOrder.subtotal,
           shippingCost: quickdashOrder.shippingAmount,
           taxAmount: quickdashOrder.taxAmount,
-          discountAmount: '0',
+          discountAmount: quickdashOrder.discountAmount || '0',
           discountCode: '',
           total: quickdashOrder.total,
-          currency: 'USD',
-          items: [], // Items need to be fetched separately or included in response
-          itemCount: 0,
-          customerNotes: '',
+          currency: quickdashOrder.payment?.currency || quickdashOrder.currency || 'CAD',
+          items: quickdashOrder.items.map(item => ({
+            id: item.id,
+            name: item.variantName ? `${item.productName} — ${item.variantName}` : item.productName,
+            price: Number(item.unitPrice),
+            quantity: item.quantity,
+          })),
+          itemCount: quickdashOrder.items.reduce((total, item) => total + item.quantity, 0),
+          customerNotes: quickdashOrder.customerNotes || '',
           createdAt: quickdashOrder.createdAt,
           shippedAt: quickdashOrder.shippedAt || '',
           deliveredAt: quickdashOrder.deliveredAt || '',
@@ -143,7 +152,7 @@ export default function OrderDetailPage() {
         } else if (err?.status === 403) {
           setError('You do not have permission to view this order');
         } else {
-          setError('Failed to load order');
+          setError(getCommerceErrorMessage(err));
         }
       } finally {
         setLoading(false);
@@ -151,7 +160,7 @@ export default function OrderDetailPage() {
     };
 
     fetchOrder();
-  }, [orderId, user, authLoading, router]);
+  }, [orderId, user, authLoading, router, retryKey]);
 
   const copyTracking = () => {
     if (order?.trackingNumber) {
@@ -179,6 +188,11 @@ export default function OrderDetailPage() {
           <Link href="/dashboard" className="mt-4 text-purple-600 hover:underline">
             Back to Dashboard
           </Link>
+          {error && error !== 'Order not found' && error !== 'You do not have permission to view this order' && (
+            <button onClick={() => setRetryKey((key) => key + 1)} className="mt-3 text-purple-600 hover:underline">
+              Try Again
+            </button>
+          )}
         </div>
         <Footer />
       </div>
