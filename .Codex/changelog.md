@@ -1,5 +1,31 @@
 # Gemsutopia Changelog
 
+## 2026-07-17 — Tracking, Contact, Review, and Profile Failure States
+
+### Completed
+- Made checkout email visibly required for order tracking and prevented incomplete tracking submissions.
+- Added tracking timeouts, no-store requests, safe invalid-response handling, and distinct not-found/service/connection error messages.
+- Made contact submission results persistent and accessible instead of relying only on temporary toasts; failed submissions preserve the form for retry.
+- Surfaced Quickdash review validation errors and differentiated service connectivity failures.
+- Replaced silent profile-load failure with loading, error, and retry states.
+- Removed deceptive address editing from Profile because that save contract only persists name and phone; address values are now read-only and direct customers to the Addresses section.
+
+### Files Changed
+- `apps/web/src/app/(public)/track/page.tsx`
+- `apps/web/src/app/(info)/contact-us/page.tsx`
+- `apps/web/src/components/modals/ReviewModal.tsx`
+- `apps/web/src/components/user-dashboard/UserProfile.tsx`
+- `.Codex/changelog.md`
+- `memory/MEMORY.md`
+
+### Verification
+- `pnpm --filter @gemsutopia/web exec tsc --noEmit` passed.
+
+### What's Next
+- Quickdash needs address update/default endpoints before those actions can be enabled honestly in Gemsutopia.
+- Remove or disable remaining unsupported account controls such as 2FA, login history, account export, and any preference settings that are only stored locally but presented as server-backed.
+- Add automated checkout coverage after the functional failure-state pass is complete.
+
 ## 2026-07-17 — Shipping Rate Loading and Retry State
 
 ### Completed

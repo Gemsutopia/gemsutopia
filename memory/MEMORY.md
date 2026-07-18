@@ -1,5 +1,11 @@
 # Gemsutopia Project Memory
 
+## Tracking and Account Failure-State Pass (2026-07-17)
+- Order tracking now requires both order number and checkout email and distinguishes not-found, timeout, service, and connection failures.
+- Contact and review failures remain visible with retryable form data; review validation messages from Quickdash are preserved.
+- Profile loading no longer silently renders an empty account on failure.
+- Profile address fields are read-only because the current profile update request only persists name and phone. Real address editing/default selection remains blocked on Quickdash endpoints.
+
 ## Shipping Rate State (2026-07-17)
 - Shipping-rate lookup now runs on valid address submission rather than incomplete background address changes.
 - Checkout shows a persistent inline error and retry action, disables duplicate submissions while calculating, and cannot advance without a current rate.

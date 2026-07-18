@@ -10,11 +10,15 @@ import {
   faMapMarkerAlt,
   faEdit,
 } from '@fortawesome/free-solid-svg-icons';
+import { getCommerceErrorMessage } from '@/lib/commerce-error';
 
 export default function UserProfile() {
   const { user } = useBetterAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -29,6 +33,8 @@ export default function UserProfile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        setIsLoading(true);
+        setLoadError(null);
         const { store } = await import('@/lib/store');
         const { user: profile } = await store.auth.getProfile();
         if (profile) {
@@ -59,12 +65,15 @@ export default function UserProfile() {
             }));
           }
         }
-      } catch {
-        // Silent fail - form stays empty
+      } catch (error) {
+        setLoadError(getCommerceErrorMessage(error));
+      } finally {
+        setIsLoading(false);
       }
     };
     if (user) fetchProfile();
-  }, [user]);
+    else setIsLoading(false);
+  }, [user, retryKey]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -88,6 +97,29 @@ export default function UserProfile() {
       setIsSaving(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4" role="status" aria-live="polite">
+        <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
+        <div className="h-72 animate-pulse rounded-lg bg-gray-200" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="rounded-lg bg-red-50 p-6 text-center" role="alert">
+        <p className="mb-4 text-red-800">{loadError}</p>
+        <button
+          onClick={() => setRetryKey(key => key + 1)}
+          className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -192,8 +224,8 @@ export default function UserProfile() {
               type="text"
               name="address"
               value={formData.address}
-              onChange={handleInputChange}
-              disabled={!isEditing}
+              readOnly
+              disabled
               className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:outline-none disabled:bg-gray-100"
               placeholder="Enter your address"
             />
@@ -205,8 +237,8 @@ export default function UserProfile() {
               type="text"
               name="city"
               value={formData.city}
-              onChange={handleInputChange}
-              disabled={!isEditing}
+              readOnly
+              disabled
               className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:outline-none disabled:bg-gray-100"
               placeholder="Enter your city"
             />
@@ -218,8 +250,8 @@ export default function UserProfile() {
               type="text"
               name="zipCode"
               value={formData.zipCode}
-              onChange={handleInputChange}
-              disabled={!isEditing}
+              readOnly
+              disabled
               className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:outline-none disabled:bg-gray-100"
               placeholder="Enter your zip code"
             />
@@ -231,12 +263,15 @@ export default function UserProfile() {
               type="text"
               name="country"
               value={formData.country}
-              onChange={handleInputChange}
-              disabled={!isEditing}
+              readOnly
+              disabled
               className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:outline-none disabled:bg-gray-100"
               placeholder="Enter your country"
             />
           </div>
+          <p className="md:col-span-2 text-sm text-gray-500">
+            Shipping addresses are managed from the Addresses section.
+          </p>
         </div>
 
         {isEditing && (

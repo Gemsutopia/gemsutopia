@@ -71,9 +71,9 @@ export default function ReviewModal({ isOpen, onClose, productId }: ReviewModalP
         body: JSON.stringify({ ...reviewForm, productId }),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
-      if (data.success) {
+      if (response.ok && data?.success) {
         setSubmitMessage('Thank you for your review!');
         setReviewForm({
           name: '',
@@ -87,10 +87,12 @@ export default function ReviewModal({ isOpen, onClose, productId }: ReviewModalP
           setSubmitMessage('');
         }, 2000);
       } else {
-        setSubmitMessage('Failed to submit review. Please try again.');
+        setSubmitMessage(
+          data?.error?.message || 'Your review could not be submitted. Please try again.'
+        );
       }
     } catch {
-      setSubmitMessage('Failed to submit review. Please try again.');
+      setSubmitMessage('We could not reach the review service. Check your connection and retry.');
     } finally {
       setIsSubmitting(false);
     }
@@ -112,7 +114,7 @@ export default function ReviewModal({ isOpen, onClose, productId }: ReviewModalP
 
         {/* Header */}
         <div className="mb-4 text-center sm:mb-6">
-          <h3 className="mb-1 font-[family-name:var(--font-cormorant)] text-2xl text-white sm:mb-2 sm:text-3xl">
+          <h3 className="mb-1 font-[family-name:var(--font-bacasime)] text-2xl text-white sm:mb-2 sm:text-3xl">
             Share Your Experience
           </h3>
           <p className="text-xs text-white/60 sm:text-sm">
@@ -122,6 +124,7 @@ export default function ReviewModal({ isOpen, onClose, productId }: ReviewModalP
 
         {submitMessage && (
           <div
+            role={submitMessage.includes('Thank you') ? 'status' : 'alert'}
             className={`mb-3 rounded-lg p-2 text-center text-xs sm:mb-4 sm:p-3 sm:text-sm ${
               submitMessage.includes('Thank you')
                 ? 'border border-green-500/30 bg-green-500/10 text-green-400'
