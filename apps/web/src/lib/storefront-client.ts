@@ -762,20 +762,34 @@ export class StorefrontClient {
 
     createPayPalOrder: async (data: {
       items: {
-        name: string;
+        variantId: string;
         quantity: number;
-        unitAmount: number;
-        productId?: string;
-        variantId?: string;
       }[];
-      currency?: string;
       successUrl?: string;
       cancelUrl?: string;
-      shippingAmount?: number;
-      discountAmount?: number;
+      country: string;
+      state?: string;
       discountCode?: string;
-      metadata?: Record<string, string>;
-    }): Promise<{ orderId: string; approveUrl: string }> => {
+      customerEmail?: string;
+      checkoutAttemptId?: string;
+    }): Promise<{
+      orderId: string;
+      approveUrl: string;
+      quote: {
+        currency: string;
+        subtotal: number;
+        shippingAmount: number;
+        discountAmount: number;
+        total: number;
+        items: Array<{
+          variantId: string;
+          productId: string;
+          name: string;
+          quantity: number;
+          unitAmount: number;
+        }>;
+      };
+    }> => {
       return this.request('/payments/paypal/checkout', {
         method: 'POST',
         body: data,
