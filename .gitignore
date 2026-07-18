@@ -202,6 +202,7 @@ FRONTEND_FINISH_PLAN.md
 scripts/
 export/
 *.dump
+/gemsutopia-neon-backup.dump
 
 # Stray tool-generated root temporary files
 /_tmp_*
