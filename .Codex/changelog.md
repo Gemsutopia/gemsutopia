@@ -1,5 +1,29 @@
 # Gemsutopia Changelog
 
+## 2026-07-17 — Remove Unsupported Account Controls
+
+### Completed
+- Removed address edit and set-default controls that had no Quickdash endpoint and only displayed "coming soon" after interaction.
+- Preserved working address creation and deletion, including the default flag available during creation.
+- Removed fake Profile security controls and invented password-age text; real password change remains in Settings.
+- Removed nonfunctional 2FA, login-history, and account-export controls.
+- Clearly labeled notification/privacy/communication preferences as browser-local until Quickdash preference syncing exists.
+- Updated preference-save confirmation so it no longer implies a server-backed account update.
+
+### Files Changed
+- `apps/web/src/components/user-dashboard/UserAddresses.tsx`
+- `apps/web/src/components/user-dashboard/UserProfile.tsx`
+- `apps/web/src/components/user-dashboard/UserSettings.tsx`
+- `.Codex/changelog.md`
+- `memory/MEMORY.md`
+
+### Verification
+- `pnpm --filter @gemsutopia/web exec tsc --noEmit` passed.
+
+### What's Next
+- Quickdash contracts still needed: address update/default, server-backed customer preferences, 2FA, login history, and account export.
+- Audit remaining storefront links/actions for dead or simulated behavior before closing the functional-state branch.
+
 ## 2026-07-17 — Tracking, Contact, Review, and Profile Failure States
 
 ### Completed

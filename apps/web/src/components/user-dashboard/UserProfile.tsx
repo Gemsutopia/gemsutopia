@@ -293,31 +293,6 @@ export default function UserProfile() {
         )}
       </div>
 
-      {/* Account Security */}
-      <div className="rounded-lg bg-white p-6 shadow-md">
-        <h3 className="mb-6 text-xl font-semibold text-gray-900">Account Security</h3>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
-            <div>
-              <p className="font-medium text-gray-900">Password</p>
-              <p className="text-sm text-gray-600">Last updated 2 months ago</p>
-            </div>
-            <button className="font-medium text-purple-600 hover:text-purple-800">
-              Change Password
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
-            <div>
-              <p className="font-medium text-gray-900">Two-Factor Authentication</p>
-              <p className="text-sm text-gray-600">Add an extra layer of security</p>
-            </div>
-            <button className="font-medium text-purple-600 hover:text-purple-800">
-              Enable 2FA
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

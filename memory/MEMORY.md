@@ -1,5 +1,10 @@
 # Gemsutopia Project Memory
 
+## Unsupported Account Controls Removed (2026-07-17)
+- Removed address edit/default, 2FA, login history, account export, and fake Profile security controls because Quickdash has no backing contracts for them.
+- Address add/delete and password change/account deletion remain available because they have real requests.
+- Customer preferences remain browser-local and are now labeled honestly rather than presented as synced Quickdash settings.
+
 ## Tracking and Account Failure-State Pass (2026-07-17)
 - Order tracking now requires both order number and checkout email and distinguishes not-found, timeout, service, and connection failures.
 - Contact and review failures remain visible with retryable form data; review validation messages from Quickdash are preserved.
