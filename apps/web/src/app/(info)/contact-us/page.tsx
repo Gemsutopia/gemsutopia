@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { toast } from 'sonner';
-import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 
 export default function ContactUs() {
   const router = useRouter();
@@ -56,9 +56,7 @@ export default function ContactUs() {
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (submitState) setSubmitState(null);
     setFormData((prev) => ({
       ...prev,
@@ -70,7 +68,7 @@ export default function ContactUs() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
+      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-32">
         <div className="relative z-10 mx-auto max-w-2xl">
           {/* Back button */}
           <button
@@ -172,7 +170,13 @@ export default function ContactUs() {
             {/* Submit button */}
             <button
               type="submit"
-              disabled={isSubmitting || !formData.name || !formData.email || !formData.subject || !formData.message}
+              disabled={
+                isSubmitting ||
+                !formData.name ||
+                !formData.email ||
+                !formData.subject ||
+                !formData.message
+              }
               className={`mt-6 h-10 w-full rounded-md font-[family-name:var(--font-inter)] text-base font-medium transition-all duration-200 ${
                 formData.name && formData.email && formData.subject && formData.message
                   ? 'bg-white text-black hover:bg-white/90'

@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
 import { Accordion, AccordionItem } from '@heroui/react';
 import { IconChevronDown } from '@tabler/icons-react';
-import { useCurrency } from '@/contexts/CurrencyContext';
+import Image from 'next/image';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { useCookies } from '@/contexts/CookieContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const tabContent: Record<string, { label: string; href: string }[]> = {
   Shop: [
@@ -74,7 +74,7 @@ export default function Footer() {
   return (
     <footer className="relative z-10 flex h-auto min-h-[50vh] w-full flex-col items-center justify-center overflow-hidden border-t border-white/10 bg-black py-10 text-white xs:min-h-[55vh] xs:py-12 md:min-h-[60vh] md:py-16 lg:py-20">
       {/* Footer Content */}
-      <div className="relative z-10 w-full px-4 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
+      <div className="relative z-10 w-full px-4 xs:px-5 sm:px-6 md:px-12 lg:px-24 xl:px-32 3xl:px-40">
         {/* Mobile Accordion Navigation */}
         <div className="mb-4 md:hidden">
           <Accordion
@@ -88,7 +88,7 @@ export default function Footer() {
               content: 'pt-0 pb-4',
             }}
           >
-            {tabs.map(tab => (
+            {tabs.map((tab) => (
               <AccordionItem
                 key={tab}
                 aria-label={tab}
@@ -96,7 +96,7 @@ export default function Footer() {
                 indicator={<IconChevronDown size={16} className="text-white/40" />}
               >
                 <div className="flex flex-col gap-3">
-                  {tabContent[tab]?.map(link => (
+                  {tabContent[tab]?.map((link) => (
                     <a
                       key={link.href}
                       href={link.href}
@@ -119,7 +119,7 @@ export default function Footer() {
               <input
                 type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 className="h-10 flex-1 rounded-l-lg border border-r-0 border-white/[0.03] bg-white/5 px-4 text-sm text-white placeholder-white/40 transition-colors focus:border-white/10 focus:outline-none"
                 disabled={isSubscribing}
@@ -140,7 +140,7 @@ export default function Footer() {
           {/* Tabs and Currency */}
           <div className="flex items-center justify-between">
             <div className="flex gap-5 md:gap-8 lg:gap-10 xl:gap-12">
-              {tabs.map(tab => (
+              {tabs.map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -158,11 +158,13 @@ export default function Footer() {
             >
               {currency === 'USD' ? (
                 <>
-                  <span className="fi fi-us mr-1.5" /> America <span className="text-white/50">(USD)</span>
+                  <span className="fi fi-us mr-1.5" /> America{' '}
+                  <span className="text-white/50">(USD)</span>
                 </>
               ) : (
                 <>
-                  <span className="fi fi-ca mr-1.5" /> Canada <span className="text-white/50">(CAD)</span>
+                  <span className="fi fi-ca mr-1.5" /> Canada{' '}
+                  <span className="text-white/50">(CAD)</span>
                 </>
               )}
             </button>
@@ -175,7 +177,7 @@ export default function Footer() {
             <div className="flex min-h-[180px] flex-col justify-between rounded-xl border border-white/[0.06] bg-white/5 p-5 md:min-h-[200px] md:p-6 lg:min-h-[220px] lg:p-8 xl:p-10">
               {/* Page Links */}
               <div className="flex flex-wrap gap-x-6 gap-y-2.5 md:gap-x-8 md:gap-y-3 lg:gap-x-10 lg:gap-y-4">
-                {tabContent[activeTab]?.map(link => (
+                {tabContent[activeTab]?.map((link) => (
                   <a
                     key={link.href}
                     href={link.href}
@@ -195,7 +197,7 @@ export default function Footer() {
                   <input
                     type="email"
                     value={email}
-                    onChange={e => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
                     className="h-10 flex-1 rounded-l-lg border border-r-0 border-white/10 bg-white/5 px-4 text-sm text-white placeholder-white/40 transition-colors focus:border-white/20 focus:outline-none md:h-11 lg:h-12 lg:px-5"
                     disabled={isSubscribing}

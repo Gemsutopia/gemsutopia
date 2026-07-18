@@ -1,28 +1,28 @@
 'use client';
-import { useEffect, useState, use, useRef } from 'react';
+import {
+  IconArrowLeft,
+  IconChevronDown,
+  IconHeart,
+  IconSearch,
+  IconTrash,
+  IconX,
+} from '@tabler/icons-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {
-  IconArrowLeft,
-  IconSearch,
-  IconX,
-  IconChevronDown,
-  IconTrash,
-  IconHeart,
-} from '@tabler/icons-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { use, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { EmptyProducts, EmptySearchResults, LoadError } from '@/components/empty-states';
-import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 import { PageLoader } from '@/components/ui/page-loader';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { useInventory } from '@/contexts/InventoryContext';
 import { useGemPouch } from '@/contexts/GemPouchContext';
+import { useInventory } from '@/contexts/InventoryContext';
 import { useWishlist } from '@/contexts/WishlistContext';
-import { toast } from 'sonner';
-import { store } from '@/lib/store';
 import { getCommerceErrorMessage } from '@/lib/commerce-error';
+import { store } from '@/lib/store';
 
 // Product interface
 interface Product {
@@ -67,7 +67,7 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
 
   // Get quantity of item in pouch
   const getItemQuantity = (productId: string) => {
-    const item = pouchItems.find(i => i.id === productId);
+    const item = pouchItems.find((i) => i.id === productId);
     return item?.quantity || 0;
   };
 
@@ -113,12 +113,9 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
   }, []);
 
   // Count active filters
-  const activeFilterCount = [
-    minPrice !== '',
-    maxPrice !== '',
-    inStockOnly,
-    onSaleOnly,
-  ].filter(Boolean).length;
+  const activeFilterCount = [minPrice !== '', maxPrice !== '', inStockOnly, onSaleOnly].filter(
+    Boolean
+  ).length;
 
   // Clear all filters
   const clearFilters = () => {
@@ -140,9 +137,7 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
 
         // Fetch categories from Quickdash
         const { categories: categoriesList } = await store.categories.list({ count: true });
-        const foundCategory = categoriesList.find(
-          (cat) => cat.slug === categorySlug
-        );
+        const foundCategory = categoriesList.find((cat) => cat.slug === categorySlug);
         if (!foundCategory) {
           setCategoryMissing(true);
           setLoading(false);
@@ -172,7 +167,9 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
           name: product.name,
           type: product.category?.id || '',
           price: parseFloat(product.price),
-          originalPrice: product.compareAtPrice ? parseFloat(product.compareAtPrice) : parseFloat(product.price),
+          originalPrice: product.compareAtPrice
+            ? parseFloat(product.compareAtPrice)
+            : parseFloat(product.price),
           image: product.thumbnail || product.images?.[0] || '/images/placeholder.jpg',
           images: product.images || [],
           featuredImageIndex: 0,
@@ -193,7 +190,7 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
 
   // Filter and sort products
   const filteredProducts = products
-    .filter(product => {
+    .filter((product) => {
       // Search filter
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
@@ -281,7 +278,7 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-<main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-6 md:pt-32 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
+      <main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-12 md:pt-32 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
         <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
           {/* Back Button */}
           <div className="mb-4 xs:mb-5 md:mb-6">
@@ -308,9 +305,13 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
                   />
                 </div>
               )}
-              <h1 className="mb-3 font-[family-name:var(--font-bacasime)] text-3xl text-white xs:mb-4 xs:text-4xl md:text-5xl lg:text-6xl">{category.name}</h1>
+              <h1 className="mb-3 font-[family-name:var(--font-bacasime)] text-3xl text-white xs:mb-4 xs:text-4xl md:text-5xl lg:text-6xl">
+                {category.name}
+              </h1>
               {category.description && (
-                <p className="mx-auto mb-3 max-w-2xl text-base text-white xs:mb-4 xs:text-lg">{category.description}</p>
+                <p className="mx-auto mb-3 max-w-2xl text-base text-white xs:mb-4 xs:text-lg">
+                  {category.description}
+                </p>
               )}
               <p className="text-xs text-white/80 xs:text-sm">
                 {products.length} {products.length === 1 ? 'gem' : 'gems'} in this collection
@@ -372,7 +373,9 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
                       className="flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-black/30 px-3 font-[family-name:var(--font-inter)] text-sm text-white transition-colors hover:border-white/20 xs:h-11"
                     >
                       <span className="hidden xs:inline">Sort:</span>
-                      <span>{sortOptions.find(opt => opt.value === sortBy)?.label || 'Default'}</span>
+                      <span>
+                        {sortOptions.find((opt) => opt.value === sortBy)?.label || 'Default'}
+                      </span>
                       <IconChevronDown size={14} className="text-white/60" />
                     </button>
                     <AnimatePresence>
@@ -458,7 +461,9 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
                             >
                               <span
                                 className={`h-5 w-5 rounded-full transition-all ${
-                                  inStockOnly ? 'translate-x-5 bg-black' : 'translate-x-0 bg-white/60'
+                                  inStockOnly
+                                    ? 'translate-x-5 bg-black'
+                                    : 'translate-x-0 bg-white/60'
                                 }`}
                               />
                             </button>
@@ -477,7 +482,9 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
                             >
                               <span
                                 className={`h-5 w-5 rounded-full transition-all ${
-                                  onSaleOnly ? 'translate-x-5 bg-black' : 'translate-x-0 bg-white/60'
+                                  onSaleOnly
+                                    ? 'translate-x-5 bg-black'
+                                    : 'translate-x-0 bg-white/60'
                                 }`}
                               />
                             </button>
@@ -512,20 +519,23 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
 
           {/* Products Grid */}
           {filteredProducts.length === 0 ? (
-            (searchQuery || activeFilterCount > 0) ? (
+            searchQuery || activeFilterCount > 0 ? (
               <EmptySearchResults query={searchQuery || undefined} />
             ) : (
               <EmptyProducts category={category?.name} />
             )
           ) : (
             <div className="grid grid-cols-2 gap-3 xs:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
-              {filteredProducts.map(product => (
+              {filteredProducts.map((product) => (
                 <div
                   key={product.id}
                   className="group flex flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-all duration-300 hover:border-white/20 hover:bg-white/10 xs:rounded-2xl"
                 >
                   {/* Product Image - Clickable */}
-                  <Link href={`/product/${product.id}`} className="relative aspect-square overflow-hidden bg-neutral-900">
+                  <Link
+                    href={`/product/${product.id}`}
+                    className="relative aspect-square overflow-hidden bg-neutral-900"
+                  >
                     {/* Sale Badge - Bottom Left */}
                     {product.price < product.originalPrice && (
                       <div className="absolute bottom-2 left-2 z-10 rounded-md bg-red-500 px-1.5 py-0.5 text-[10px] font-semibold text-white xs:rounded-lg xs:px-2 xs:py-1 xs:text-xs">
@@ -538,7 +548,7 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          const item = pouchItems.find(i => i.id === product.id);
+                          const item = pouchItems.find((i) => i.id === product.id);
                           if (item) {
                             const previousQuantity = item.quantity;
                             const newQuantity = previousQuantity - 1;
@@ -548,7 +558,8 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
                                 description: product.name,
                                 action: {
                                   label: 'Undo',
-                                  onClick: () => addItem({ ...item, quantity: undefined } as any, 1),
+                                  onClick: () =>
+                                    addItem({ ...item, quantity: undefined } as any, 1),
                                 },
                               });
                             } else {
@@ -568,55 +579,58 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
                         <span>{getItemQuantity(product.id)}</span>
                         <IconTrash size={12} className="xs:h-3.5 xs:w-3.5" />
                       </button>
-                    ) : product.stock > 0 && (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          if (isInWishlist(product.id)) {
-                            removeFromWishlist(product.id);
-                            toast.success('Removed from Wishlist', {
-                              description: product.name,
-                              action: {
-                                label: 'Undo',
-                                onClick: () => addToWishlist({
-                                  id: product.id,
-                                  name: product.name,
-                                  price: product.price,
-                                  image: product.image,
-                                  inventory: product.stock,
-                                }),
-                              },
-                            });
-                          } else {
-                            addToWishlist({
-                              id: product.id,
-                              name: product.name,
-                              price: product.price,
-                              image: product.image,
-                              inventory: product.stock,
-                            });
-                            toast.success('Added to Wishlist', {
-                              description: product.name,
-                              action: {
-                                label: 'Undo',
-                                onClick: () => removeFromWishlist(product.id),
-                              },
-                            });
-                          }
-                        }}
-                        className={`absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-sm transition-colors xs:h-8 xs:w-8 ${
-                          isInWishlist(product.id)
-                            ? 'bg-white/20 text-red-400'
-                            : 'bg-black/50 text-white/70 hover:bg-white/20 hover:text-white'
-                        }`}
-                      >
-                        <IconHeart
-                          size={16}
-                          className="xs:h-[18px] xs:w-[18px]"
-                          fill={isInWishlist(product.id) ? 'currentColor' : 'none'}
-                        />
-                      </button>
+                    ) : (
+                      product.stock > 0 && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (isInWishlist(product.id)) {
+                              removeFromWishlist(product.id);
+                              toast.success('Removed from Wishlist', {
+                                description: product.name,
+                                action: {
+                                  label: 'Undo',
+                                  onClick: () =>
+                                    addToWishlist({
+                                      id: product.id,
+                                      name: product.name,
+                                      price: product.price,
+                                      image: product.image,
+                                      inventory: product.stock,
+                                    }),
+                                },
+                              });
+                            } else {
+                              addToWishlist({
+                                id: product.id,
+                                name: product.name,
+                                price: product.price,
+                                image: product.image,
+                                inventory: product.stock,
+                              });
+                              toast.success('Added to Wishlist', {
+                                description: product.name,
+                                action: {
+                                  label: 'Undo',
+                                  onClick: () => removeFromWishlist(product.id),
+                                },
+                              });
+                            }
+                          }}
+                          className={`absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-sm transition-colors xs:h-8 xs:w-8 ${
+                            isInWishlist(product.id)
+                              ? 'bg-white/20 text-red-400'
+                              : 'bg-black/50 text-white/70 hover:bg-white/20 hover:text-white'
+                          }`}
+                        >
+                          <IconHeart
+                            size={16}
+                            className="xs:h-[18px] xs:w-[18px]"
+                            fill={isInWishlist(product.id) ? 'currentColor' : 'none'}
+                          />
+                        </button>
+                      )
                     )}
                     {/* Low Stock Badge - Bottom Right */}
                     {product.stock > 0 && product.stock <= 3 && (
@@ -647,10 +661,14 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
                     <Link href={`/product/${product.id}`} className="block">
                       <h2 className="font-[family-name:var(--font-inter)] text-xs font-semibold text-white transition-colors hover:text-white/80 xs:text-sm">
                         <span className="xs:hidden">
-                          {product.name.length > 18 ? `${product.name.slice(0, 18)}...` : product.name}
+                          {product.name.length > 18
+                            ? `${product.name.slice(0, 18)}...`
+                            : product.name}
                         </span>
                         <span className="hidden xs:inline">
-                          {product.name.length > 24 ? `${product.name.slice(0, 24)}...` : product.name}
+                          {product.name.length > 24
+                            ? `${product.name.slice(0, 24)}...`
+                            : product.name}
                         </span>
                       </h2>
                     </Link>
@@ -671,7 +689,7 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
                         <button
                           onClick={(e) => {
                             e.preventDefault();
-                            const existingItem = pouchItems.find(i => i.id === product.id);
+                            const existingItem = pouchItems.find((i) => i.id === product.id);
                             const previousQuantity = existingItem?.quantity || 0;
                             addItem({
                               id: product.id,
@@ -716,9 +734,13 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
           {/* Breadcrumbs */}
           <div className="mt-10 flex justify-center xs:mt-12 md:mt-16 lg:mt-20">
             <nav className="flex items-center gap-2 font-[family-name:var(--font-inter)] text-xs text-white/40 xs:text-sm">
-              <a href="/" className="transition-colors hover:text-white/60">Home</a>
+              <a href="/" className="transition-colors hover:text-white/60">
+                Home
+              </a>
               <span>/</span>
-              <a href="/shop" className="transition-colors hover:text-white/60">Shop</a>
+              <a href="/shop" className="transition-colors hover:text-white/60">
+                Shop
+              </a>
               <span>/</span>
               <span className="text-white/60">{category?.name || 'Category'}</span>
             </nav>

@@ -1,23 +1,21 @@
 'use client';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 
 export default function Cookies() {
   return (
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
+      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-32">
         <div className="relative z-10 mx-auto max-w-2xl">
           {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="mb-3 font-[family-name:var(--font-bacasime)] text-4xl text-white">
               Cookie Policy
             </h1>
-            <p className="text-sm text-white/60">
-              Last updated: January 2026
-            </p>
+            <p className="text-sm text-white/60">Last updated: January 2026</p>
           </div>
 
           {/* Intro */}
@@ -40,16 +38,16 @@ export default function Cookies() {
               <h2 className="mb-2 text-sm font-medium text-white">Essential Cookies</h2>
               <p className="text-sm leading-relaxed text-white/50">
                 These cookies are necessary for the website to function and cannot be switched off.
-                They enable basic features like shopping cart functionality, checkout process,
-                and remembering your preferences.
+                They enable basic features like shopping cart functionality, checkout process, and
+                remembering your preferences.
               </p>
             </div>
 
             <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-4">
               <h2 className="mb-2 text-sm font-medium text-white">Analytics Cookies</h2>
               <p className="text-sm leading-relaxed text-white/50">
-                We use analytics cookies to understand how visitors interact with our website.
-                This helps us improve our website performance and user experience. All information
+                We use analytics cookies to understand how visitors interact with our website. This
+                helps us improve our website performance and user experience. All information
                 collected is anonymous and aggregated.
               </p>
             </div>
@@ -58,8 +56,8 @@ export default function Cookies() {
               <h2 className="mb-2 text-sm font-medium text-white">Marketing Cookies</h2>
               <p className="text-sm leading-relaxed text-white/50">
                 These cookies track your browsing activity to help us show you relevant
-                advertisements. They may be set by us or third-party advertising partners.
-                You can opt out of marketing cookies without affecting core website functionality.
+                advertisements. They may be set by us or third-party advertising partners. You can
+                opt out of marketing cookies without affecting core website functionality.
               </p>
             </div>
 
@@ -91,9 +89,7 @@ export default function Cookies() {
 
           {/* Contact CTA */}
           <div className="mt-10">
-            <p className="mb-3 text-center text-xs text-white/40">
-              Questions about cookies?
-            </p>
+            <p className="mb-3 text-center text-xs text-white/40">Questions about cookies?</p>
             <Link
               href="/contact-us"
               className="block h-10 w-full rounded-md bg-white/10 pt-2.5 text-center font-[family-name:var(--font-inter)] text-base text-white transition-all duration-200 hover:bg-white/20 sm:mx-auto sm:w-auto sm:px-10"

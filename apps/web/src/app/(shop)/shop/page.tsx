@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { IconChevronDown, IconSearch, IconX } from '@tabler/icons-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { IconSearch, IconX, IconChevronDown } from '@tabler/icons-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import { PageLoader } from '@/components/ui/page-loader';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { EmptyState, LoadError } from '@/components/empty-states';
-import { store, type Category as StorefrontCategory } from '@/lib/store';
+import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
+import { PageLoader } from '@/components/ui/page-loader';
 import { getCommerceErrorMessage } from '@/lib/commerce-error';
+import { type Category as StorefrontCategory, store } from '@/lib/store';
 
 // Extended category type for UI display
 interface Category extends Omit<StorefrontCategory, 'sortOrder'> {
@@ -59,8 +59,7 @@ export default function Shop() {
       const query = searchQuery.toLowerCase();
       result = result.filter(
         (cat) =>
-          cat.name.toLowerCase().includes(query) ||
-          cat.description?.toLowerCase().includes(query)
+          cat.name.toLowerCase().includes(query) || cat.description?.toLowerCase().includes(query)
       );
     }
 
@@ -116,7 +115,7 @@ export default function Shop() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-<main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-6 md:pt-32 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
+      <main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-12 md:pt-32 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
         <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
           {/* Page Header */}
           <div className="mb-6 text-center xs:mb-8 md:mb-10 lg:mb-12">
@@ -155,7 +154,10 @@ export default function Shop() {
               </div>
 
               {/* Sort Dropdown - Custom */}
-              <div className="relative ml-auto flex items-center gap-2 sm:ml-0" ref={sortDropdownRef}>
+              <div
+                className="relative ml-auto flex items-center gap-2 sm:ml-0"
+                ref={sortDropdownRef}
+              >
                 <span className="font-[family-name:var(--font-inter)] text-xs text-white/40 xs:text-sm">
                   Sort by
                 </span>
@@ -163,7 +165,7 @@ export default function Shop() {
                   onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
                   className="flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-black/30 px-3 font-[family-name:var(--font-inter)] text-sm text-white transition-colors hover:border-white/20 xs:h-11"
                 >
-                  <span>{sortOptions.find(opt => opt.value === sortBy)?.label || 'Default'}</span>
+                  <span>{sortOptions.find((opt) => opt.value === sortBy)?.label || 'Default'}</span>
                   <IconChevronDown
                     size={14}
                     className={`text-white/60 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`}
@@ -206,7 +208,8 @@ export default function Shop() {
             {/* Results Count - inside card */}
             {!loading && searchQuery && (
               <p className="mt-3 font-[family-name:var(--font-inter)] text-sm text-white/50">
-                {filteredCategories.length} {filteredCategories.length === 1 ? 'category' : 'categories'} found
+                {filteredCategories.length}{' '}
+                {filteredCategories.length === 1 ? 'category' : 'categories'} found
               </p>
             )}
           </div>
@@ -227,7 +230,9 @@ export default function Shop() {
                   href={`/shop/${category.slug}`}
                   className={`group h-full ${category.all_sold_out ? 'pointer-events-none' : ''}`}
                 >
-                  <div className={`flex h-full flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-all duration-300 xs:rounded-2xl ${category.all_sold_out ? 'cursor-not-allowed' : 'hover:border-white/20 hover:bg-white/10'}`}>
+                  <div
+                    className={`flex h-full flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-all duration-300 xs:rounded-2xl ${category.all_sold_out ? 'cursor-not-allowed' : 'hover:border-white/20 hover:bg-white/10'}`}
+                  >
                     {/* Category Image */}
                     <div className="relative aspect-square overflow-hidden bg-neutral-900">
                       <Image
@@ -258,7 +263,9 @@ export default function Shop() {
                         </p>
                       )}
                       <p className="mt-auto pt-1.5 font-[family-name:var(--font-inter)] text-xs text-white/40 xs:pt-2">
-                        {category.all_sold_out ? 'All sold out' : `${category.product_count ?? 0} gems`}
+                        {category.all_sold_out
+                          ? 'All sold out'
+                          : `${category.product_count ?? 0} gems`}
                       </p>
                     </div>
                   </div>
@@ -276,14 +283,20 @@ export default function Shop() {
                   ? `No categories match "${searchQuery}". Try a different search.`
                   : 'Check back soon! New collections are added regularly.'
               }
-              action={searchQuery ? { label: 'Clear Search', onClick: () => setSearchQuery('') } : undefined}
+              action={
+                searchQuery
+                  ? { label: 'Clear Search', onClick: () => setSearchQuery('') }
+                  : undefined
+              }
             />
           )}
 
           {/* Breadcrumbs */}
           <div className="mt-10 flex justify-center xs:mt-12 md:mt-16 lg:mt-20">
             <nav className="flex items-center gap-2 font-[family-name:var(--font-inter)] text-xs text-white/40 xs:text-sm">
-              <a href="/" className="transition-colors hover:text-white/60">Home</a>
+              <a href="/" className="transition-colors hover:text-white/60">
+                Home
+              </a>
               <span>/</span>
               <span className="text-white/60">Shop</span>
             </nav>

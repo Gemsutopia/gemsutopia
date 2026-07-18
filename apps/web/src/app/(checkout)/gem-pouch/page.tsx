@@ -1,15 +1,15 @@
 'use client';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import { EmptyCart } from '@/components/empty-states';
-import { useGemPouch } from '@/contexts/GemPouchContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
-import { useWishlist } from '@/contexts/WishlistContext';
-import { toast } from 'sonner';
-import { IconTrash, IconHeart, IconMinus, IconPlus } from '@tabler/icons-react';
+import { IconHeart, IconMinus, IconPlus, IconTrash } from '@tabler/icons-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback } from 'react';
+import { toast } from 'sonner';
+import { EmptyCart } from '@/components/empty-states';
+import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { useGemPouch } from '@/contexts/GemPouchContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 import { useInventoryUpdates } from '@/lib/pusher-client';
 
 export default function GemPouch() {
@@ -27,7 +27,7 @@ export default function GemPouch() {
 
   useInventoryUpdates(undefined, handleSoldOut);
 
-  const handleRemove = (item: typeof items[0]) => {
+  const handleRemove = (item: (typeof items)[0]) => {
     const removedItem = { ...item };
     removeItem(item.id);
     toast.success('Removed from Gem Pouch', {
@@ -39,7 +39,7 @@ export default function GemPouch() {
     });
   };
 
-  const handleDecrement = (item: typeof items[0]) => {
+  const handleDecrement = (item: (typeof items)[0]) => {
     const previousQuantity = item.quantity;
     const newQuantity = previousQuantity - 1;
 
@@ -65,7 +65,7 @@ export default function GemPouch() {
     }
   };
 
-  const handleIncrement = (item: typeof items[0]) => {
+  const handleIncrement = (item: (typeof items)[0]) => {
     const previousQuantity = item.quantity;
     const newQuantity = previousQuantity + 1;
     updateQuantity(item.id, newQuantity);
@@ -78,7 +78,7 @@ export default function GemPouch() {
     });
   };
 
-  const handleMoveToWishlist = (item: typeof items[0]) => {
+  const handleMoveToWishlist = (item: (typeof items)[0]) => {
     if (!isInWishlist(item.id)) {
       const removedItem = { ...item };
       addToWishlist({
@@ -111,7 +111,7 @@ export default function GemPouch() {
       description: `${itemsToRestore.length} ${itemsToRestore.length === 1 ? 'item' : 'items'} removed`,
       action: {
         label: 'Undo',
-        onClick: () => itemsToRestore.forEach(item => addToPouch(item)),
+        onClick: () => itemsToRestore.forEach((item) => addToPouch(item)),
       },
     });
   };
@@ -133,7 +133,7 @@ export default function GemPouch() {
     <div className="flex flex-col bg-black">
       <Header />
 
-<main className="min-h-screen flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-6 md:pt-32 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
+      <main className="min-h-screen flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-12 md:pt-32 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
         <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
           {/* Page Header */}
           <div className="mb-6 text-center xs:mb-8 md:mb-10 lg:mb-12">
@@ -150,13 +150,16 @@ export default function GemPouch() {
             {/* Products Grid - 2 columns on all sizes, left side on desktop */}
             <div className="flex-1">
               <div className="grid grid-cols-2 gap-3 xs:gap-4 md:gap-5 lg:gap-6">
-                {items.map(item => (
+                {items.map((item) => (
                   <div
                     key={item.id}
                     className="group flex flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-all duration-300 hover:border-white/20 hover:bg-white/10 xs:rounded-2xl"
                   >
                     {/* Product Image */}
-                    <Link href={`/product/${item.id}`} className="relative aspect-square overflow-hidden bg-neutral-900">
+                    <Link
+                      href={`/product/${item.id}`}
+                      className="relative aspect-square overflow-hidden bg-neutral-900"
+                    >
                       {/* Remove Button - Top Right */}
                       <button
                         onClick={(e) => {
@@ -179,7 +182,11 @@ export default function GemPouch() {
                             : 'bg-black/50 text-white/70 hover:bg-white/20 hover:text-white'
                         }`}
                       >
-                        <IconHeart size={14} className="xs:h-4 xs:w-4" fill={isInWishlist(item.id) ? 'currentColor' : 'none'} />
+                        <IconHeart
+                          size={14}
+                          className="xs:h-4 xs:w-4"
+                          fill={isInWishlist(item.id) ? 'currentColor' : 'none'}
+                        />
                       </button>
                       <Image
                         src={item.image}
@@ -341,7 +348,9 @@ export default function GemPouch() {
           {/* Breadcrumbs */}
           <div className="mt-10 flex justify-center xs:mt-12 md:mt-16 lg:mt-20">
             <nav className="flex items-center gap-2 font-[family-name:var(--font-inter)] text-xs text-white/40 xs:text-sm">
-              <Link href="/" className="transition-colors hover:text-white/60">Home</Link>
+              <Link href="/" className="transition-colors hover:text-white/60">
+                Home
+              </Link>
               <span>/</span>
               <span className="text-white/60">Gem Pouch</span>
             </nav>

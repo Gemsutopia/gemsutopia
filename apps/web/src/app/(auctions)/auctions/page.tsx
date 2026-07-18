@@ -1,16 +1,16 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import { IconChevronDown, IconClock, IconSearch, IconX } from '@tabler/icons-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { IconSearch, IconX, IconChevronDown, IconClock } from '@tabler/icons-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import { EmptyAuctions, LoadError } from '@/components/empty-states';
-import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 import { PageLoader } from '@/components/ui/page-loader';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { store } from '@/lib/store';
 import { getCommerceErrorMessage } from '@/lib/commerce-error';
+import { store } from '@/lib/store';
 
 interface Auction {
   id: string;
@@ -97,11 +97,7 @@ function CountdownTimer({ endTime, status }: { endTime: string; status: string }
     return <span className="text-white/50">Ended</span>;
   }
 
-  return (
-    <span className={isUrgent ? 'text-red-400' : 'text-white'}>
-      {timeLeft}
-    </span>
-  );
+  return <span className={isUrgent ? 'text-red-400' : 'text-white'}>{timeLeft}</span>;
 }
 
 export default function AuctionsPage() {
@@ -174,7 +170,7 @@ export default function AuctionsPage() {
 
   // Filter and sort auctions
   const filteredAuctions = auctions
-    .filter(auction => {
+    .filter((auction) => {
       // Tab filter
       if (activeTab === 'active' && auction.status !== 'active') return false;
       if (activeTab === 'pending' && auction.status !== 'pending') return false;
@@ -269,7 +265,7 @@ export default function AuctionsPage() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-<main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-6 md:pt-32 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
+      <main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-12 md:pt-32 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
         <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
           {/* Page Header */}
           <div className="mb-8 text-center xs:mb-10 md:mb-12">
@@ -277,13 +273,14 @@ export default function AuctionsPage() {
               Gemsutopia Reserve Auctions
             </h1>
             <p className="mx-auto max-w-2xl text-sm text-white/60 xs:text-base md:text-lg">
-              Occasional reserve auctions featuring select gemstones, minerals, and collector specimens.
+              Occasional reserve auctions featuring select gemstones, minerals, and collector
+              specimens.
             </p>
           </div>
 
           {/* Filter Tabs */}
           <div className="mb-6 flex justify-center gap-1.5 xs:mb-8 xs:gap-2">
-            {filterTabs.map(tab => (
+            {filterTabs.map((tab) => (
               <button
                 key={tab.value}
                 onClick={() => setActiveTab(tab.value)}
@@ -310,7 +307,7 @@ export default function AuctionsPage() {
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search auctions..."
                   className="h-10 w-full rounded-xl border border-white/10 bg-black/30 pl-10 pr-10 text-sm text-white placeholder-white/40 transition-colors focus:border-white/20 focus:outline-none xs:h-11"
                 />
@@ -331,7 +328,9 @@ export default function AuctionsPage() {
                   className="flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-black/30 px-3 text-sm text-white transition-colors hover:border-white/20 xs:h-11"
                 >
                   <span className="hidden xs:inline">Sort:</span>
-                  <span>{sortOptions.find(opt => opt.value === sortBy)?.label || 'Ending Soon'}</span>
+                  <span>
+                    {sortOptions.find((opt) => opt.value === sortBy)?.label || 'Ending Soon'}
+                  </span>
                   <IconChevronDown size={14} className="text-white/60" />
                 </button>
                 <AnimatePresence>
@@ -380,7 +379,7 @@ export default function AuctionsPage() {
             <EmptyAuctions />
           ) : (
             <div className="grid grid-cols-2 gap-3 xs:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
-              {filteredAuctions.map(auction => (
+              {filteredAuctions.map((auction) => (
                 <Link
                   key={auction.id}
                   href={`/auctions/${auction.id}`}
@@ -399,7 +398,9 @@ export default function AuctionsPage() {
                     )}
 
                     {/* Ended Overlay */}
-                    {(auction.status === 'ended' || auction.status === 'sold' || auction.status === 'no_sale') && (
+                    {(auction.status === 'ended' ||
+                      auction.status === 'sold' ||
+                      auction.status === 'no_sale') && (
                       <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                         <span className="font-[family-name:var(--font-bacasime)] text-xl tracking-wider text-white xs:text-2xl md:text-3xl">
                           {auction.status === 'sold' ? 'SOLD' : 'ENDED'}
@@ -408,7 +409,11 @@ export default function AuctionsPage() {
                     )}
 
                     <Image
-                      src={auction.images?.[auction.featuredImageIndex || 0] || auction.images?.[0] || '/images/placeholder.jpg'}
+                      src={
+                        auction.images?.[auction.featuredImageIndex || 0] ||
+                        auction.images?.[0] ||
+                        '/images/placeholder.jpg'
+                      }
                       alt={auction.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -421,10 +426,14 @@ export default function AuctionsPage() {
                     {/* Title */}
                     <h2 className="text-xs font-semibold text-white xs:text-sm">
                       <span className="xs:hidden">
-                        {auction.title.length > 18 ? `${auction.title.slice(0, 18)}...` : auction.title}
+                        {auction.title.length > 18
+                          ? `${auction.title.slice(0, 18)}...`
+                          : auction.title}
                       </span>
                       <span className="hidden xs:inline">
-                        {auction.title.length > 24 ? `${auction.title.slice(0, 24)}...` : auction.title}
+                        {auction.title.length > 24
+                          ? `${auction.title.slice(0, 24)}...`
+                          : auction.title}
                       </span>
                     </h2>
 
@@ -447,7 +456,9 @@ export default function AuctionsPage() {
           {/* Breadcrumbs */}
           <div className="mt-10 flex justify-center xs:mt-12 md:mt-16 lg:mt-20">
             <nav className="flex items-center gap-2 text-xs text-white/40 xs:text-sm">
-              <a href="/" className="transition-colors hover:text-white/60">Home</a>
+              <a href="/" className="transition-colors hover:text-white/60">
+                Home
+              </a>
               <span>/</span>
               <span className="text-white/60">Auctions</span>
             </nav>

@@ -1,9 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import { useEffect, useState } from 'react';
 import { EmptyState } from '@/components/empty-states';
+import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 
 export default function CareGuide() {
   const [content, setContent] = useState<any>({});
@@ -14,8 +14,8 @@ export default function CareGuide() {
     if (process.env.NEXT_PUBLIC_QUICKDASH_PAGE_CONTENT !== 'true') return;
 
     fetch('/api/pages/care-guide')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         const remoteContent = data?.data?.content;
         if (remoteContent && Object.keys(remoteContent).length > 0) {
           setContent(remoteContent);
@@ -28,17 +28,22 @@ export default function CareGuide() {
 
   const defaultContent: Record<string, string> = {
     title: 'Care Guide',
-    subtitle: 'Preserving nature\'s beauty',
+    subtitle: "Preserving nature's beauty",
     section_1_title: 'General Handling',
-    section_1_content: 'Always handle your specimens with clean, dry hands. Natural oils and lotions can affect the surface of certain minerals over time. When possible, hold pieces by their edges or base rather than their display faces.',
+    section_1_content:
+      'Always handle your specimens with clean, dry hands. Natural oils and lotions can affect the surface of certain minerals over time. When possible, hold pieces by their edges or base rather than their display faces.',
     section_2_title: 'Cleaning Your Specimens',
-    section_2_content: 'Most specimens can be gently dusted with a soft brush. For deeper cleaning, use lukewarm water and mild soap, then dry thoroughly. Avoid ultrasonic cleaners and harsh chemicals—they can damage delicate surfaces and alter colors.',
+    section_2_content:
+      'Most specimens can be gently dusted with a soft brush. For deeper cleaning, use lukewarm water and mild soap, then dry thoroughly. Avoid ultrasonic cleaners and harsh chemicals—they can damage delicate surfaces and alter colors.',
     section_3_title: 'Display & Storage',
-    section_3_content: 'Keep specimens away from direct sunlight, which can fade certain minerals like amethyst and rose quartz. Store pieces individually in soft cloth or padded containers to prevent scratching. Humidity control helps preserve specimens long-term.',
+    section_3_content:
+      'Keep specimens away from direct sunlight, which can fade certain minerals like amethyst and rose quartz. Store pieces individually in soft cloth or padded containers to prevent scratching. Humidity control helps preserve specimens long-term.',
     section_4_title: 'Temperature Considerations',
-    section_4_content: 'Avoid exposing your gemstones to extreme temperature changes. Rapid shifts can cause thermal shock, potentially leading to fractures in some specimens. Room temperature with stable conditions is ideal.',
+    section_4_content:
+      'Avoid exposing your gemstones to extreme temperature changes. Rapid shifts can cause thermal shock, potentially leading to fractures in some specimens. Room temperature with stable conditions is ideal.',
     section_5_title: 'Special Care Notes',
-    section_5_content: 'Some minerals require specific care. Labradorite should be kept dry. Ammolite benefits from occasional light oiling. If you\'re unsure about caring for a specific specimen, reach out—we\'re happy to provide guidance tailored to your piece.',
+    section_5_content:
+      "Some minerals require specific care. Labradorite should be kept dry. Ammolite benefits from occasional light oiling. If you're unsure about caring for a specific specimen, reach out—we're happy to provide guidance tailored to your piece.",
   };
 
   const getContent = (key: string): string => content[key] || defaultContent[key] || '';
@@ -75,7 +80,7 @@ export default function CareGuide() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
+      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-32">
         <div className="relative z-10 mx-auto max-w-2xl">
           {/* Header */}
           <div className="mb-8 text-center">

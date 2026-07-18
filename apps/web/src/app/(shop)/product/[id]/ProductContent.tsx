@@ -1,22 +1,22 @@
 'use client';
 
+import { IconTrash } from '@tabler/icons-react';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import ReviewModal from '@/components/modals/ReviewModal';
 import { Button } from '@/components/ui/button';
-import { useDevice } from '@/hooks/useDevice';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useGemPouch } from '@/contexts/GemPouchContext';
 import { useWishlist } from '@/contexts/WishlistContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
-import { toast } from 'sonner';
-import { IconTrash } from '@tabler/icons-react';
-import ReviewModal from '@/components/modals/ReviewModal';
+import { useDevice } from '@/hooks/useDevice';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { store } from '@/lib/store';
 
 // Helper to check if URL is a video
 const isVideo = (url: string) => {
   const videoExtensions = ['.mp4', '.webm', '.mov', '.ogg'];
-  return videoExtensions.some(ext => url.toLowerCase().includes(ext));
+  return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
 };
 
 interface Product {
@@ -114,7 +114,13 @@ export default function ProductContent({ product }: ProductContentProps) {
     };
     fetchSimilarProducts();
   }, [product.id, product.category?.slug]);
-  const { items: pouchItems, addItem: addToPouch, removeItem: removeFromPouch, updateQuantity, isInPouch } = useGemPouch();
+  const {
+    items: pouchItems,
+    addItem: addToPouch,
+    removeItem: removeFromPouch,
+    updateQuantity,
+    isInPouch,
+  } = useGemPouch();
   const { addItem: addToWishlist, isInWishlist } = useWishlist();
   const { formatPrice } = useCurrency();
   const { addViewed, getExcluding } = useRecentlyViewed();
@@ -132,7 +138,7 @@ export default function ProductContent({ product }: ProductContentProps) {
   const recentlyViewed = getExcluding(product.id);
 
   // Get quantity of this product in pouch
-  const pouchQuantity = pouchItems.find(i => i.id === product.id)?.quantity || 0;
+  const pouchQuantity = pouchItems.find((i) => i.id === product.id)?.quantity || 0;
 
   const handleAddToPouch = () => {
     if (product.inventory === 0) return;
@@ -142,14 +148,15 @@ export default function ProductContent({ product }: ProductContentProps) {
       variantId: product.variantId,
       sku: product.sku,
       name: product.name,
-      price: (product.onSale || product.on_sale) && (product.salePrice || product.sale_price)
-        ? Number(product.salePrice || product.sale_price)
-        : product.price,
+      price:
+        (product.onSale || product.on_sale) && (product.salePrice || product.sale_price)
+          ? Number(product.salePrice || product.sale_price)
+          : product.price,
       image: product.images?.[0] || images[0],
       stock: product.inventory,
     };
 
-    const existingItem = pouchItems.find(i => i.id === product.id);
+    const existingItem = pouchItems.find((i) => i.id === product.id);
     const previousQuantity = existingItem?.quantity || 0;
     const addedQuantity = quantity;
 
@@ -181,9 +188,10 @@ export default function ProductContent({ product }: ProductContentProps) {
     addToWishlist({
       id: product.id,
       name: product.name,
-      price: (product.onSale || product.on_sale) && (product.salePrice || product.sale_price)
-        ? Number(product.salePrice || product.sale_price)
-        : product.price,
+      price:
+        (product.onSale || product.on_sale) && (product.salePrice || product.sale_price)
+          ? Number(product.salePrice || product.sale_price)
+          : product.price,
       image: product.images?.[0] || images[0],
       inventory: product.inventory,
     });
@@ -193,7 +201,7 @@ export default function ProductContent({ product }: ProductContentProps) {
   };
 
   const handleRemoveFromPouch = () => {
-    const item = pouchItems.find(i => i.id === product.id);
+    const item = pouchItems.find((i) => i.id === product.id);
     if (item) {
       const previousQuantity = item.quantity;
       const newQuantity = previousQuantity - 1;
@@ -257,7 +265,7 @@ export default function ProductContent({ product }: ProductContentProps) {
   };
 
   return (
-    <div className="px-4 pb-16 pt-[78px] xs:px-5 xs:pt-[88px] sm:px-6 sm:pt-[96px] md:px-6 md:pt-28 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
+    <div className="px-4 pb-16 pt-[78px] xs:px-5 xs:pt-[88px] sm:px-6 sm:pt-[96px] md:px-12 md:pt-28 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
       <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
         <div className="flex flex-col gap-4 xs:gap-5 md:gap-6 lg:flex-row lg:items-start lg:gap-6">
           {/* Thumbnails - left on desktop, bottom on mobile/tablet */}
@@ -267,21 +275,18 @@ export default function ProductContent({ product }: ProductContentProps) {
                 key={index}
                 onClick={() => setSelectedImage(index)}
                 className={`relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-neutral-900 transition-all xs:h-16 xs:w-16 md:h-[4.5rem] md:w-[4.5rem] lg:h-16 lg:w-16 ${
-                  selectedImage === index
-                    ? 'opacity-100'
-                    : 'opacity-50 hover:opacity-100'
+                  selectedImage === index ? 'opacity-100' : 'opacity-50 hover:opacity-100'
                 }`}
               >
                 {isVideo(media) ? (
                   <>
-                    <video
-                      src={media}
-                      className="h-full w-full object-cover"
-                      muted
-                      playsInline
-                    />
+                    <video src={media} className="h-full w-full object-cover" muted playsInline />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      <svg className="h-5 w-5 text-white/80" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="h-5 w-5 text-white/80"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     </div>
@@ -391,7 +396,9 @@ export default function ProductContent({ product }: ProductContentProps) {
                       </svg>
                     ))}
                   </div>
-                  <span className="font-[family-name:var(--font-inter)] text-sm text-white/50">(24)</span>
+                  <span className="font-[family-name:var(--font-inter)] text-sm text-white/50">
+                    (24)
+                  </span>
                 </div>
 
                 {/* Best Seller Badge */}
@@ -410,7 +417,8 @@ export default function ProductContent({ product }: ProductContentProps) {
 
               {/* Price */}
               <div className="mt-3 flex items-start gap-2 xs:mt-4 md:justify-center lg:justify-start">
-                {(product.onSale || product.on_sale) && (product.salePrice || product.sale_price) ? (
+                {(product.onSale || product.on_sale) &&
+                (product.salePrice || product.sale_price) ? (
                   <>
                     <span className="font-[family-name:var(--font-inter)] text-xl text-white xs:text-2xl lg:text-3xl xl:text-[2rem]">
                       {formatPrice(Number(product.salePrice || product.sale_price))}
@@ -425,156 +433,175 @@ export default function ProductContent({ product }: ProductContentProps) {
                   </span>
                 )}
               </div>
-
-              </div>
+            </div>
 
             {/* Bottom section - Stock, Quantity & Buttons */}
             <div className="mt-5 w-full xs:mt-6 sm:mt-8 lg:mt-0">
-            {/* Stock Status - Above quantity */}
-            <div className="mb-2 md:text-center lg:text-left">
-              {product.inventory > 10 ? (
-                <span className="inline-flex items-center gap-1.5 font-[family-name:var(--font-inter)] text-xs text-emerald-400 xs:text-sm">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  In Stock
-                </span>
-              ) : product.inventory > 0 ? (
-                <span className="inline-flex items-center gap-1.5 font-[family-name:var(--font-inter)] text-xs text-amber-400 xs:text-sm">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-                  Only {product.inventory} left
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 font-[family-name:var(--font-inter)] text-xs text-red-400 xs:text-sm">
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-                  Out of Stock
-                </span>
-              )}
-            </div>
-
-            {/* Quantity & In Pouch Badge Row */}
-            <div className="flex w-full items-center justify-between md:max-w-md md:justify-center md:gap-8 lg:mb-3 lg:max-w-none lg:justify-between lg:gap-0">
-              {/* Quantity Selector */}
-              {product.inventory > 0 ? (
-                <div className="flex items-center gap-3 xs:gap-4">
-                  <span className="font-[family-name:var(--font-inter)] text-sm text-white/50">Qty</span>
-                  <div className="flex items-center rounded-lg bg-white/5">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="flex h-9 w-9 items-center justify-center text-white/70 transition-colors hover:text-white xs:h-10 xs:w-10 sm:h-11 sm:w-11"
-                    >
-                      −
-                    </button>
-                    <span className="w-7 text-center font-[family-name:var(--font-inter)] text-white xs:w-8 sm:w-10">
-                      {quantity}
-                    </span>
-                    <button
-                      onClick={() => setQuantity(Math.min(product.inventory, quantity + 1))}
-                      className="flex h-9 w-9 items-center justify-center text-white/70 transition-colors hover:text-white xs:h-10 xs:w-10 sm:h-11 sm:w-11"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div />
-              )}
-
-              {/* In Pouch Badge - Right side */}
-              {isInPouch(product.id) && (
-                <button
-                  onClick={handleRemoveFromPouch}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-neutral-500/20 px-2.5 py-1 font-[family-name:var(--font-inter)] text-xs font-medium text-neutral-300 transition-colors hover:bg-neutral-500/30"
-                >
-                  <span>{pouchQuantity} in Pouch</span>
-                  <IconTrash size={12} />
-                </button>
-              )}
-            </div>
-
-            {/* Buttons */}
-            <div className="mt-4 flex w-full flex-col gap-2.5 xs:mt-5 xs:gap-3 md:max-w-md md:flex-row lg:max-w-none">
-              <Button
-                onClick={handleAddToPouch}
-                disabled={product.inventory === 0}
-                className={`h-10 w-full rounded-lg px-5 font-[family-name:var(--font-inter)] text-sm transition-all duration-200 xs:h-11 xs:px-6 xs:text-base sm:h-12 md:flex-1 lg:w-auto lg:flex-none lg:px-16 xl:px-20 ${
-                  product.inventory === 0
-                    ? 'cursor-not-allowed bg-white/20 text-white/50'
-                    : secondaryHovered
-                      ? 'bg-white/10 text-white'
-                      : 'bg-white text-black hover:bg-white/90'
-                }`}
-                onMouseEnter={() => setSecondaryHovered(false)}
-              >
-                {product.inventory === 0 ? 'Sold Out' : 'Add to Pouch'}
-              </Button>
-              <Button
-                onClick={handleAddToWishlist}
-                variant="outline"
-                className={`h-10 w-full rounded-lg border-transparent px-5 font-[family-name:var(--font-inter)] text-sm transition-all duration-200 xs:h-11 xs:px-6 xs:text-base sm:h-12 md:flex-1 lg:w-auto lg:flex-none lg:px-16 xl:px-20 ${
-                  secondaryHovered
-                    ? 'bg-white text-black'
-                    : 'bg-white/10 text-white hover:bg-white/20'
-                }`}
-                onMouseEnter={() => setSecondaryHovered(true)}
-              >
-                {isInWishlist(product.id) ? 'In Wishlist' : 'Add to Wishlist'}
-              </Button>
-            </div>
-
-            {/* Share Buttons */}
-            <div className="mt-4 flex items-center justify-center gap-3 xs:mt-5 md:justify-center lg:justify-start">
-              <span className="font-[family-name:var(--font-inter)] text-xs text-white/40">Share</span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    const url = encodeURIComponent(window.location.href);
-                    const text = encodeURIComponent(product.name);
-                    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
-                  }}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
-                  aria-label="Share on X"
-                >
-                  <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => {
-                    const url = encodeURIComponent(window.location.href);
-                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-                  }}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
-                  aria-label="Share on Facebook"
-                >
-                  <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => {
-                    const url = encodeURIComponent(window.location.href);
-                    const title = encodeURIComponent(product.name);
-                    window.open(`https://pinterest.com/pin/create/button/?url=${url}&description=${title}`, '_blank');
-                  }}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
-                  aria-label="Share on Pinterest"
-                >
-                  <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
-                  }}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
-                  aria-label="Copy link"
-                >
-                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                  </svg>
-                </button>
+              {/* Stock Status - Above quantity */}
+              <div className="mb-2 md:text-center lg:text-left">
+                {product.inventory > 10 ? (
+                  <span className="inline-flex items-center gap-1.5 font-[family-name:var(--font-inter)] text-xs text-emerald-400 xs:text-sm">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    In Stock
+                  </span>
+                ) : product.inventory > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 font-[family-name:var(--font-inter)] text-xs text-amber-400 xs:text-sm">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                    Only {product.inventory} left
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 font-[family-name:var(--font-inter)] text-xs text-red-400 xs:text-sm">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+                    Out of Stock
+                  </span>
+                )}
               </div>
-            </div>
+
+              {/* Quantity & In Pouch Badge Row */}
+              <div className="flex w-full items-center justify-between md:max-w-md md:justify-center md:gap-8 lg:mb-3 lg:max-w-none lg:justify-between lg:gap-0">
+                {/* Quantity Selector */}
+                {product.inventory > 0 ? (
+                  <div className="flex items-center gap-3 xs:gap-4">
+                    <span className="font-[family-name:var(--font-inter)] text-sm text-white/50">
+                      Qty
+                    </span>
+                    <div className="flex items-center rounded-lg bg-white/5">
+                      <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="flex h-9 w-9 items-center justify-center text-white/70 transition-colors hover:text-white xs:h-10 xs:w-10 sm:h-11 sm:w-11"
+                      >
+                        −
+                      </button>
+                      <span className="w-7 text-center font-[family-name:var(--font-inter)] text-white xs:w-8 sm:w-10">
+                        {quantity}
+                      </span>
+                      <button
+                        onClick={() => setQuantity(Math.min(product.inventory, quantity + 1))}
+                        className="flex h-9 w-9 items-center justify-center text-white/70 transition-colors hover:text-white xs:h-10 xs:w-10 sm:h-11 sm:w-11"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div />
+                )}
+
+                {/* In Pouch Badge - Right side */}
+                {isInPouch(product.id) && (
+                  <button
+                    onClick={handleRemoveFromPouch}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-neutral-500/20 px-2.5 py-1 font-[family-name:var(--font-inter)] text-xs font-medium text-neutral-300 transition-colors hover:bg-neutral-500/30"
+                  >
+                    <span>{pouchQuantity} in Pouch</span>
+                    <IconTrash size={12} />
+                  </button>
+                )}
+              </div>
+
+              {/* Buttons */}
+              <div className="mt-4 flex w-full flex-col gap-2.5 xs:mt-5 xs:gap-3 md:max-w-md md:flex-row lg:max-w-none">
+                <Button
+                  onClick={handleAddToPouch}
+                  disabled={product.inventory === 0}
+                  className={`h-10 w-full rounded-lg px-5 font-[family-name:var(--font-inter)] text-sm transition-all duration-200 xs:h-11 xs:px-6 xs:text-base sm:h-12 md:flex-1 lg:w-auto lg:flex-none lg:px-16 xl:px-20 ${
+                    product.inventory === 0
+                      ? 'cursor-not-allowed bg-white/20 text-white/50'
+                      : secondaryHovered
+                        ? 'bg-white/10 text-white'
+                        : 'bg-white text-black hover:bg-white/90'
+                  }`}
+                  onMouseEnter={() => setSecondaryHovered(false)}
+                >
+                  {product.inventory === 0 ? 'Sold Out' : 'Add to Pouch'}
+                </Button>
+                <Button
+                  onClick={handleAddToWishlist}
+                  variant="outline"
+                  className={`h-10 w-full rounded-lg border-transparent px-5 font-[family-name:var(--font-inter)] text-sm transition-all duration-200 xs:h-11 xs:px-6 xs:text-base sm:h-12 md:flex-1 lg:w-auto lg:flex-none lg:px-16 xl:px-20 ${
+                    secondaryHovered
+                      ? 'bg-white text-black'
+                      : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                  onMouseEnter={() => setSecondaryHovered(true)}
+                >
+                  {isInWishlist(product.id) ? 'In Wishlist' : 'Add to Wishlist'}
+                </Button>
+              </div>
+
+              {/* Share Buttons */}
+              <div className="mt-4 flex items-center justify-center gap-3 xs:mt-5 md:justify-center lg:justify-start">
+                <span className="font-[family-name:var(--font-inter)] text-xs text-white/40">
+                  Share
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const url = encodeURIComponent(window.location.href);
+                      const text = encodeURIComponent(product.name);
+                      window.open(
+                        `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
+                        '_blank'
+                      );
+                    }}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+                    aria-label="Share on X"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const url = encodeURIComponent(window.location.href);
+                      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+                    }}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+                    aria-label="Share on Facebook"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const url = encodeURIComponent(window.location.href);
+                      const title = encodeURIComponent(product.name);
+                      window.open(
+                        `https://pinterest.com/pin/create/button/?url=${url}&description=${title}`,
+                        '_blank'
+                      );
+                    }}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+                    aria-label="Share on Pinterest"
+                  >
+                    <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                    }}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+                    aria-label="Copy link"
+                  >
+                    <svg
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -587,7 +614,9 @@ export default function ProductContent({ product }: ProductContentProps) {
           <div className="rounded-xl bg-white/5 p-5 xs:rounded-2xl xs:p-6 sm:p-8 md:mx-auto md:max-w-2xl lg:mx-0 lg:max-w-none lg:p-10 xl:p-12 3xl:max-w-4xl">
             <div
               className="prose prose-invert max-w-none font-[family-name:var(--font-inter)] text-sm text-white/70 prose-p:leading-relaxed xs:text-base"
-              dangerouslySetInnerHTML={{ __html: product.description || 'No description available.' }}
+              dangerouslySetInnerHTML={{
+                __html: product.description || 'No description available.',
+              }}
             />
           </div>
         </div>
@@ -628,15 +657,25 @@ export default function ProductContent({ product }: ProductContentProps) {
         {/* Product Specs */}
         {(() => {
           const specs = [
-            { label: 'Type', value: product.gemstoneType || product.gemstone_type || 'Natural Gemstone' },
-            { label: 'Carat Weight', value: product.caratWeight || product.carat_weight || '2.45 ct' },
+            {
+              label: 'Type',
+              value: product.gemstoneType || product.gemstone_type || 'Natural Gemstone',
+            },
+            {
+              label: 'Carat Weight',
+              value: product.caratWeight || product.carat_weight || '2.45 ct',
+            },
             { label: 'Cut', value: product.cut || 'Oval Brilliant' },
             { label: 'Clarity', value: product.clarity || 'Eye Clean' },
             { label: 'Color', value: product.color || 'Vivid' },
             { label: 'Origin', value: product.origin || 'Alberta, Canada' },
             { label: 'Treatment', value: product.treatment || 'None (Natural)' },
             { label: 'Certification', value: product.certification || 'GIA' },
-            { label: 'Certificate #', value: product.certificationNumber || product.certification_number || 'GIA-2024-78543' },
+            {
+              label: 'Certificate #',
+              value:
+                product.certificationNumber || product.certification_number || 'GIA-2024-78543',
+            },
           ];
 
           return (
@@ -675,9 +714,10 @@ export default function ProductContent({ product }: ProductContentProps) {
               {similarProducts.map((item) => {
                 const itemImages = item.images?.length > 0 ? item.images : placeholderMedia;
                 const isOnSale = item.onSale || item.on_sale;
-                const displayPrice = isOnSale && (item.salePrice || item.sale_price)
-                  ? Number(item.salePrice || item.sale_price)
-                  : Number(item.price) || 0;
+                const displayPrice =
+                  isOnSale && (item.salePrice || item.sale_price)
+                    ? Number(item.salePrice || item.sale_price)
+                    : Number(item.price) || 0;
                 return (
                   <a
                     key={item.id}
@@ -693,7 +733,9 @@ export default function ProductContent({ product }: ProductContentProps) {
                       />
                       {item.inventory === 0 && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                          <span className="font-[family-name:var(--font-bacasime)] text-lg text-white/80">SOLD OUT</span>
+                          <span className="font-[family-name:var(--font-bacasime)] text-lg text-white/80">
+                            SOLD OUT
+                          </span>
                         </div>
                       )}
                     </div>
@@ -750,13 +792,20 @@ export default function ProductContent({ product }: ProductContentProps) {
         {/* Breadcrumbs */}
         <div className="mt-10 flex justify-center xs:mt-12 md:mt-16 lg:mt-20">
           <nav className="flex items-center gap-2 font-[family-name:var(--font-inter)] text-xs text-white/40 xs:text-sm">
-            <a href="/" className="transition-colors hover:text-white">Home</a>
+            <a href="/" className="transition-colors hover:text-white">
+              Home
+            </a>
             <span>/</span>
-            <a href="/shop" className="transition-colors hover:text-white">Shop</a>
+            <a href="/shop" className="transition-colors hover:text-white">
+              Shop
+            </a>
             <span>/</span>
             {product.category && (
               <>
-                <a href={`/shop/${product.category.slug}`} className="transition-colors hover:text-white">
+                <a
+                  href={`/shop/${product.category.slug}`}
+                  className="transition-colors hover:text-white"
+                >
                   {product.category.name}
                 </a>
                 <span>/</span>
@@ -765,8 +814,7 @@ export default function ProductContent({ product }: ProductContentProps) {
             <span className="text-white/60">{product.name}</span>
           </nav>
         </div>
-
-              </div>
+      </div>
 
       {/* Review Modal */}
       <ReviewModal
@@ -810,10 +858,7 @@ export default function ProductContent({ product }: ProductContentProps) {
               style={{ transform: `translateX(-${selectedImage * 100}%)` }}
             >
               {images.map((media, index) => (
-                <div
-                  key={index}
-                  className="relative h-full w-full flex-shrink-0 px-4"
-                >
+                <div key={index} className="relative h-full w-full flex-shrink-0 px-4">
                   <div
                     onClick={() => !isVideo(media) && setIsZoomed(false)}
                     className={`relative h-full w-full ${!isVideo(media) ? 'cursor-zoom-out' : ''}`}
@@ -851,21 +896,18 @@ export default function ProductContent({ product }: ProductContentProps) {
                   setSelectedImage(index);
                 }}
                 className={`relative h-10 w-10 overflow-hidden rounded-md transition-all xs:h-11 xs:w-11 xs:rounded-lg sm:h-12 sm:w-12 ${
-                  selectedImage === index
-                    ? 'ring-1 ring-white/50'
-                    : 'opacity-60 hover:opacity-100'
+                  selectedImage === index ? 'ring-1 ring-white/50' : 'opacity-60 hover:opacity-100'
                 }`}
               >
                 {isVideo(media) ? (
                   <>
-                    <video
-                      src={media}
-                      className="h-full w-full object-cover"
-                      muted
-                      playsInline
-                    />
+                    <video src={media} className="h-full w-full object-cover" muted playsInline />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      <svg className="h-4 w-4 text-white/80" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="h-4 w-4 text-white/80"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     </div>

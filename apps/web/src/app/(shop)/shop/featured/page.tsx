@@ -1,23 +1,23 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
-import Link from 'next/link';
 import {
   IconArrowLeft,
-  IconSearch,
-  IconX,
   IconChevronDown,
-  IconTrash,
   IconHeart,
+  IconSearch,
+  IconTrash,
+  IconX,
 } from '@tabler/icons-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { EmptyProducts, LoadError } from '@/components/empty-states';
-import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 import { PageLoader } from '@/components/ui/page-loader';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useGemPouch } from '@/contexts/GemPouchContext';
 import { useWishlist } from '@/contexts/WishlistContext';
-import { toast } from 'sonner';
 
 interface Product {
   id: string;
@@ -28,8 +28,8 @@ interface Product {
   stock: number;
 }
 
-import { CHANNELS, EVENTS, useEvent } from '@/lib/pusher-client';
 import { getCommerceErrorMessage } from '@/lib/commerce-error';
+import { CHANNELS, EVENTS, useEvent } from '@/lib/pusher-client';
 
 const sortOptions = [
   { value: 'default', label: 'Default' },
@@ -45,7 +45,7 @@ export default function FeaturedPage() {
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
 
   const getItemQuantity = (productId: string) => {
-    const item = pouchItems.find(i => i.id === productId);
+    const item = pouchItems.find((i) => i.id === productId);
     return item?.quantity || 0;
   };
 
@@ -77,12 +77,9 @@ export default function FeaturedPage() {
   }, []);
 
   // Count active filters
-  const activeFilterCount = [
-    minPrice !== '',
-    maxPrice !== '',
-    inStockOnly,
-    onSaleOnly,
-  ].filter(Boolean).length;
+  const activeFilterCount = [minPrice !== '', maxPrice !== '', inStockOnly, onSaleOnly].filter(
+    Boolean
+  ).length;
 
   // Clear all filters
   const clearFilters = () => {
@@ -101,28 +98,32 @@ export default function FeaturedPage() {
       setLoadError('');
       const { store } = await import('@/lib/store');
       const { products: featured } = await store.products.list({ featured: true, limit: 50 });
-      setProducts(featured
-        .filter((p) => {
-          const img = p.thumbnail || (p.images && p.images[0]);
-          return img && img.trim() !== '' && img !== '/images/placeholder.jpg';
-        })
-        .map((p) => ({
-          id: p.id,
-          name: p.name,
-          price: Number(p.price),
-          originalPrice: Number(p.compareAtPrice || p.price),
-          image: p.thumbnail || (p.images && p.images[0]) || '',
-          stock: p.stock?.reduce((total, item) => total + Math.max(0, item.quantity), 0) ?? 0,
-        }))
+      setProducts(
+        featured
+          .filter((p) => {
+            const img = p.thumbnail || (p.images && p.images[0]);
+            return img && img.trim() !== '' && img !== '/images/placeholder.jpg';
+          })
+          .map((p) => ({
+            id: p.id,
+            name: p.name,
+            price: Number(p.price),
+            originalPrice: Number(p.compareAtPrice || p.price),
+            image: p.thumbnail || (p.images && p.images[0]) || '',
+            stock: p.stock?.reduce((total, item) => total + Math.max(0, item.quantity), 0) ?? 0,
+          }))
       );
     } catch (error) {
       setProducts([]);
       setLoadError(getCommerceErrorMessage(error));
+    } finally {
+      setLoading(false);
     }
-    finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchProducts(); }, [retryKey]);
+  useEffect(() => {
+    fetchProducts();
+  }, [retryKey]);
 
   // Product mutations in QuickDash invalidate this view.
   useEvent(CHANNELS.PRODUCTS, EVENTS.PRODUCT_CREATED, fetchProducts);
@@ -132,7 +133,7 @@ export default function FeaturedPage() {
 
   // Filter and sort products
   const filteredProducts = products
-    .filter(product => {
+    .filter((product) => {
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         if (!product.name.toLowerCase().includes(query)) return false;
@@ -145,11 +146,16 @@ export default function FeaturedPage() {
     })
     .sort((a, b) => {
       switch (sortBy) {
-        case 'price-low': return a.price - b.price;
-        case 'price-high': return b.price - a.price;
-        case 'name-asc': return a.name.localeCompare(b.name);
-        case 'name-desc': return b.name.localeCompare(a.name);
-        default: return 0;
+        case 'price-low':
+          return a.price - b.price;
+        case 'price-high':
+          return b.price - a.price;
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        default:
+          return 0;
       }
     });
 
@@ -185,7 +191,7 @@ export default function FeaturedPage() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-<main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-6 md:pt-32 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
+      <main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-12 md:pt-32 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
         <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
           {/* Back Button */}
           <div className="mb-4 xs:mb-5 md:mb-6">
@@ -216,7 +222,10 @@ export default function FeaturedPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               {/* Search Input */}
               <div className="relative flex-1 sm:max-w-xs md:max-w-sm">
-                <IconSearch size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                <IconSearch
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
+                />
                 <input
                   type="text"
                   value={searchQuery}
@@ -260,7 +269,9 @@ export default function FeaturedPage() {
                     className="flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-black/30 px-3 font-[family-name:var(--font-inter)] text-sm text-white transition-colors hover:border-white/20 xs:h-11"
                   >
                     <span className="hidden xs:inline">Sort:</span>
-                    <span>{sortOptions.find(opt => opt.value === sortBy)?.label || 'Default'}</span>
+                    <span>
+                      {sortOptions.find((opt) => opt.value === sortBy)?.label || 'Default'}
+                    </span>
                     <IconChevronDown size={14} className="text-white/60" />
                   </button>
                   <AnimatePresence>
@@ -400,13 +411,16 @@ export default function FeaturedPage() {
             <EmptyProducts category="Featured" />
           ) : (
             <div className="grid grid-cols-2 gap-3 xs:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
-              {filteredProducts.map(product => (
+              {filteredProducts.map((product) => (
                 <div
                   key={product.id}
                   className="group flex flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 transition-all duration-300 hover:border-white/20 hover:bg-white/10 xs:rounded-2xl"
                 >
                   {/* Product Image */}
-                  <Link href={`/product/${product.id}`} className="relative aspect-square overflow-hidden bg-neutral-900">
+                  <Link
+                    href={`/product/${product.id}`}
+                    className="relative aspect-square overflow-hidden bg-neutral-900"
+                  >
                     {/* Sale Badge */}
                     {product.price < product.originalPrice && (
                       <div className="absolute bottom-2 left-2 z-10 rounded-md bg-red-500 px-1.5 py-0.5 text-[10px] font-semibold text-white xs:rounded-lg xs:px-2 xs:py-1 xs:text-xs">
@@ -419,7 +433,7 @@ export default function FeaturedPage() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          const item = pouchItems.find(i => i.id === product.id);
+                          const item = pouchItems.find((i) => i.id === product.id);
                           if (item) {
                             const previousQuantity = item.quantity;
                             const newQuantity = previousQuantity - 1;
@@ -429,7 +443,8 @@ export default function FeaturedPage() {
                                 description: product.name,
                                 action: {
                                   label: 'Undo',
-                                  onClick: () => addItem({ ...item, quantity: undefined } as any, 1),
+                                  onClick: () =>
+                                    addItem({ ...item, quantity: undefined } as any, 1),
                                 },
                               });
                             } else {
@@ -449,55 +464,58 @@ export default function FeaturedPage() {
                         <span>{getItemQuantity(product.id)}</span>
                         <IconTrash size={12} className="xs:h-3.5 xs:w-3.5" />
                       </button>
-                    ) : product.stock > 0 && (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          if (isInWishlist(product.id)) {
-                            removeFromWishlist(product.id);
-                            toast.success('Removed from Wishlist', {
-                              description: product.name,
-                              action: {
-                                label: 'Undo',
-                                onClick: () => addToWishlist({
-                                  id: product.id,
-                                  name: product.name,
-                                  price: product.price,
-                                  image: product.image,
-                                  inventory: product.stock,
-                                }),
-                              },
-                            });
-                          } else {
-                            addToWishlist({
-                              id: product.id,
-                              name: product.name,
-                              price: product.price,
-                              image: product.image,
-                              inventory: product.stock,
-                            });
-                            toast.success('Added to Wishlist', {
-                              description: product.name,
-                              action: {
-                                label: 'Undo',
-                                onClick: () => removeFromWishlist(product.id),
-                              },
-                            });
-                          }
-                        }}
-                        className={`absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-sm transition-colors xs:h-8 xs:w-8 ${
-                          isInWishlist(product.id)
-                            ? 'bg-white/20 text-white'
-                            : 'bg-black/50 text-white/70 hover:bg-white/20 hover:text-white'
-                        }`}
-                      >
-                        <IconHeart
-                          size={16}
-                          className="xs:h-[18px] xs:w-[18px]"
-                          fill={isInWishlist(product.id) ? 'currentColor' : 'none'}
-                        />
-                      </button>
+                    ) : (
+                      product.stock > 0 && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (isInWishlist(product.id)) {
+                              removeFromWishlist(product.id);
+                              toast.success('Removed from Wishlist', {
+                                description: product.name,
+                                action: {
+                                  label: 'Undo',
+                                  onClick: () =>
+                                    addToWishlist({
+                                      id: product.id,
+                                      name: product.name,
+                                      price: product.price,
+                                      image: product.image,
+                                      inventory: product.stock,
+                                    }),
+                                },
+                              });
+                            } else {
+                              addToWishlist({
+                                id: product.id,
+                                name: product.name,
+                                price: product.price,
+                                image: product.image,
+                                inventory: product.stock,
+                              });
+                              toast.success('Added to Wishlist', {
+                                description: product.name,
+                                action: {
+                                  label: 'Undo',
+                                  onClick: () => removeFromWishlist(product.id),
+                                },
+                              });
+                            }
+                          }}
+                          className={`absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-sm transition-colors xs:h-8 xs:w-8 ${
+                            isInWishlist(product.id)
+                              ? 'bg-white/20 text-white'
+                              : 'bg-black/50 text-white/70 hover:bg-white/20 hover:text-white'
+                          }`}
+                        >
+                          <IconHeart
+                            size={16}
+                            className="xs:h-[18px] xs:w-[18px]"
+                            fill={isInWishlist(product.id) ? 'currentColor' : 'none'}
+                          />
+                        </button>
+                      )
                     )}
                     {/* Low Stock Badge */}
                     {product.stock > 0 && product.stock <= 3 && (
@@ -525,10 +543,14 @@ export default function FeaturedPage() {
                     <Link href={`/product/${product.id}`} className="block">
                       <h2 className="font-[family-name:var(--font-inter)] text-xs font-semibold text-white transition-colors hover:text-white/80 xs:text-sm">
                         <span className="xs:hidden">
-                          {product.name.length > 18 ? `${product.name.slice(0, 18)}...` : product.name}
+                          {product.name.length > 18
+                            ? `${product.name.slice(0, 18)}...`
+                            : product.name}
                         </span>
                         <span className="hidden xs:inline">
-                          {product.name.length > 24 ? `${product.name.slice(0, 24)}...` : product.name}
+                          {product.name.length > 24
+                            ? `${product.name.slice(0, 24)}...`
+                            : product.name}
                         </span>
                       </h2>
                     </Link>
@@ -549,7 +571,7 @@ export default function FeaturedPage() {
                         <button
                           onClick={(e) => {
                             e.preventDefault();
-                            const existingItem = pouchItems.find(i => i.id === product.id);
+                            const existingItem = pouchItems.find((i) => i.id === product.id);
                             const previousQuantity = existingItem?.quantity || 0;
                             addItem({
                               id: product.id,
@@ -575,7 +597,14 @@ export default function FeaturedPage() {
                           className="group/bag flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/10 transition-all hover:bg-white xs:h-8 xs:w-8"
                           aria-label={`Add ${product.name} to pouch`}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-white transition-all group-hover/bag:text-black xs:h-4 xs:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-3.5 w-3.5 text-white transition-all group-hover/bag:text-black xs:h-4 xs:w-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
                             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
                             <line x1="3" y1="6" x2="21" y2="6" />
                             <path d="M16 10a4 4 0 0 1-8 0" />
@@ -592,9 +621,13 @@ export default function FeaturedPage() {
           {/* Breadcrumbs */}
           <div className="mt-10 flex justify-center xs:mt-12 md:mt-16 lg:mt-20">
             <nav className="flex items-center gap-2 font-[family-name:var(--font-inter)] text-xs text-white/40 xs:text-sm">
-              <Link href="/" className="transition-colors hover:text-white/60">Home</Link>
+              <Link href="/" className="transition-colors hover:text-white/60">
+                Home
+              </Link>
               <span>/</span>
-              <Link href="/shop" className="transition-colors hover:text-white/60">Shop</Link>
+              <Link href="/shop" className="transition-colors hover:text-white/60">
+                Shop
+              </Link>
               <span>/</span>
               <span className="text-white/60">Featured</span>
             </nav>

@@ -1,28 +1,27 @@
 'use client';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 
 export default function Privacy() {
   return (
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
+      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-32">
         <div className="relative z-10 mx-auto max-w-2xl">
           {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="mb-3 font-[family-name:var(--font-bacasime)] text-4xl text-white">
               Privacy Policy
             </h1>
-            <p className="text-sm text-white/60">
-              Last updated: January 2026
-            </p>
+            <p className="text-sm text-white/60">Last updated: January 2026</p>
           </div>
 
           {/* Intro */}
           <p className="mb-8 text-center text-sm text-white/50">
-            Your privacy is important to us. This policy explains how we collect, use, and protect your information.
+            Your privacy is important to us. This policy explains how we collect, use, and protect
+            your information.
           </p>
 
           {/* Sections */}
@@ -30,10 +29,10 @@ export default function Privacy() {
             <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-4">
               <h2 className="mb-2 text-sm font-medium text-white">Information We Collect</h2>
               <p className="text-sm leading-relaxed text-white/50">
-                To fulfill your order, you must provide certain information such as your name,
-                email address, postal address, payment information, and the details of the product
-                you're ordering. You may also choose to provide additional personal information
-                when you contact us directly.
+                To fulfill your order, you must provide certain information such as your name, email
+                address, postal address, payment information, and the details of the product you're
+                ordering. You may also choose to provide additional personal information when you
+                contact us directly.
               </p>
             </div>
 
@@ -90,18 +89,16 @@ export default function Privacy() {
             <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-4">
               <h2 className="mb-2 text-sm font-medium text-white">Third-Party Services</h2>
               <p className="text-sm leading-relaxed text-white/50">
-                This policy does not apply to third-party services we link to or integrate with.
-                We encourage you to review the privacy policies of any third-party services you
-                use through our website.
+                This policy does not apply to third-party services we link to or integrate with. We
+                encourage you to review the privacy policies of any third-party services you use
+                through our website.
               </p>
             </div>
           </div>
 
           {/* Contact CTA */}
           <div className="mt-10">
-            <p className="mb-3 text-center text-xs text-white/40">
-              Questions about privacy?
-            </p>
+            <p className="mb-3 text-center text-xs text-white/40">Questions about privacy?</p>
             <Link
               href="/contact-us"
               className="block h-10 w-full rounded-md bg-white/10 pt-2.5 text-center font-[family-name:var(--font-inter)] text-base text-white transition-all duration-200 hover:bg-white/20 sm:mx-auto sm:w-auto sm:px-10"

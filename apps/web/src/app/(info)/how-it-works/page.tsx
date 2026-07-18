@@ -1,9 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import { useEffect, useState } from 'react';
 import { EmptyState } from '@/components/empty-states';
+import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
 
 export default function HowItWorks() {
   const [content, setContent] = useState<any>({});
@@ -14,8 +14,8 @@ export default function HowItWorks() {
     if (process.env.NEXT_PUBLIC_QUICKDASH_PAGE_CONTENT !== 'true') return;
 
     fetch('/api/pages/how-it-works')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         const remoteContent = data?.data?.content;
         if (remoteContent && Object.keys(remoteContent).length > 0) {
           setContent(remoteContent);
@@ -30,15 +30,20 @@ export default function HowItWorks() {
     title: 'How It Works',
     subtitle: 'From earth to your collection',
     section_1_title: 'Discovery & Sourcing',
-    section_1_content: 'Every piece begins with careful sourcing. Some specimens are personally collected during rockhounding expeditions across Canada, while others come from trusted small-scale miners and suppliers who share our commitment to ethical practices.',
+    section_1_content:
+      'Every piece begins with careful sourcing. Some specimens are personally collected during rockhounding expeditions across Canada, while others come from trusted small-scale miners and suppliers who share our commitment to ethical practices.',
     section_2_title: 'Selection & Inspection',
-    section_2_content: 'Each gemstone undergoes thorough inspection before joining our collection. We evaluate color, clarity, and overall quality, ensuring only specimens we\'d proudly add to our own collection make it to yours.',
+    section_2_content:
+      "Each gemstone undergoes thorough inspection before joining our collection. We evaluate color, clarity, and overall quality, ensuring only specimens we'd proudly add to our own collection make it to yours.",
     section_3_title: 'Documentation & Photography',
-    section_3_content: 'We photograph every piece in natural lighting from multiple angles. Our listings include accurate measurements, weight, and honest descriptions of any natural characteristics. What you see is exactly what you\'ll receive.',
+    section_3_content:
+      "We photograph every piece in natural lighting from multiple angles. Our listings include accurate measurements, weight, and honest descriptions of any natural characteristics. What you see is exactly what you'll receive.",
     section_4_title: 'Secure Packaging',
-    section_4_content: 'Your gemstone is carefully wrapped in protective materials and placed in a secure box designed to prevent movement during transit. We treat every shipment as if we\'re sending a piece of our personal collection.',
+    section_4_content:
+      "Your gemstone is carefully wrapped in protective materials and placed in a secure box designed to prevent movement during transit. We treat every shipment as if we're sending a piece of our personal collection.",
     section_5_title: 'Delivery & Support',
-    section_5_content: 'Once shipped, you\'ll receive tracking information via email. Our support doesn\'t end at delivery—we\'re here to answer questions about your specimen, provide care advice, or assist with any concerns.',
+    section_5_content:
+      "Once shipped, you'll receive tracking information via email. Our support doesn't end at delivery—we're here to answer questions about your specimen, provide care advice, or assist with any concerns.",
   };
 
   const getContent = (key: string): string => content[key] || defaultContent[key] || '';
@@ -75,7 +80,7 @@ export default function HowItWorks() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
+      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-32">
         <div className="relative z-10 mx-auto max-w-2xl">
           {/* Header */}
           <div className="mb-8 text-center">

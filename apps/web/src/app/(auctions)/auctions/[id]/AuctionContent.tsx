@@ -2,21 +2,21 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { useDevice } from '@/hooks/useDevice';
-import { useCurrency } from '@/contexts/CurrencyContext';
-import { useGemPouch } from '@/contexts/GemPouchContext';
-import { useRealtimeAuction } from '@/hooks/useRealtimeData';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import BiddingModal from '@/components/auctions/BiddingModal';
 import BidHistory from '@/components/auctions/BidHistory';
+import { Button } from '@/components/ui/button';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { useGemPouch } from '@/contexts/GemPouchContext';
+import { useDevice } from '@/hooks/useDevice';
+import { useRealtimeAuction } from '@/hooks/useRealtimeData';
 
 // Helper to check if URL is a video
 const isVideo = (url: string) => {
   const videoExtensions = ['.mp4', '.webm', '.mov', '.ogg'];
-  return videoExtensions.some(ext => url.toLowerCase().includes(ext));
+  return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
 };
 
 interface Auction {
@@ -67,10 +67,7 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
   const { isLg } = useDevice();
 
   // Use real-time auction data
-  const {
-    data: auctionData,
-    update: updateAuction,
-  } = useRealtimeAuction(initialAuction.id);
+  const { data: auctionData, update: updateAuction } = useRealtimeAuction(initialAuction.id);
 
   const rawAuction = (auctionData as Auction | null) || initialAuction;
   const images = rawAuction.images?.length > 0 ? rawAuction.images : placeholderMedia;
@@ -92,9 +89,7 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
           const data = await response.json();
           const auctions = data.data?.auctions || [];
           // Filter out current auction and limit to 4
-          const filtered = auctions
-            .filter((a: Auction) => a.id !== initialAuction.id)
-            .slice(0, 4);
+          const filtered = auctions.filter((a: Auction) => a.id !== initialAuction.id).slice(0, 4);
           setOtherAuctions(filtered);
         }
       } catch {
@@ -222,20 +217,23 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
     const buyNowPrice = getBuyNowPrice();
 
     // Add the auction item to cart
-    addItem({
-      id: rawAuction.id,
-      name: rawAuction.title,
-      price: buyNowPrice,
-      image: images[0] || '/images/products/gem.png',
-      stock: 1, // Auction items are unique, only 1 available
-    }, 1);
+    addItem(
+      {
+        id: rawAuction.id,
+        name: rawAuction.title,
+        price: buyNowPrice,
+        image: images[0] || '/images/products/gem.png',
+        stock: 1, // Auction items are unique, only 1 available
+      },
+      1
+    );
 
     toast.success('Added to Gem Pouch!');
     router.push('/gem-pouch');
   };
 
   return (
-    <div className="px-4 pb-16 pt-[78px] xs:px-5 xs:pt-[88px] sm:px-6 sm:pt-[96px] md:px-6 md:pt-28 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
+    <div className="px-4 pb-16 pt-[78px] xs:px-5 xs:pt-[88px] sm:px-6 sm:pt-[96px] md:px-12 md:pt-28 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
       <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
         <div className="flex flex-col gap-4 xs:gap-5 md:gap-6 lg:flex-row lg:items-start lg:gap-6">
           {/* Thumbnails - left on desktop, bottom on mobile/tablet */}
@@ -245,21 +243,18 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
                 key={index}
                 onClick={() => setSelectedImage(index)}
                 className={`relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-neutral-900 transition-all xs:h-16 xs:w-16 md:h-[4.5rem] md:w-[4.5rem] lg:h-16 lg:w-16 ${
-                  selectedImage === index
-                    ? 'opacity-100'
-                    : 'opacity-50 hover:opacity-100'
+                  selectedImage === index ? 'opacity-100' : 'opacity-50 hover:opacity-100'
                 }`}
               >
                 {isVideo(media) ? (
                   <>
-                    <video
-                      src={media}
-                      className="h-full w-full object-cover"
-                      muted
-                      playsInline
-                    />
+                    <video src={media} className="h-full w-full object-cover" muted playsInline />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      <svg className="h-5 w-5 text-white/80" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="h-5 w-5 text-white/80"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     </div>
@@ -457,13 +452,18 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
 
               {/* Share Buttons */}
               <div className="mt-4 flex items-center justify-center gap-3 xs:mt-5 md:justify-center lg:justify-start">
-                <span className="font-[family-name:var(--font-inter)] text-xs text-white/40">Share</span>
+                <span className="font-[family-name:var(--font-inter)] text-xs text-white/40">
+                  Share
+                </span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => {
                       const url = encodeURIComponent(window.location.href);
                       const text = encodeURIComponent(rawAuction.title);
-                      window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+                      window.open(
+                        `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
+                        '_blank'
+                      );
                     }}
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
                     aria-label="Share on X"
@@ -488,7 +488,10 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
                     onClick={() => {
                       const url = encodeURIComponent(window.location.href);
                       const title = encodeURIComponent(rawAuction.title);
-                      window.open(`https://pinterest.com/pin/create/button/?url=${url}&description=${title}`, '_blank');
+                      window.open(
+                        `https://pinterest.com/pin/create/button/?url=${url}&description=${title}`,
+                        '_blank'
+                      );
                     }}
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
                     aria-label="Share on Pinterest"
@@ -505,8 +508,18 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
                     aria-label="Copy link"
                   >
-                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    <svg
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -534,7 +547,9 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
             <div
               className="prose prose-invert max-w-none font-[family-name:var(--font-inter)] text-sm text-white/70 prose-p:leading-relaxed xs:text-base"
               dangerouslySetInnerHTML={{
-                __html: rawAuction.description || 'Premium quality gemstone from Alberta, Canada. This exceptional gemstone features remarkable clarity and natural beauty, ethically sourced with care. Certificate of authenticity included.',
+                __html:
+                  rawAuction.description ||
+                  'Premium quality gemstone from Alberta, Canada. This exceptional gemstone features remarkable clarity and natural beauty, ethically sourced with care. Certificate of authenticity included.',
               }}
             />
           </div>
@@ -577,15 +592,35 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
         {(() => {
           const metadata = rawAuction.metadata || {};
           const specs = [
-            { label: 'Type', value: rawAuction.gemstoneType || (metadata.gemstoneType as string) || 'Natural Gemstone' },
-            { label: 'Carat Weight', value: rawAuction.caratWeight || (metadata.caratWeight as string) || '—' },
+            {
+              label: 'Type',
+              value:
+                rawAuction.gemstoneType || (metadata.gemstoneType as string) || 'Natural Gemstone',
+            },
+            {
+              label: 'Carat Weight',
+              value: rawAuction.caratWeight || (metadata.caratWeight as string) || '—',
+            },
             { label: 'Cut', value: rawAuction.cut || (metadata.cut as string) || '—' },
             { label: 'Clarity', value: rawAuction.clarity || (metadata.clarity as string) || '—' },
             { label: 'Color', value: rawAuction.color || (metadata.color as string) || '—' },
-            { label: 'Origin', value: rawAuction.origin || (metadata.origin as string) || 'Alberta, Canada' },
-            { label: 'Treatment', value: rawAuction.treatment || (metadata.treatment as string) || 'None (Natural)' },
-            { label: 'Certification', value: rawAuction.certification || (metadata.certification as string) || '—' },
-            { label: 'Certificate #', value: rawAuction.certificationNumber || (metadata.certificationNumber as string) || '—' },
+            {
+              label: 'Origin',
+              value: rawAuction.origin || (metadata.origin as string) || 'Alberta, Canada',
+            },
+            {
+              label: 'Treatment',
+              value: rawAuction.treatment || (metadata.treatment as string) || 'None (Natural)',
+            },
+            {
+              label: 'Certification',
+              value: rawAuction.certification || (metadata.certification as string) || '—',
+            },
+            {
+              label: 'Certificate #',
+              value:
+                rawAuction.certificationNumber || (metadata.certificationNumber as string) || '—',
+            },
           ];
 
           return (
@@ -622,8 +657,10 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
             </h2>
             <div className="scrollbar-none -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 xs:-mx-5 xs:gap-4 xs:px-5 sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible md:px-0 lg:gap-5 xl:gap-6">
               {otherAuctions.map((auction) => {
-                const auctionImages = auction.images?.length > 0 ? auction.images : placeholderMedia;
-                const isEnded = auction.status !== 'active' || new Date(auction.endTime) <= new Date();
+                const auctionImages =
+                  auction.images?.length > 0 ? auction.images : placeholderMedia;
+                const isEnded =
+                  auction.status !== 'active' || new Date(auction.endTime) <= new Date();
                 return (
                   <Link
                     key={auction.id}
@@ -639,7 +676,9 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
                       />
                       {isEnded && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                          <span className="font-[family-name:var(--font-bacasime)] text-lg text-white/80">ENDED</span>
+                          <span className="font-[family-name:var(--font-bacasime)] text-lg text-white/80">
+                            ENDED
+                          </span>
                         </div>
                       )}
                     </div>
@@ -661,9 +700,13 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
         {/* Breadcrumbs */}
         <div className="mt-10 flex justify-center xs:mt-12 md:mt-16 lg:mt-20">
           <nav className="flex items-center gap-2 font-[family-name:var(--font-inter)] text-xs text-white/40 xs:text-sm">
-            <Link href="/" className="transition-colors hover:text-white">Home</Link>
+            <Link href="/" className="transition-colors hover:text-white">
+              Home
+            </Link>
             <span>/</span>
-            <Link href="/auctions" className="transition-colors hover:text-white">Auctions</Link>
+            <Link href="/auctions" className="transition-colors hover:text-white">
+              Auctions
+            </Link>
             <span>/</span>
             <span className="text-white/60">{rawAuction.title}</span>
           </nav>
@@ -704,50 +747,51 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
               className="flex h-full transition-transform duration-300 ease-out"
               style={{ transform: `translateX(-${selectedImage * 100}%)` }}
             >
-              {allMedia.filter(m => !isVideo(m)).map((media, index) => (
-                <div
-                  key={index}
-                  className="relative h-full w-full flex-shrink-0 px-4"
-                >
-                  <div
-                    onClick={() => setIsZoomed(false)}
-                    className="relative h-full w-full cursor-zoom-out"
-                  >
-                    <Image
-                      src={media}
-                      alt={`${rawAuction.title} ${index + 1}`}
-                      fill
-                      className="object-contain"
-                      sizes="80vw"
-                    />
+              {allMedia
+                .filter((m) => !isVideo(m))
+                .map((media, index) => (
+                  <div key={index} className="relative h-full w-full flex-shrink-0 px-4">
+                    <div
+                      onClick={() => setIsZoomed(false)}
+                      className="relative h-full w-full cursor-zoom-out"
+                    >
+                      <Image
+                        src={media}
+                        alt={`${rawAuction.title} ${index + 1}`}
+                        fill
+                        className="object-contain"
+                        sizes="80vw"
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
           {/* Thumbnail navigation in modal */}
           <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5 xs:bottom-5 xs:gap-2 sm:bottom-6">
-            {allMedia.filter(m => !isVideo(m)).map((media, index) => (
-              <button
-                key={index}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedImage(index);
-                }}
-                className={`relative h-10 w-10 overflow-hidden rounded-md transition-all xs:h-11 xs:w-11 xs:rounded-lg sm:h-12 sm:w-12 ${
-                  selectedImage === index
-                    ? 'ring-1 ring-white/50'
-                    : 'opacity-60 hover:opacity-100'
-                }`}
-              >
-                <Image
-                  src={media}
-                  alt={`${rawAuction.title} thumbnail ${index + 1}`}
-                  fill
-                  className="object-cover"
-                />
-              </button>
-            ))}
+            {allMedia
+              .filter((m) => !isVideo(m))
+              .map((media, index) => (
+                <button
+                  key={index}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImage(index);
+                  }}
+                  className={`relative h-10 w-10 overflow-hidden rounded-md transition-all xs:h-11 xs:w-11 xs:rounded-lg sm:h-12 sm:w-12 ${
+                    selectedImage === index
+                      ? 'ring-1 ring-white/50'
+                      : 'opacity-60 hover:opacity-100'
+                  }`}
+                >
+                  <Image
+                    src={media}
+                    alt={`${rawAuction.title} thumbnail ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </button>
+              ))}
           </div>
         </div>
       )}

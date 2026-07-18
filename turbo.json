@@ -1,17 +1,11 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [
-    "NODE_ENV",
-    "VERCEL_ENV"
-  ],
+  "globalEnv": ["NODE_ENV", "VERCEL_ENV"],
   "globalPassThroughEnv": [
-    "STRIPE_SECRET_KEY",
-    "STRIPE_WEBHOOK_SECRET",
+    "PLAYWRIGHT_BASE_URL",
     "PAYPAL_CLIENT_ID",
     "PAYPAL_CLIENT_SECRET",
     "PAYPAL_MODE",
-    "COINBASE_COMMERCE_API_KEY",
-    "COINBASE_COMMERCE_WEBHOOK_SECRET",
     "SUPABASE_SERVICE_ROLE_KEY",
     "PUSHER_APP_ID",
     "PUSHER_KEY",
@@ -31,7 +25,6 @@
         "NEXT_PUBLIC_SITE_URL",
         "NEXT_PUBLIC_STOREFRONT_API_KEY",
         "NEXT_PUBLIC_STOREFRONT_URL",
-        "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_PAYPAL_CLIENT_ID",
         "NEXT_PUBLIC_SUPABASE_URL",
         "NEXT_PUBLIC_SUPABASE_ANON_KEY",
@@ -41,7 +34,7 @@
         "DATABASE_URL",
         "WORKSPACE_ID",
         "BETTER_AUTH_SECRET",
-        "STRIPE_PUBLISHABLE_KEY"
+        "RESEND_API_KEY"
       ]
     },
     "dev": {
@@ -51,8 +44,12 @@
     "lint": {
       "dependsOn": ["^build"]
     },
-    "type-check": {
+    "typecheck": {
       "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
     },
     "db:push": {
       "cache": false
