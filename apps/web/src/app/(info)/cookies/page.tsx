@@ -1,6 +1,5 @@
 'use client';
 import Link from 'next/link';
-import Image from 'next/image';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
@@ -9,19 +8,7 @@ export default function Cookies() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-32">
-        {/* Background gem logo */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <Image
-            src="/logos/gem2.svg"
-            alt=""
-            width={800}
-            height={800}
-            className="h-[120vw] w-[120vw] animate-[spin_60s_linear_infinite] opacity-[0.06] drop-shadow-[0_0_80px_rgba(255,255,255,0.3)] sm:h-[600px] sm:w-[600px]"
-            aria-hidden="true"
-          />
-        </div>
-
+      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
         <div className="relative z-10 mx-auto max-w-2xl">
           {/* Header */}
           <div className="mb-8 text-center">
@@ -79,9 +66,8 @@ export default function Cookies() {
             <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-4">
               <h2 className="mb-2 text-sm font-medium text-white">Third-Party Cookies</h2>
               <ul className="space-y-1.5 text-sm leading-relaxed text-white/50">
-                <li>• Google Analytics (for website analytics)</li>
-                <li>• Payment processors (for secure transactions)</li>
-                <li>• Social media platforms (for social sharing features)</li>
+                <li>• QuickEngine storefront analytics (only with your permission)</li>
+                <li>• Payment processors when you choose to check out</li>
               </ul>
             </div>
 
@@ -89,17 +75,16 @@ export default function Cookies() {
               <h2 className="mb-2 text-sm font-medium text-white">Managing Cookies</h2>
               <ul className="space-y-1.5 text-sm leading-relaxed text-white/50">
                 <li>• Browser Settings: Most browsers let you control cookies through settings</li>
-                <li>• Cookie Settings: Use our Cookie Settings page to manage preferences</li>
-                <li>• Opt-Out: You can opt out of certain cookies, though this may affect functionality</li>
+                <li>• Cookie choices: Reopen the consent banner from the footer</li>
+                <li>• Reject: Continue with only storage required to operate the shop</li>
               </ul>
             </div>
 
             <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-4">
               <h2 className="mb-2 text-sm font-medium text-white">Your Consent</h2>
               <p className="text-sm leading-relaxed text-white/50">
-                By continuing to use our website, you consent to our use of cookies as described
-                in this policy. You can withdraw your consent at any time by adjusting your
-                cookie settings or browser preferences.
+                Optional analytics are used only after you accept them. You can change your choice
+                at any time using the Cookie choices button in the footer.
               </p>
             </div>
           </div>

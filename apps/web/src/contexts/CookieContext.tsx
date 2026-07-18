@@ -15,7 +15,7 @@ interface CookieContextType {
   acceptAll: () => void;
   rejectAll: () => void;
   showBanner: boolean;
-  dismissBanner: () => void;
+  openBanner: () => void;
 }
 
 const CookieContext = createContext<CookieContextType | undefined>(undefined);
@@ -27,40 +27,61 @@ const defaultPreferences: CookiePreferences = {
   functional: false,
 };
 
+const CONSENT_STORAGE_KEY = 'gemsutopia-cookie-consent';
+const CONSENT_VERSION = 1;
+
+type StoredConsent = {
+  version: number;
+  preferences: CookiePreferences;
+};
+
 export function CookieProvider({ children }: { children: ReactNode }) {
   const [preferences, setPreferences] = useState<CookiePreferences>(defaultPreferences);
   const [hasConsented, setHasConsented] = useState(false);
   const [showBanner, setShowBanner] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-
-  // Set client flag
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    try {
+      const savedConsent = localStorage.getItem(CONSENT_STORAGE_KEY);
+      if (!savedConsent) {
+        setShowBanner(true);
+        return;
+      }
 
-  useEffect(() => {
-    if (!isClient) return;
+      const parsed = JSON.parse(savedConsent) as StoredConsent;
+      if (parsed.version !== CONSENT_VERSION || !parsed.preferences) {
+        setShowBanner(true);
+        return;
+      }
 
-    // Check if user has already made a choice
-    const savedPreferences = localStorage.getItem('cookiePreferences');
-    const hasConsentedBefore = localStorage.getItem('cookieConsent');
-
-    if (savedPreferences && hasConsentedBefore) {
-      setPreferences(JSON.parse(savedPreferences));
+      setPreferences({ ...defaultPreferences, ...parsed.preferences, essential: true });
       setHasConsented(true);
       setShowBanner(false);
-    } else {
-      // Show banner if no previous consent
+    } catch {
       setShowBanner(true);
     }
-  }, [isClient]);
+  }, []);
+
+  const persistConsent = (updatedPreferences: CookiePreferences) => {
+    try {
+      localStorage.setItem(
+        CONSENT_STORAGE_KEY,
+        JSON.stringify({ version: CONSENT_VERSION, preferences: updatedPreferences }),
+      );
+      // Remove the previous split-key format after successfully saving the new record.
+      localStorage.removeItem('cookiePreferences');
+      localStorage.removeItem('cookieConsent');
+    } catch {
+      // Storage can be unavailable in privacy-restricted browsers. State still works for this visit.
+    }
+  };
 
   const updatePreferences = (newPreferences: Partial<CookiePreferences>) => {
     const updatedPreferences = { ...preferences, ...newPreferences };
+    updatedPreferences.essential = true;
     setPreferences(updatedPreferences);
-    localStorage.setItem('cookiePreferences', JSON.stringify(updatedPreferences));
-    localStorage.setItem('cookieConsent', 'true');
+    persistConsent(updatedPreferences);
     setHasConsented(true);
+    setShowBanner(false);
   };
 
   const acceptAll = () => {
@@ -85,11 +106,7 @@ export function CookieProvider({ children }: { children: ReactNode }) {
     setShowBanner(false);
   };
 
-  const dismissBanner = () => {
-    setShowBanner(false);
-    localStorage.setItem('cookieConsent', 'true');
-    setHasConsented(true);
-  };
+  const openBanner = () => setShowBanner(true);
 
   return (
     <CookieContext.Provider
@@ -100,7 +117,7 @@ export function CookieProvider({ children }: { children: ReactNode }) {
         acceptAll,
         rejectAll,
         showBanner,
-        dismissBanner,
+        openBanner,
       }}
     >
       {children}
@@ -115,4 +132,3 @@ export const useCookies = () => {
   }
   return context;
 };
-
