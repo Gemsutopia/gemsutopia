@@ -1,7 +1,8 @@
 'use client';
-import { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { useBetterAuth } from '@/contexts/BetterAuthContext';
+import { store } from '@/lib/store';
 
 interface WishlistItem {
   id: string;
@@ -28,8 +29,6 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [isClient, setIsClient] = useState(false);
   const [hasSynced, setHasSynced] = useState(false);
-  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const skipNextSync = useRef(false);
   const { user } = useBetterAuth();
 
   // Set client flag
@@ -63,25 +62,20 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
     const syncFromServer = async () => {
       try {
-        const res = await fetch('/api/wishlist');
-        if (!res.ok) return;
-
-        const data = await res.json();
-        const serverItems: WishlistItem[] = data.data?.items || [];
+        const { wishlist } = await store.wishlist.list();
+        const serverItems: WishlistItem[] = wishlist.map(item => ({
+          id: item.product.id,
+          name: item.product.name,
+          price: Number.parseFloat(item.product.price),
+          image: item.product.thumbnail || item.product.images?.[0] || '',
+          stock: item.product.isActive === false ? 0 : undefined,
+        }));
 
         setItems(prev => {
-          // Merge: server items + any local items not on server
           const serverIds = new Set(serverItems.map(i => i.id));
           const localOnly = prev.filter(i => !serverIds.has(i.id));
-          const merged = [...serverItems, ...localOnly];
-
-          // If there were local-only items, sync them back to server
-          if (localOnly.length > 0) {
-            skipNextSync.current = false; // Allow the next sync
-            syncToServer(merged);
-          }
-
-          return merged;
+          void Promise.allSettled(localOnly.map(item => store.wishlist.add(item.id)));
+          return [...serverItems, ...localOnly];
         });
 
         setHasSynced(true);
@@ -100,42 +94,6 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  // Debounced sync to server
-  const syncToServer = useCallback(
-    (itemsToSync: WishlistItem[]) => {
-      if (!user) return;
-
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
-      }
-
-      syncTimeoutRef.current = setTimeout(async () => {
-        try {
-          await fetch('/api/wishlist', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              items: itemsToSync.map(i => ({ id: i.id, price: i.price })),
-            }),
-          });
-        } catch {
-          // Silent fail
-        }
-      }, 1000);
-    },
-    [user]
-  );
-
-  // Trigger sync when items change (after initial load)
-  useEffect(() => {
-    if (!isClient || !user || !hasSynced) return;
-    if (skipNextSync.current) {
-      skipNextSync.current = false;
-      return;
-    }
-    syncToServer(items);
-  }, [items, isClient, user, hasSynced, syncToServer]);
-
   const addItem = (item: WishlistItem) => {
     if (
       (item.inventory !== undefined && item.inventory === 0) ||
@@ -150,15 +108,28 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       if (exists) {
         return prev;
       }
+      if (user) {
+        void store.wishlist.add(item.id).catch(() => {
+          toast.error('Could not save this item to your account');
+        });
+      }
       return [...prev, item];
     });
   };
 
   const removeItem = (id: string) => {
     setItems(prev => prev.filter(item => item.id !== id));
+    if (user) {
+      void store.wishlist.remove(id).catch(() => {
+        toast.error('Could not update your account wishlist');
+      });
+    }
   };
 
   const clearWishlist = () => {
+    if (user) {
+      void Promise.allSettled(items.map(item => store.wishlist.remove(item.id)));
+    }
     setItems([]);
   };
 
