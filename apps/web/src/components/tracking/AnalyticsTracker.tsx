@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { store } from '@/lib/store';
+import { useCookies } from '@/contexts/CookieContext';
 
 function getOrCreateVisitorId(): string {
   if (typeof window === 'undefined') return '';
@@ -26,10 +27,11 @@ function getSessionId(): string {
 
 export default function AnalyticsTracker() {
   const pathname = usePathname();
+  const { hasConsented, preferences } = useCookies();
   const lastPathRef = useRef<string>('');
 
   useEffect(() => {
-    if (pathname === lastPathRef.current) return;
+    if (!hasConsented || !preferences.analytics || pathname === lastPathRef.current) return;
     lastPathRef.current = pathname;
 
     const visitorId = getOrCreateVisitorId();
@@ -44,7 +46,7 @@ export default function AnalyticsTracker() {
         hostname: window.location.hostname,
       })
       .catch(() => {});
-  }, [pathname]);
+  }, [hasConsented, pathname, preferences.analytics]);
 
   return null;
 }

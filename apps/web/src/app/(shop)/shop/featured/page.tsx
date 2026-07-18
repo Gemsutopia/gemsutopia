@@ -10,7 +10,7 @@ import {
   IconHeart,
 } from '@tabler/icons-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { EmptyProducts } from '@/components/empty-states';
+import { EmptyProducts, LoadError } from '@/components/empty-states';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { PageLoader } from '@/components/ui/page-loader';
@@ -29,6 +29,7 @@ interface Product {
 }
 
 import { useEvent } from '@/lib/pusher-client';
+import { getCommerceErrorMessage } from '@/lib/commerce-error';
 
 const sortOptions = [
   { value: 'default', label: 'Default' },
@@ -51,6 +52,8 @@ export default function FeaturedPage() {
   const [sortBy, setSortBy] = useState('default');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [retryKey, setRetryKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
@@ -94,6 +97,8 @@ export default function FeaturedPage() {
   // Fetch featured products from Quickdash API
   const fetchProducts = async () => {
     try {
+      setLoading(true);
+      setLoadError('');
       const { store } = await import('@/lib/store');
       const { products: featured } = await store.products.list({ featured: true, limit: 50 });
       setProducts(featured
@@ -107,14 +112,17 @@ export default function FeaturedPage() {
           price: Number(p.price),
           originalPrice: Number(p.compareAtPrice || p.price),
           image: p.thumbnail || (p.images && p.images[0]) || '',
-          stock: 10, // Default stock since Quickdash doesn't expose inventory in listing
+          stock: p.stock?.reduce((total, item) => total + Math.max(0, item.quantity), 0) ?? 0,
         }))
       );
-    } catch { /* silent */ }
+    } catch (error) {
+      setProducts([]);
+      setLoadError(getCommerceErrorMessage(error));
+    }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchProducts(); }, []);
+  useEffect(() => { fetchProducts(); }, [retryKey]);
 
   // Real-time updates via Pusher
   useEvent('content', 'featured-products-updated', fetchProducts);
@@ -146,6 +154,18 @@ export default function FeaturedPage() {
     return <PageLoader />;
   }
 
+  if (loadError) {
+    return (
+      <div className="flex min-h-screen flex-col bg-black">
+        <Header />
+        <main className="flex h-screen flex-col items-center justify-center">
+          <LoadError message={loadError} onRetry={() => setRetryKey((key) => key + 1)} />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (products.length === 0) {
     return (
       <div className="flex min-h-screen flex-col bg-black">
@@ -162,7 +182,7 @@ export default function FeaturedPage() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-12 md:pt-32 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
+<main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-6 md:pt-32 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
         <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
           {/* Back Button */}
           <div className="mb-4 xs:mb-5 md:mb-6">

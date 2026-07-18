@@ -205,7 +205,7 @@ export default function Hero() {
 
               {/* Active Image - Center, focused */}
               <div className="absolute inset-0 z-20 flex items-center justify-center">
-                <div className="h-full w-full px-0 md:px-20 lg:px-32 xl:px-40 3xl:px-52">
+                <div className="h-full w-full px-0 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
                   <div className="relative h-full w-full overflow-hidden rounded-2xl bg-neutral-700 lg:rounded-3xl">
                     <Image
                       src={images[currentIndex]}

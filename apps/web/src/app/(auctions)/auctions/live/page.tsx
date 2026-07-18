@@ -29,7 +29,7 @@ export default async function LiveAuctions() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-12 md:pt-32 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
+<main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-6 md:pt-32 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
         <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
           {/* Page Header */}
           <div className="mb-8 text-center xs:mb-10 md:mb-12">

@@ -20,7 +20,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
-  --font-playfair: var(--font-playfair);
   --font-bacasime: var(--font-bacasime);
   --font-inter: var(--font-inter);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -376,4 +375,3 @@
   width: 0 !important;
   height: 0 !important;
 }
-

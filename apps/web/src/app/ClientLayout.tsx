@@ -9,8 +9,6 @@ import { ModeProvider } from '../lib/contexts/ModeContext';
 import CookieBanner from '../components/layout/CookieBanner';
 import MaintenanceOverlay from '../components/layout/MaintenanceOverlay';
 import SandboxBanner from '../components/layout/SandboxBanner';
-import DynamicMetadata from '../components/seo/DynamicMetadata';
-import DynamicTitle from '../components/seo/DynamicTitle';
 import SoldOutItemsMonitor from '../components/feedback/SoldOutItemsMonitor';
 import ReferralTracker from '../components/tracking/ReferralTracker';
 import AnalyticsTracker from '../components/tracking/AnalyticsTracker';
@@ -28,8 +26,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               <WishlistProvider>
                 <GemPouchProvider>
                   <ScrollToTop />
-                  <DynamicMetadata />
-                  <DynamicTitle />
                   <SoldOutItemsMonitor />
                   <ReferralTracker />
                   <AnalyticsTracker />

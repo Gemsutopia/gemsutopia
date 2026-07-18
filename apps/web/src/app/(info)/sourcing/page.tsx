@@ -1,22 +1,24 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { EmptyState } from '@/components/empty-states';
 
 export default function EthicalSourcing() {
   const [content, setContent] = useState<any>({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(process.env.NEXT_PUBLIC_QUICKDASH_PAGE_CONTENT === 'true');
   const [hasContent, setHasContent] = useState(true);
 
   useEffect(() => {
+    if (process.env.NEXT_PUBLIC_QUICKDASH_PAGE_CONTENT !== 'true') return;
+
     fetch('/api/pages/sourcing')
       .then(res => res.json())
       .then(data => {
-        if (data && Object.keys(data).length > 0) {
-          setContent(data);
+        const remoteContent = data?.data?.content;
+        if (remoteContent && Object.keys(remoteContent).length > 0) {
+          setContent(remoteContent);
           setHasContent(true);
         }
         setLoading(false);
@@ -73,19 +75,7 @@ export default function EthicalSourcing() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-32">
-        {/* Background gem logo */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <Image
-            src="/logos/gem2.svg"
-            alt=""
-            width={800}
-            height={800}
-            className="h-[120vw] w-[120vw] animate-[spin_60s_linear_infinite] opacity-[0.06] drop-shadow-[0_0_80px_rgba(255,255,255,0.3)] sm:h-[600px] sm:w-[600px]"
-            aria-hidden="true"
-          />
-        </div>
-
+      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
         <div className="relative z-10 mx-auto max-w-2xl">
           {/* Header */}
           <div className="mb-8 text-center">

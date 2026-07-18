@@ -12,7 +12,7 @@ export default function CheckoutCancelPage() {
           <IconX size={32} className="text-amber-400" />
         </div>
 
-        <h1 className="mb-3 font-[family-name:var(--font-cormorant)] text-2xl text-white md:text-3xl">
+        <h1 className="mb-3 font-[family-name:var(--font-bacasime)] text-2xl text-white md:text-3xl">
           Payment Cancelled
         </h1>
         <p className="mb-8 text-sm text-white/60">

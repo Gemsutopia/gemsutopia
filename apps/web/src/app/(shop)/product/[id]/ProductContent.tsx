@@ -21,6 +21,7 @@ const isVideo = (url: string) => {
 
 interface Product {
   id: string;
+  variantId?: string;
   name: string;
   description: string;
   price: number;
@@ -104,7 +105,7 @@ export default function ProductContent({ product }: ProductContentProps) {
             image: p.thumbnail || p.images?.[0] || '/images/placeholder.jpg',
             images: p.images || [],
             featuredImageIndex: 0,
-            stock: 99,
+            stock: p.stock?.reduce((total, item) => total + Math.max(0, item.quantity), 0) ?? 0,
           }));
         setSimilarProducts(filtered as any);
       } catch {
@@ -138,6 +139,8 @@ export default function ProductContent({ product }: ProductContentProps) {
 
     const item = {
       id: product.id,
+      variantId: product.variantId,
+      sku: product.sku,
       name: product.name,
       price: (product.onSale || product.on_sale) && (product.salePrice || product.sale_price)
         ? Number(product.salePrice || product.sale_price)
@@ -254,7 +257,7 @@ export default function ProductContent({ product }: ProductContentProps) {
   };
 
   return (
-    <div className="px-4 pb-16 pt-[78px] xs:px-5 xs:pt-[88px] sm:px-6 sm:pt-[96px] md:px-12 md:pt-28 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
+    <div className="px-4 pb-16 pt-[78px] xs:px-5 xs:pt-[88px] sm:px-6 sm:pt-[96px] md:px-6 md:pt-28 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
       <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
         <div className="flex flex-col gap-4 xs:gap-5 md:gap-6 lg:flex-row lg:items-start lg:gap-6">
           {/* Thumbnails - left on desktop, bottom on mobile/tablet */}

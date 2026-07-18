@@ -12,6 +12,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 import Image from 'next/image';
+import { store } from '@/lib/store';
+import { getCommerceErrorMessage } from '@/lib/commerce-error';
 
 interface Auction {
   id: string;
@@ -60,17 +62,11 @@ export default function UserBids() {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetch('/api/bids/user');
-      const data = await response.json();
-
-      if (data.success) {
-        setBids(data.data.bids);
-        setStats(data.data.stats);
-      } else {
-        setError(data.error?.message || 'Failed to fetch bids');
-      }
-    } catch {
-      setError('Failed to load bids');
+      const data = await store.auctions.getMyBids();
+      setBids(data.bids as unknown as Bid[]);
+      setStats(data.stats as unknown as BidStats);
+    } catch (error) {
+      setError(getCommerceErrorMessage(error));
     } finally {
       setIsLoading(false);
     }

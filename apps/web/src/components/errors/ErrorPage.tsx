@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { IconArrowLeft, IconHome, IconRefresh } from '@tabler/icons-react';
 
 export interface ErrorConfig {
   code: number;
@@ -87,61 +88,72 @@ interface ErrorPageProps {
 
 export default function ErrorPage({
   code,
+  customTitle,
+  customDescription,
+  errorId,
+  onRetry,
 }: ErrorPageProps) {
   const config = ERROR_CONFIGS[code] || ERROR_CONFIGS[500];
+  const router = useRouter();
+  const title = customTitle || config.title;
+  const description = customDescription || config.description;
+  const canRetry = Boolean(onRetry) || ![401, 403, 404, 410].includes(code);
+
+  const handleRetry = () => {
+    if (onRetry) {
+      onRetry();
+      return;
+    }
+    window.location.reload();
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black relative overflow-hidden">
-      {/* Rotating gem logo */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <Image
-          src="/logos/gem2.svg"
-          alt=""
-          width={800}
-          height={800}
-          className="h-[150vw] w-[150vw] md:h-[700px] md:w-[700px] lg:h-[900px] lg:w-[900px] animate-[spin_60s_linear_infinite] opacity-[0.08]"
-          aria-hidden="true"
-        />
-      </div>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-4 py-24 text-white">
+      <section className="relative z-10 w-full max-w-xl rounded-3xl border border-white/10 bg-white/[0.035] p-6 text-center shadow-2xl shadow-black/50 backdrop-blur-md sm:p-10">
+        <p className="mb-5 font-[family-name:var(--font-inter)] text-xs font-medium tracking-[0.24em] text-white/40 uppercase">
+          Error {code}
+        </p>
+        <h1 className="font-[family-name:var(--font-bacasime)] text-4xl text-white sm:text-5xl">
+          {title}
+        </h1>
+        <p className="mx-auto mt-4 max-w-md font-[family-name:var(--font-inter)] text-sm leading-6 text-white/55 sm:text-base">
+          {description}
+        </p>
+        {errorId && (
+          <p className="mt-4 font-mono text-xs text-white/30">Reference: {errorId}</p>
+        )}
 
-      <div className="relative z-10 flex flex-col items-center justify-center px-4 sm:px-8 w-full">
-        <h1 className="text-7xl sm:text-8xl md:text-9xl text-white font-[family-name:var(--font-cormorant)] font-semibold">{code}</h1>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm sm:text-base text-gray-400 font-[family-name:var(--font-inter)]">{config.title} – {config.description}</p>
-
-          <div className="mt-8 flex w-[calc(100vw-4rem)] flex-col gap-4 sm:w-auto sm:flex-row justify-center">
+        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             {code === 401 ? (
               <Link
                 href="/sign-in"
-                className="h-10 w-full rounded-md px-8 font-[family-name:var(--font-inter)] text-base transition-all duration-200 sm:h-11 sm:w-auto sm:rounded-lg sm:px-10 sm:text-lg bg-white text-black hover:bg-white/90 flex items-center justify-center whitespace-nowrap"
+                className="flex h-11 w-full items-center justify-center rounded-xl bg-white px-6 text-sm font-medium text-black transition-colors hover:bg-white/90 sm:w-auto"
               >
-                Log In
+                Sign in
               </Link>
-            ) : code === 403 || code === 404 ? (
+            ) : code === 403 || code === 404 || code === 410 ? (
               <button
-                onClick={() => window.history.back()}
-                className="h-10 w-full rounded-md px-8 font-[family-name:var(--font-inter)] text-base transition-all duration-200 sm:h-11 sm:w-auto sm:rounded-lg sm:px-10 sm:text-lg bg-white text-black hover:bg-white/90 flex items-center justify-center whitespace-nowrap"
+                onClick={() => router.back()}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-medium text-black transition-colors hover:bg-white/90 sm:w-auto"
               >
-                Go Back
+                <IconArrowLeft size={17} /> Go back
               </button>
-            ) : (
+            ) : canRetry ? (
               <button
-                onClick={() => window.location.reload()}
-                className="h-10 w-full rounded-md px-8 font-[family-name:var(--font-inter)] text-base transition-all duration-200 sm:h-11 sm:w-auto sm:rounded-lg sm:px-10 sm:text-lg bg-white text-black hover:bg-white/90 flex items-center justify-center whitespace-nowrap"
+                onClick={handleRetry}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-medium text-black transition-colors hover:bg-white/90 sm:w-auto"
               >
-                Try Again
+                <IconRefresh size={17} /> Try again
               </button>
-            )}
+            ) : null}
             <Link
               href="/"
-              className="h-10 w-full rounded-md px-8 font-[family-name:var(--font-inter)] text-base transition-all duration-200 sm:h-11 sm:w-auto sm:rounded-lg sm:px-10 sm:text-lg bg-white/10 text-white hover:bg-white/20 flex items-center justify-center whitespace-nowrap"
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-6 text-sm font-medium text-white transition-colors hover:bg-white/10 sm:w-auto"
             >
-              Go Home
+              <IconHome size={17} /> Home
             </Link>
-          </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

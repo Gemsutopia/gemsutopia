@@ -14,6 +14,8 @@ import {
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 import { IconBrandTwitter, IconBrandFacebook, IconMail } from '@tabler/icons-react';
+import { store } from '@/lib/store';
+import { getCommerceErrorMessage } from '@/lib/commerce-error';
 
 interface Referral {
   code: string;
@@ -46,6 +48,7 @@ export default function UserReferrals() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user?.email) {
@@ -57,17 +60,18 @@ export default function UserReferrals() {
     if (!user?.email) return;
 
     setLoading(true);
+    setLoadError(null);
     try {
-      const response = await fetch(`/api/referrals?email=${encodeURIComponent(user.email)}`);
-      const result = await response.json();
+      const result = await store.referrals.get(user.email);
 
-      if (result.success && result.data.referral) {
-        setReferral(result.data.referral);
+      if (result.referral) {
+        setReferral(result.referral as Referral);
       } else {
         setReferral(null);
       }
     } catch (error) {
       console.error('Failed to fetch referral:', error);
+      setLoadError(getCommerceErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -78,20 +82,10 @@ export default function UserReferrals() {
 
     setCreating(true);
     try {
-      const response = await fetch('/api/referrals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: user.email,
-          name: user.name || undefined,
-          userId: user.id,
-        }),
-      });
+      const result = await store.referrals.generate(user.email);
 
-      const result = await response.json();
-
-      if (result.success && result.data.referral) {
-        setReferral(result.data.referral);
+      if (result.referral) {
+        setReferral(result.referral as Referral);
         toast.success( 'Your referral code has been created!');
       } else {
         toast.error( 'Failed to create referral code');
@@ -148,6 +142,20 @@ export default function UserReferrals() {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <FontAwesomeIcon icon={faSpinner} className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="rounded-lg bg-red-50 p-6 text-center">
+        <p className="mb-4 text-red-800">{loadError}</p>
+        <button
+          onClick={fetchReferral}
+          className="rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700"
+        >
+          Try Again
+        </button>
       </div>
     );
   }

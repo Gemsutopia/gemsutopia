@@ -235,7 +235,7 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
   };
 
   return (
-    <div className="px-4 pb-16 pt-[78px] xs:px-5 xs:pt-[88px] sm:px-6 sm:pt-[96px] md:px-12 md:pt-28 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
+    <div className="px-4 pb-16 pt-[78px] xs:px-5 xs:pt-[88px] sm:px-6 sm:pt-[96px] md:px-6 md:pt-28 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
       <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
         <div className="flex flex-col gap-4 xs:gap-5 md:gap-6 lg:flex-row lg:items-start lg:gap-6">
           {/* Thumbnails - left on desktop, bottom on mobile/tablet */}

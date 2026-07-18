@@ -3,88 +3,106 @@ import { store } from '@/lib/store';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Home() {
-  // Fetch featured products from Quickdash Storefront API
-  let featuredProducts: Array<{
-    id: string;
-    name: string;
-    price: number;
-    image_url: string | null;
-    inventory: number;
-  }> = [];
+type FeaturedProduct = {
+  id: string;
+  name: string;
+  price: number;
+  image_url: string | null;
+  inventory: number;
+};
 
+type ContentItem = {
+  id: string;
+  section: string;
+  key: string;
+  content_type: string;
+  value: string;
+  is_active: boolean;
+};
+
+async function loadFeaturedProducts(): Promise<FeaturedProduct[]> {
   try {
     const { products } = await store.products.list({ featured: true, limit: 8 });
-    featuredProducts = products.map(p => ({
-      id: p.id,
-      name: p.name,
-      price: parseFloat(p.price),
-      image_url: p.thumbnail || p.images?.[0] || null,
-      inventory: 99,
+    return products.map(product => ({
+      id: product.id,
+      name: product.name,
+      price: Number.parseFloat(product.price),
+      image_url: product.thumbnail || product.images?.[0] || null,
+      inventory: product.stock?.reduce((total, stock) => total + stock.quantity, 0) ?? 0,
     }));
-  } catch (error) {
-    console.error('Failed to fetch featured products:', error);
+  } catch {
+    return [];
   }
+}
 
-  // Fetch site content via Storefront API
-  let initialContent: { id: string; section: string; key: string; content_type: string; value: string; is_active: boolean }[] = [];
+async function loadContent(): Promise<ContentItem[]> {
   try {
     const { content } = await store.siteContent.list();
-    initialContent = content
+    return content
       .filter(item => item.value && item.key.includes(':'))
       .map(item => {
-        const colonIdx = item.key.indexOf(':');
+        const colonIndex = item.key.indexOf(':');
         return {
           id: item.id,
-          section: item.key.slice(0, colonIdx),
-          key: item.key.slice(colonIdx + 1),
+          section: item.key.slice(0, colonIndex),
+          key: item.key.slice(colonIndex + 1),
           content_type: item.type,
           value: item.value!,
           is_active: true,
         };
       });
-  } catch (error) {
-    console.error('Failed to fetch site content:', error);
+  } catch {
+    return [];
   }
+}
 
-  // Fetch stats via Storefront API
-  let initialStats: { id: string; title: string; value: string }[] = [];
+async function loadStats() {
   try {
     const { stats } = await store.stats.list();
-    initialStats = stats.map(s => ({ id: s.id, title: s.title, value: s.value }));
-  } catch (error) {
-    console.error('Failed to fetch stats:', error);
+    return stats.map(stat => ({ id: stat.id, title: stat.title, value: stat.value }));
+  } catch {
+    return [];
   }
+}
 
-  // Fetch testimonials via Storefront API
-  let initialTestimonials: { id: number; name: string; text: string; rating: number }[] = [];
+async function loadTestimonials() {
   try {
     const { testimonials } = await store.testimonials.list();
-    const featured = testimonials.filter(t => t.isFeatured);
-    const toShow = featured.length > 0 ? featured : testimonials;
-    initialTestimonials = toShow.map((t, i) => ({
-      id: i + 1,
-      name: t.reviewerName,
-      text: t.content,
-      rating: t.rating,
+    const featured = testimonials.filter(testimonial => testimonial.isFeatured);
+    return (featured.length > 0 ? featured : testimonials).map((testimonial, index) => ({
+      id: index + 1,
+      name: testimonial.reviewerName,
+      text: testimonial.content,
+      rating: testimonial.rating,
     }));
-  } catch (error) {
-    console.error('Failed to fetch testimonials:', error);
+  } catch {
+    return [];
   }
+}
 
-  // Fetch FAQ via Storefront API
-  let initialFaqItems: { id: string; question: string; answer: string; sort_order: number }[] = [];
+async function loadFaq() {
   try {
     const { faq } = await store.faq.list();
-    initialFaqItems = faq.map(item => ({
+    return faq.map(item => ({
       id: item.id,
       question: item.question,
       answer: item.answer,
       sort_order: item.sortOrder ?? 0,
     }));
-  } catch (error) {
-    console.error('Failed to fetch FAQ:', error);
+  } catch {
+    return [];
   }
+}
+
+export default async function Home() {
+  const [featuredProducts, initialContent, initialStats, initialTestimonials, initialFaqItems] =
+    await Promise.all([
+      loadFeaturedProducts(),
+      loadContent(),
+      loadStats(),
+      loadTestimonials(),
+      loadFaq(),
+    ]);
 
   return (
     <HomeContent

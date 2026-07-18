@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionItem } from '@heroui/react';
 import { IconChevronDown } from '@tabler/icons-react';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useCookies } from '@/contexts/CookieContext';
 
 const tabContent: Record<string, { label: string; href: string }[]> = {
   Shop: [
@@ -43,6 +44,7 @@ export default function Footer() {
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [activeTab, setActiveTab] = useState<string>('Shop');
   const { currency, setCurrency } = useCurrency();
+  const { openBanner } = useCookies();
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +74,7 @@ export default function Footer() {
   return (
     <footer className="relative z-10 flex h-auto min-h-[50vh] w-full flex-col items-center justify-center overflow-hidden border-t border-white/10 bg-black py-10 text-white xs:min-h-[55vh] xs:py-12 md:min-h-[60vh] md:py-16 lg:py-20">
       {/* Footer Content */}
-      <div className="relative z-10 w-full px-4 xs:px-5 sm:px-6 md:px-12 lg:px-24 xl:px-32 3xl:px-40">
+      <div className="relative z-10 w-full px-4 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
         {/* Mobile Accordion Navigation */}
         <div className="mb-4 md:hidden">
           <Accordion
@@ -233,6 +235,13 @@ export default function Footer() {
             >
               Cookies
             </a>
+            <button
+              type="button"
+              onClick={openBanner}
+              className="text-[11px] text-white/60 transition-colors hover:text-white xs:text-xs md:text-sm"
+            >
+              Cookie choices
+            </button>
           </div>
         </div>
 

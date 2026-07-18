@@ -1,6 +1,7 @@
 'use client';
 
-import { Spinner } from '@/components/ui/spinner';
+import Image from 'next/image';
+import { useState } from 'react';
 
 const gemFacts = [
   "Diamonds are the hardest natural substance on Earth, scoring 10 on the Mohs scale.",
@@ -70,13 +71,24 @@ interface PageLoaderProps {
 }
 
 export function PageLoader({ showFact = true, message, fullScreen = true }: PageLoaderProps) {
-  const fact = getRandomFact();
+  const [fact] = useState(getRandomFact);
+  const gemLoader = (
+    <Image
+      src="/logos/gem2.svg"
+      alt=""
+      width={72}
+      height={72}
+      className="h-16 w-16 animate-[spin_3s_linear_infinite] opacity-80"
+      aria-hidden="true"
+      priority
+    />
+  );
 
   if (!fullScreen) {
     return (
-      <div className="flex items-center justify-center py-20">
+      <div className="flex items-center justify-center py-20" role="status" aria-live="polite">
         <div className="flex flex-col items-center gap-6 max-w-md px-6 text-center">
-          <Spinner size="48" color="white" />
+          {gemLoader}
           {message && <p className="text-white/50 text-sm leading-relaxed">{message}</p>}
           {showFact && !message && <p className="text-white/50 text-sm leading-relaxed">{fact}</p>}
         </div>
@@ -85,9 +97,9 @@ export function PageLoader({ showFact = true, message, fullScreen = true }: Page
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
+    <div className="min-h-screen flex items-center justify-center bg-black" role="status" aria-live="polite">
       <div className="flex flex-col items-center gap-6 max-w-md px-6 text-center">
-        <Spinner size="48" color="white" />
+        {gemLoader}
         {message && <p className="text-white/50 text-sm leading-relaxed">{message}</p>}
         {showFact && !message && <p className="text-white/50 text-sm leading-relaxed">{fact}</p>}
       </div>
