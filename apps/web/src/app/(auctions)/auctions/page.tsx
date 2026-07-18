@@ -4,12 +4,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { IconSearch, IconX, IconChevronDown, IconClock } from '@tabler/icons-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { EmptyAuctions } from '@/components/empty-states';
+import { EmptyAuctions, LoadError } from '@/components/empty-states';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { PageLoader } from '@/components/ui/page-loader';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { store } from '@/lib/store';
+import { getCommerceErrorMessage } from '@/lib/commerce-error';
 
 interface Auction {
   id: string;
@@ -107,6 +108,8 @@ export default function AuctionsPage() {
   const { formatPrice } = useCurrency();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [retryKey, setRetryKey] = useState(0);
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('ending-soon');
@@ -129,6 +132,7 @@ export default function AuctionsPage() {
     const fetchAuctions = async () => {
       try {
         setLoading(true);
+        setLoadError('');
         const { auctions: quickdashAuctions } = await store.auctions.list({ limit: 50 });
 
         // Map to local format
@@ -151,13 +155,14 @@ export default function AuctionsPage() {
       } catch (error) {
         console.error('Failed to fetch auctions:', error);
         setAuctions([]);
+        setLoadError(getCommerceErrorMessage(error));
       } finally {
         setLoading(false);
       }
     };
 
     fetchAuctions();
-  }, []);
+  }, [retryKey]);
 
   // Check if auction is ending soon (within 1 hour)
   const isEndingSoon = (endTime: string) => {
@@ -248,11 +253,23 @@ export default function AuctionsPage() {
     return <PageLoader />;
   }
 
+  if (loadError) {
+    return (
+      <div className="flex min-h-screen flex-col bg-black">
+        <Header />
+        <main className="flex h-screen flex-col items-center justify-center">
+          <LoadError message={loadError} onRetry={() => setRetryKey((key) => key + 1)} />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-12 md:pt-32 lg:px-24 lg:pb-20 lg:pt-36 xl:px-32 3xl:px-40">
+<main className="flex-grow px-4 pb-16 pt-28 xs:px-5 xs:pt-32 sm:px-6 md:px-6 md:pt-32 lg:px-6 lg:pb-20 lg:pt-36 xl:px-6 3xl:px-6">
         <div className="mx-auto max-w-7xl 3xl:max-w-[1600px]">
           {/* Page Header */}
           <div className="mb-8 text-center xs:mb-10 md:mb-12">

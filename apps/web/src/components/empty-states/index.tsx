@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { IconDiamond } from '@tabler/icons-react';
 
 interface EmptyStateProps {
   title: string;
@@ -23,23 +24,26 @@ export function EmptyState({
   secondaryAction,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4 text-center w-full">
-      <h1 className="text-3xl md:text-4xl font-semibold text-white mb-4 font-[family-name:var(--font-bacasime)]">{title}</h1>
-      <p className="text-gray-400 max-w-sm mb-8">{description}</p>
+    <section className="mx-auto flex w-full max-w-xl flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/[0.035] px-6 py-12 text-center sm:px-10 sm:py-14">
+      <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-white/60">
+        <IconDiamond size={20} stroke={1.5} />
+      </div>
+      <h2 className="mb-3 font-[family-name:var(--font-bacasime)] text-3xl text-white md:text-4xl">{title}</h2>
+      <p className="mb-8 max-w-sm text-sm leading-6 text-white/50 sm:text-base">{description}</p>
       {(action || secondaryAction) && (
-        <div className="flex w-[calc(100vw-4rem)] flex-col gap-4 sm:w-auto sm:flex-row justify-center">
+        <div className="flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
           {action && (
             action.href ? (
               <Link
                 href={action.href}
-                className="h-10 w-full rounded-md px-8 font-[family-name:var(--font-inter)] text-base transition-all duration-200 sm:h-11 sm:w-auto sm:rounded-lg sm:px-10 sm:text-lg bg-white text-black hover:bg-white/90 flex items-center justify-center whitespace-nowrap"
+                className="flex h-11 w-full items-center justify-center rounded-xl bg-white px-6 text-sm font-medium text-black transition-colors hover:bg-white/90 sm:w-auto"
               >
                 {action.label}
               </Link>
             ) : (
               <button
                 onClick={action.onClick}
-                className="h-10 w-full rounded-md px-8 font-[family-name:var(--font-inter)] text-base transition-all duration-200 sm:h-11 sm:w-auto sm:rounded-lg sm:px-10 sm:text-lg bg-white text-black hover:bg-white/90 flex items-center justify-center whitespace-nowrap"
+                className="flex h-11 w-full items-center justify-center rounded-xl bg-white px-6 text-sm font-medium text-black transition-colors hover:bg-white/90 sm:w-auto"
               >
                 {action.label}
               </button>
@@ -49,14 +53,14 @@ export function EmptyState({
             secondaryAction.href ? (
               <Link
                 href={secondaryAction.href}
-                className="h-10 w-full rounded-md px-8 font-[family-name:var(--font-inter)] text-base transition-all duration-200 sm:h-11 sm:w-auto sm:rounded-lg sm:px-10 sm:text-lg bg-white/10 text-white hover:bg-white/20 flex items-center justify-center whitespace-nowrap"
+                className="flex h-11 w-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] px-6 text-sm font-medium text-white transition-colors hover:bg-white/10 sm:w-auto"
               >
                 {secondaryAction.label}
               </Link>
             ) : (
               <button
                 onClick={secondaryAction.onClick}
-                className="h-10 w-full rounded-md px-8 font-[family-name:var(--font-inter)] text-base transition-all duration-200 sm:h-11 sm:w-auto sm:rounded-lg sm:px-10 sm:text-lg bg-white/10 text-white hover:bg-white/20 flex items-center justify-center whitespace-nowrap"
+                className="flex h-11 w-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] px-6 text-sm font-medium text-white transition-colors hover:bg-white/10 sm:w-auto"
               >
                 {secondaryAction.label}
               </button>
@@ -64,7 +68,7 @@ export function EmptyState({
           )}
         </div>
       )}
-    </div>
+    </section>
   );
 }
 
@@ -187,6 +191,23 @@ export function OfflineState() {
       title="You're Offline"
       description="Please check your internet connection and try again."
       action={{ label: 'Retry', onClick: () => window.location.reload() }}
+    />
+  );
+}
+
+export function LoadError({
+  message = 'We could not load this content right now.',
+  onRetry,
+}: {
+  message?: string;
+  onRetry: () => void;
+}) {
+  return (
+    <EmptyState
+      title="Unable to Load"
+      description={message}
+      action={{ label: 'Try Again', onClick: onRetry }}
+      secondaryAction={{ label: 'Return Home', href: '/' }}
     />
   );
 }
