@@ -27,7 +27,7 @@
   "dependencies": {
     "@gemsutopia/cache": "workspace:*",
     "@gemsutopia/database": "workspace:*",
-    "better-auth": "^1.4.11",
+    "better-auth": "^1.6.23",
     "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {

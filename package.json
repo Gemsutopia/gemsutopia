@@ -21,11 +21,11 @@
     "@neondatabase/serverless": "^1.0.2",
     "@types/node": "^25.0.6",
     "drizzle-kit": "^0.31.8",
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "^0.45.2",
     "pg": "^8.17.1",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "turbo": "^2.7.5",
+    "turbo": "^2.10.5",
     "typescript": "^5.9.3"
   }
 }
