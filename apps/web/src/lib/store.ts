@@ -74,16 +74,16 @@ const { user: profile } = await store.auth.getProfile()
 await store.wishlist.add('product-uuid')
 const { wishlist } = await store.wishlist.list()
 
-// Checkout with Stripe
-const { url } = await store.payments.createStripeSession({
+// Checkout with PayPal
+const { approveUrl } = await store.payments.createPayPalOrder({
   items: [
-    { name: 'Blue Sapphire', price: 299.99, quantity: 1 }
+    { name: 'Blue Sapphire', unitAmount: 299.99, quantity: 1 }
   ],
+  currency: 'CAD',
   successUrl: `${window.location.origin}/checkout/success`,
   cancelUrl: `${window.location.origin}/cart`,
 })
-// Redirect to Stripe
-window.location.href = url
+window.location.href = approveUrl
 
 // Validate discount
 const { discount } = await store.discounts.validate('SAVE10', 199.99)

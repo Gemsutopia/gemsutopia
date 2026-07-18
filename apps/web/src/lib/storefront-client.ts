@@ -39,6 +39,8 @@ export type Product = {
 	isFeatured: boolean | null
 	category: { id: string; name: string | null; slug: string | null } | null
 	tags: string[] | null
+	variants?: { id: string; name: string | null; sku: string | null; price: string | null; attributes?: Record<string, unknown> | null }[]
+	stock?: { variantId: string; quantity: number }[] | null
 	createdAt: string
 }
 
@@ -84,6 +86,29 @@ export type Order = {
 	createdAt: string
 	shippedAt: string | null
 	deliveredAt: string | null
+	currency?: string | null
+}
+
+export type OrderDetail = Order & {
+	discountAmount: string | null
+	customerNotes: string | null
+	items: Array<{
+		id: string
+		productName: string
+		variantName: string | null
+		sku: string | null
+		unitPrice: string
+		quantity: number
+		totalPrice: string
+	}>
+	shippingAddress: Address | null
+	billingAddress: Address | null
+	payment: {
+		status: string
+		method: string
+		provider: string
+		currency: string
+	} | null
 }
 
 export type Address = {
@@ -351,12 +376,33 @@ export class StorefrontClient {
 			method,
 			headers,
 			body: body ? JSON.stringify(body) : undefined,
+			cache: 'no-store',
+			signal: AbortSignal.timeout(process.env.NODE_ENV === 'development' ? 2500 : 8000),
 		})
 
-		const data = await response.json()
+		const responseText = await response.text()
+		let data: any = {}
+		if (responseText) {
+			try {
+				data = JSON.parse(responseText)
+			} catch {
+				if (!response.ok) {
+					throw new StorefrontError(
+						`QuickDash returned an invalid response (${response.status})`,
+						response.status,
+						{ responseText: responseText.slice(0, 500) }
+					)
+				}
+				throw new StorefrontError('QuickDash returned invalid JSON', 502)
+			}
+		}
 
 		if (!response.ok) {
-			throw new StorefrontError(data.error || 'Request failed', response.status, data)
+			const message =
+				typeof data.error === 'string'
+					? data.error
+					: data.error?.message || data.message || `QuickDash request failed (${response.status})`
+			throw new StorefrontError(message, response.status, data)
 		}
 
 		return data as T
@@ -442,6 +488,35 @@ export class StorefrontClient {
 		get: async (id: string): Promise<{ auction: Auction }> => {
 			return this.request(`/auctions/${id}`)
 		},
+
+		getBids: async (id: string, limit = 20): Promise<{ bids: {
+			id: string
+			amount: string
+			bidderName: string
+			isWinning: boolean
+			status: string
+			createdAt: string
+		}[] }> => {
+			return this.request(`/auctions/${id}/bids`, { params: { limit } })
+		},
+
+		placeBid: async (id: string, data: {
+			amount: number
+			bidderEmail: string
+			bidderName: string
+		}): Promise<{ bid: { id: string; amount: string }; reserveMet: boolean }> => {
+			return this.request(`/auctions/${id}/bids`, {
+				method: 'POST',
+				body: data,
+			})
+		},
+
+		getMyBids: async (): Promise<{
+			bids: Record<string, unknown>[]
+			stats: Record<string, number>
+		}> => {
+			return this.request('/auctions/bids/me')
+		},
 	}
 
 	// ============================================
@@ -494,6 +569,20 @@ export class StorefrontClient {
 			})
 		},
 
+		changePassword: async (data: {
+			currentPassword: string
+			newPassword: string
+		}): Promise<{ success: boolean }> => {
+			return this.request('/auth/password', {
+				method: 'POST',
+				body: data,
+			})
+		},
+
+		deleteAccount: async (): Promise<{ success: boolean }> => {
+			return this.request('/auth/me', { method: 'DELETE' })
+		},
+
 		getAddresses: async (): Promise<{ addresses: Address[] }> => {
 			return this.request('/auth/addresses')
 		},
@@ -518,6 +607,18 @@ export class StorefrontClient {
 	// ============================================
 
 	orders = {
+		track: async (orderNumber: string, email: string): Promise<{ order: Order & {
+			paymentStatus?: string
+			estimatedDelivery?: string | null
+			carrier?: string | null
+			shippingMethod?: string | null
+			shippingDestination?: string | null
+		} }> => {
+			return this.request('/orders/track', {
+				params: { order_number: orderNumber, email },
+			})
+		},
+
 		list: async (customerId: string, options?: {
 			page?: number
 			limit?: number
@@ -533,7 +634,7 @@ export class StorefrontClient {
 			})
 		},
 
-		get: async (orderId: string): Promise<{ order: Order }> => {
+		get: async (orderId: string): Promise<{ order: OrderDetail }> => {
 			return this.request(`/orders/${orderId}`)
 		},
 
@@ -601,24 +702,14 @@ export class StorefrontClient {
 			return result
 		},
 
-		createStripeSession: async (data: {
-			items: { name: string; description?: string; image?: string; price: number; quantity: number }[]
-			successUrl: string
-			cancelUrl: string
-			customerEmail?: string
-			metadata?: Record<string, string>
-			shippingAmount?: number
-			discountAmount?: number
-			discountCode?: string
-		}): Promise<{ sessionId: string; url: string }> => {
-			return this.request('/payments/stripe/checkout', {
-				method: 'POST',
-				body: data,
-			})
-		},
-
 		createPayPalOrder: async (data: {
-			items: { name: string; quantity: number; unitAmount: number }[]
+			items: {
+				name: string
+				quantity: number
+				unitAmount: number
+				productId?: string
+				variantId?: string
+			}[]
 			currency?: string
 			successUrl?: string
 			cancelUrl?: string
@@ -645,63 +736,6 @@ export class StorefrontClient {
 			})
 		},
 
-		createPolarCheckout: async (data: {
-			productId?: string
-			amount?: number
-			currency?: string
-			successUrl?: string
-			metadata?: Record<string, string>
-		}): Promise<{ checkoutId: string; url: string }> => {
-			return this.request('/payments/polar/checkout', {
-				method: 'POST',
-				body: data,
-			})
-		},
-
-		getReownConfig: async (): Promise<{ projectId: string; chains: string[] }> => {
-			return this.request('/payments/reown/config')
-		},
-
-		verifyReownPayment: async (data: {
-			chain: string
-			txHash: string
-			amount: number
-			currency: string
-			walletAddress: string
-			recipientAddress?: string
-		}): Promise<{ verified: boolean; status: string; txHash: string; message: string }> => {
-			return this.request('/payments/reown/verify', {
-				method: 'POST',
-				body: data,
-			})
-		},
-
-		createShopifyCheckout: async (data: {
-			items: { variantId: string; quantity: number }[]
-			email?: string
-			note?: string
-			metadata?: Record<string, string>
-		}): Promise<{ checkoutId: string; webUrl: string }> => {
-			return this.request('/payments/shopify/checkout', {
-				method: 'POST',
-				body: data,
-			})
-		},
-
-		createSquareCheckout: async (data: {
-			items: { name: string; quantity: number; amount: number; note?: string }[]
-			currency?: string
-			successUrl?: string
-			shippingAmount?: number
-			discountAmount?: number
-			discountCode?: string
-			metadata?: Record<string, string>
-		}): Promise<{ paymentLinkId: string; url: string; orderId: string | null }> => {
-			return this.request('/payments/square/checkout', {
-				method: 'POST',
-				body: data,
-			})
-		},
 	}
 
 	// ============================================

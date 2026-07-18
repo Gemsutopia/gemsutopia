@@ -45,23 +45,17 @@ export default function UserSettings() {
 
   // Fetch settings on mount
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const res = await fetch('/api/user/settings');
-        if (res.ok) {
-          const data = await res.json();
-          const settings = data.data?.settings;
-          if (settings) {
-            if (settings.notifications) setNotifications(settings.notifications);
-            if (settings.privacy) setPrivacy(settings.privacy);
-            if (settings.communication) setCommunication(settings.communication);
-          }
-        }
-      } catch {
-        // Silent fail
-      }
-    };
-    if (user) fetchSettings();
+    if (!user) return;
+    try {
+      const saved = localStorage.getItem(`customerPreferences:${user.id}`);
+      if (!saved) return;
+      const settings = JSON.parse(saved);
+      if (settings.notifications) setNotifications(settings.notifications);
+      if (settings.privacy) setPrivacy(settings.privacy);
+      if (settings.communication) setCommunication(settings.communication);
+    } catch {
+      // Keep defaults when local preferences are invalid.
+    }
   }, [user]);
 
   const toggleNotification = (key: keyof typeof notifications) => {
@@ -115,19 +109,12 @@ export default function UserSettings() {
     }
     setIsDeleting(true);
     try {
-      const res = await fetch('/api/user/delete-account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ confirmation: 'DELETE' }),
-      });
-      if (res.ok) {
+      const result = await authClient.deleteAccount();
+      if (!result.error) {
         toast.success('Account deleted. Signing out...');
-        // Sign out after deletion
-        await authClient.signOut();
         window.location.href = '/';
       } else {
-        const data = await res.json();
-        toast.error(data.error?.message || 'Failed to delete account');
+        toast.error(result.error.message || 'Failed to delete account');
       }
     } catch {
       toast.error('Failed to delete account');
@@ -139,16 +126,12 @@ export default function UserSettings() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const res = await fetch('/api/user/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notifications, privacy, communication }),
-      });
-      if (res.ok) {
-        toast.success('Settings saved');
-      } else {
-        toast.error('Failed to save settings');
-      }
+      if (!user) throw new Error('Sign in to save preferences');
+      localStorage.setItem(
+        `customerPreferences:${user.id}`,
+        JSON.stringify({ notifications, privacy, communication })
+      );
+      toast.success('Preferences saved on this device');
     } catch {
       toast.error('Failed to save settings');
     } finally {
@@ -167,6 +150,9 @@ export default function UserSettings() {
           <FontAwesomeIcon icon={faBell} className="text-xl text-purple-600" />
           <h2 className="text-xl font-semibold text-gray-900">Notification Preferences</h2>
         </div>
+        <p className="mb-5 text-sm text-gray-500">
+          These preferences are stored only in this browser until account preference syncing is available.
+        </p>
 
         <div className="space-y-4">
           {Object.entries(notifications).map(([key, value]) => (
@@ -311,23 +297,6 @@ export default function UserSettings() {
             )}
           </div>
 
-          <button className="flex w-full items-center justify-between rounded-lg bg-gray-50 p-4 transition-colors hover:bg-gray-100">
-            <div className="text-left">
-              <h3 className="font-medium text-gray-900">Two-Factor Authentication</h3>
-              <p className="text-sm text-gray-600">Add extra security to your account</p>
-            </div>
-            <span className="rounded bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">
-              Not Enabled
-            </span>
-          </button>
-
-          <button className="flex w-full items-center justify-between rounded-lg bg-gray-50 p-4 transition-colors hover:bg-gray-100">
-            <div className="text-left">
-              <h3 className="font-medium text-gray-900">Login History</h3>
-              <p className="text-sm text-gray-600">View your recent login activity</p>
-            </div>
-            <span className="text-purple-600">→</span>
-          </button>
         </div>
       </div>
 
@@ -381,14 +350,6 @@ export default function UserSettings() {
         </div>
 
         <div className="space-y-4">
-          <button className="flex w-full items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4 transition-colors hover:bg-red-100">
-            <div className="text-left">
-              <h3 className="font-medium text-red-900">Export Account Data</h3>
-              <p className="text-sm text-red-700">Download all your account data</p>
-            </div>
-            <span className="text-red-600">→</span>
-          </button>
-
           <div>
             <button
               onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}

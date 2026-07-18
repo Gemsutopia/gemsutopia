@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { IconChevronDown } from '@tabler/icons-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBetterAuth } from '@/contexts/BetterAuthContext';
+import { store } from '@/lib/store';
 
 interface CustomerData {
   email: string;
@@ -23,6 +24,8 @@ interface CustomerInfoProps {
   data: CustomerData;
   onContinue: (data: CustomerData) => void;
   onAddressChange?: (data: CustomerData) => void;
+  isCalculatingShipping?: boolean;
+  shippingError?: string | null;
 }
 
 const US_STATES = [
@@ -99,7 +102,13 @@ const COUNTRIES = [
   { code: 'United States', name: 'United States', flagClass: 'fi fi-us' },
 ];
 
-export default function CustomerInfo({ data, onContinue, onAddressChange }: CustomerInfoProps) {
+export default function CustomerInfo({
+  data,
+  onContinue,
+  onAddressChange,
+  isCalculatingShipping = false,
+  shippingError,
+}: CustomerInfoProps) {
   const [formData, setFormData] = useState<CustomerData>(data);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isClient, setIsClient] = useState(false);
@@ -210,22 +219,18 @@ export default function CustomerInfo({ data, onContinue, onAddressChange }: Cust
       // Save address to user's account if checkbox is checked
       if (saveAddress && user) {
         try {
-          await fetch('/api/user/addresses', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              label: 'Shipping',
-              firstName: formData.firstName,
-              lastName: formData.lastName,
-              addressLine1: formData.address,
-              addressLine2: formData.apartment || '',
-              city: formData.city,
-              province: formData.state,
-              postalCode: formData.zipCode,
-              country: formData.country,
-              phone: formData.phone || '',
-              isDefault: false,
-            }),
+          await store.auth.addAddress({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            company: null,
+            addressLine1: formData.address,
+            addressLine2: formData.apartment || null,
+            city: formData.city,
+            state: formData.state,
+            postalCode: formData.zipCode,
+            country: formData.country,
+            phone: formData.phone || null,
+            isDefault: false,
           });
         } catch {
           // Non-blocking - don't prevent checkout if save fails
@@ -487,11 +492,24 @@ export default function CustomerInfo({ data, onContinue, onAddressChange }: Cust
       )}
 
       {/* Continue Button */}
+      {shippingError && (
+        <div role="alert" className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3">
+          <p className="text-sm text-red-300">{shippingError}</p>
+          <p className="mt-1 text-xs text-red-200/60">
+            Confirm the country, province or state, and postal code, then retry.
+          </p>
+        </div>
+      )}
       <button
         type="submit"
-        className="mt-6 h-10 w-full rounded-lg bg-white font-[family-name:var(--font-inter)] text-sm font-medium text-black transition-colors hover:bg-white/90 xs:h-11 xs:text-base"
+        disabled={isCalculatingShipping}
+        className="mt-6 h-10 w-full rounded-lg bg-white font-[family-name:var(--font-inter)] text-sm font-medium text-black transition-colors hover:bg-white/90 disabled:cursor-wait disabled:bg-white/30 disabled:text-white/60 xs:h-11 xs:text-base"
       >
-        Continue to Payment
+        {isCalculatingShipping
+          ? 'Calculating shipping…'
+          : shippingError
+            ? 'Retry Shipping'
+            : 'Continue to Payment'}
       </button>
 
       {/* Continue Shopping Link */}

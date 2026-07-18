@@ -6,10 +6,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faMapMarkerAlt,
   faPlus,
-  faEdit,
   faTrash,
-  faStar,
 } from '@fortawesome/free-solid-svg-icons';
+import { getCommerceErrorMessage } from '@/lib/commerce-error';
 
 interface SavedAddress {
   id: string;
@@ -45,16 +44,19 @@ export default function UserAddresses() {
   const [addresses, setAddresses] = useState<SavedAddress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [isSaving, setIsSaving] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) fetchAddresses();
+    else setIsLoading(false);
   }, [user]);
 
   const fetchAddresses = async () => {
     try {
+      setIsLoading(true);
+      setLoadError(null);
       const { store } = await import('@/lib/store');
       const { addresses: quickdashAddresses } = await store.auth.getAddresses();
 
@@ -72,8 +74,8 @@ export default function UserAddresses() {
         phone: addr.phone || undefined,
         isDefault: addr.isDefault || false,
       })));
-    } catch {
-      // Silent fail
+    } catch (error) {
+      setLoadError(getCommerceErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
@@ -86,30 +88,22 @@ export default function UserAddresses() {
     try {
       const { store } = await import('@/lib/store');
 
-      // Quickdash API only supports adding addresses, not editing
-      // For now, we just add new ones
-      if (!editingId) {
-        await store.auth.addAddress({
-          firstName: form.firstName,
-          lastName: form.lastName,
-          company: null,
-          addressLine1: form.addressLine1,
-          addressLine2: form.addressLine2 || null,
-          city: form.city,
-          state: form.province,
-          postalCode: form.postalCode,
-          country: form.country,
-          phone: form.phone || null,
-          isDefault: form.isDefault,
-        });
-        toast.success('Address added');
-      } else {
-        // TODO: Update address endpoint not yet available
-        toast.info('Editing addresses coming soon');
-      }
+      await store.auth.addAddress({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        company: null,
+        addressLine1: form.addressLine1,
+        addressLine2: form.addressLine2 || null,
+        city: form.city,
+        state: form.province,
+        postalCode: form.postalCode,
+        country: form.country,
+        phone: form.phone || null,
+        isDefault: form.isDefault,
+      });
+      toast.success('Address added');
 
       setShowForm(false);
-      setEditingId(null);
       setForm(emptyForm);
       fetchAddresses();
     } catch {
@@ -117,24 +111,6 @@ export default function UserAddresses() {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const handleEdit = (address: SavedAddress) => {
-    setEditingId(address.id);
-    setForm({
-      label: address.label,
-      firstName: address.firstName,
-      lastName: address.lastName,
-      addressLine1: address.addressLine1,
-      addressLine2: address.addressLine2 || '',
-      city: address.city,
-      province: address.province,
-      postalCode: address.postalCode,
-      country: address.country,
-      phone: address.phone || '',
-      isDefault: address.isDefault,
-    });
-    setShowForm(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -150,11 +126,6 @@ export default function UserAddresses() {
     }
   };
 
-  const handleSetDefault = async (_id: string) => {
-    // TODO: Set default address endpoint not yet available in Quickdash
-    toast.info('Setting default address coming soon');
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -168,13 +139,26 @@ export default function UserAddresses() {
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="rounded-lg bg-red-50 p-6 text-center">
+        <p className="mb-4 text-red-800">{loadError}</p>
+        <button
+          onClick={fetchAddresses}
+          className="rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Addresses</h1>
         <button
           onClick={() => {
-            setEditingId(null);
             setForm(emptyForm);
             setShowForm(true);
           }}
@@ -189,7 +173,7 @@ export default function UserAddresses() {
       {showForm && (
         <div className="rounded-lg bg-white p-6 shadow-md">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">
-            {editingId ? 'Edit Address' : 'New Address'}
+            New Address
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -319,13 +303,12 @@ export default function UserAddresses() {
                 disabled={isSaving}
                 className="rounded-lg bg-purple-600 px-6 py-2 text-sm text-white hover:bg-purple-700 disabled:opacity-50"
               >
-                {isSaving ? 'Saving...' : editingId ? 'Update' : 'Add Address'}
+                {isSaving ? 'Saving...' : 'Add Address'}
               </button>
               <button
                 type="button"
                 onClick={() => {
                   setShowForm(false);
-                  setEditingId(null);
                   setForm(emptyForm);
                 }}
                 className="rounded-lg border border-gray-300 px-6 py-2 text-sm text-gray-700 hover:bg-gray-50"
@@ -377,22 +360,6 @@ export default function UserAddresses() {
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  {!address.isDefault && (
-                    <button
-                      onClick={() => handleSetDefault(address.id)}
-                      className="rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-yellow-600"
-                      title="Set as default"
-                    >
-                      <FontAwesomeIcon icon={faStar} />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleEdit(address)}
-                    className="rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-purple-600"
-                    title="Edit"
-                  >
-                    <FontAwesomeIcon icon={faEdit} />
-                  </button>
                   <button
                     onClick={() => handleDelete(address.id)}
                     className="rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-red-600"

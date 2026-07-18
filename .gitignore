@@ -188,3 +188,21 @@ public/uploads/
 # Claude
 .claude/*
 .claude
+
+# Internal AI-agent notes and private project documentation
+.Codex/
+.claude/
+memory/
+docs/
+AGENTS.md
+CLAUDE.md
+FRONTEND_FINISH_PLAN.md
+
+# One-off migration tooling and private data exports/backups
+scripts/
+export/
+*.dump
+/gemsutopia-neon-backup.dump
+
+# Stray tool-generated root temporary files
+/_tmp_*

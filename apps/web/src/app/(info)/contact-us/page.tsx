@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -16,10 +15,15 @@ export default function ContactUs() {
     message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitState, setSubmitState] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitState(null);
 
     try {
       const response = await fetch('/api/contact', {
@@ -28,21 +32,24 @@ export default function ContactUs() {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
-      if (data.success) {
+      if (response.ok && data?.success) {
         toast.success('Message sent!', {
           description: "We'll get back to you soon.",
         });
+        setSubmitState({ type: 'success', message: 'Your message was sent successfully.' });
         setFormData({ name: '', email: '', subject: '', message: '' });
       } else {
-        toast.error('Failed to send message', {
-          description: data.error?.message || 'Please try again.',
+        setSubmitState({
+          type: 'error',
+          message: data?.error?.message || 'Your message could not be sent. Please try again.',
         });
       }
     } catch {
-      toast.error('Connection error', {
-        description: 'Please check your internet and try again.',
+      setSubmitState({
+        type: 'error',
+        message: 'We could not reach support. Check your connection and try again.',
       });
     } finally {
       setIsSubmitting(false);
@@ -52,6 +59,7 @@ export default function ContactUs() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    if (submitState) setSubmitState(null);
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -62,19 +70,7 @@ export default function ContactUs() {
     <div className="flex min-h-screen flex-col bg-black">
       <Header />
 
-      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-32">
-        {/* Background gem logo */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <Image
-            src="/logos/gem2.svg"
-            alt=""
-            width={800}
-            height={800}
-            className="h-[120vw] w-[120vw] animate-[spin_60s_linear_infinite] opacity-[0.06] drop-shadow-[0_0_80px_rgba(255,255,255,0.3)] sm:h-[600px] sm:w-[600px]"
-            aria-hidden="true"
-          />
-        </div>
-
+      <main className="relative min-h-screen grow overflow-hidden px-4 py-24 xs:px-5 sm:px-6 md:px-6 lg:px-6 xl:px-6 3xl:px-6">
         <div className="relative z-10 mx-auto max-w-2xl">
           {/* Back button */}
           <button
@@ -97,6 +93,18 @@ export default function ContactUs() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            {submitState && (
+              <div
+                role={submitState.type === 'error' ? 'alert' : 'status'}
+                className={`rounded-lg border px-4 py-3 text-sm ${
+                  submitState.type === 'success'
+                    ? 'border-green-500/30 bg-green-500/10 text-green-300'
+                    : 'border-red-500/30 bg-red-500/10 text-red-300'
+                }`}
+              >
+                {submitState.message}
+              </div>
+            )}
             <div>
               <label htmlFor="name" className="mb-2 block text-sm font-medium text-white">
                 Name

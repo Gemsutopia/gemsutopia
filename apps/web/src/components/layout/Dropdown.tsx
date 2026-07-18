@@ -114,12 +114,12 @@ export default function Dropdown({ isOpen, onClose }: DropdownProps) {
               Contact
             </a>
             <a
-              href="/social"
+              href="/facebook"
               className="flex items-center gap-3 text-lg font-semibold text-white hover:text-gray-300"
               onClick={onClose}
             >
               <IconShare size={20} />
-              Socials
+              Facebook
             </a>
             <a
               href="/support"

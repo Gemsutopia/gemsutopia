@@ -36,7 +36,10 @@ export default function TrackOrderPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!orderNumber.trim()) return;
+    if (!orderNumber.trim() || !email.trim()) {
+      setError('Enter both the order number and the email used at checkout.');
+      return;
+    }
 
     setLoading(true);
     setError('');
@@ -46,16 +49,28 @@ export default function TrackOrderPage() {
       const params = new URLSearchParams({ orderNumber: orderNumber.trim() });
       if (email.trim()) params.append('email', email.trim());
 
-      const res = await fetch(`/api/orders/track?${params}`);
-      const data = await res.json();
+      const res = await fetch(`/api/orders/track?${params}`, {
+        cache: 'no-store',
+        signal: AbortSignal.timeout(8000),
+      });
+      const data = await res.json().catch(() => null);
 
-      if (!res.ok || !data.success) {
-        setError(data.error?.message || 'Order not found. Please check your order number and try again.');
+      if (!res.ok || !data?.success) {
+        setError(
+          data?.error?.message ||
+            (res.status === 404
+              ? 'Order not found. Check the order number and checkout email.'
+              : 'Order tracking is temporarily unavailable. Please try again.')
+        );
       } else {
         setTracking(data.data);
       }
-    } catch {
-      setError('Something went wrong. Please try again.');
+    } catch (error) {
+      setError(
+        error instanceof DOMException && error.name === 'TimeoutError'
+          ? 'Order tracking took too long to respond. Please try again.'
+          : 'We could not reach order tracking. Check your connection and try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -107,7 +122,7 @@ export default function TrackOrderPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
       <div className="mb-8 text-center">
-        <h1 className="mb-2 font-[family-name:var(--font-cormorant)] text-3xl text-white md:text-4xl">
+        <h1 className="mb-2 font-[family-name:var(--font-bacasime)] text-3xl text-white md:text-4xl">
           Track Your Order
         </h1>
         <p className="text-sm text-white/60">
@@ -133,7 +148,7 @@ export default function TrackOrderPage() {
         </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="email" className="text-xs text-white/70">
-            Email (for guest orders)
+            Checkout Email <span className="text-red-400">*</span>
           </label>
           <input
             type="email"
@@ -141,12 +156,13 @@ export default function TrackOrderPage() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             placeholder="your@email.com"
+            required
             className="rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none transition-colors focus:border-white/30"
           />
         </div>
         <button
           type="submit"
-          disabled={loading || !orderNumber.trim()}
+          disabled={loading || !orderNumber.trim() || !email.trim()}
           className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-white font-[family-name:var(--font-inter)] text-sm font-medium text-black transition-colors hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/20 disabled:text-white/50"
         >
           {loading ? (

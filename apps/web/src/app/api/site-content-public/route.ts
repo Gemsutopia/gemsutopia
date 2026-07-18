@@ -25,7 +25,7 @@ export async function GET() {
 
     return NextResponse.json(
       { success: true, data: { content: mappedContent, count: mappedContent.length } },
-      { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } }
+      { headers: { 'Cache-Control': 'no-store, max-age=0' } }
     );
   } catch {
     return ApiError.internal('Failed to fetch site content');

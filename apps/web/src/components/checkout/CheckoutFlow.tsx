@@ -12,8 +12,8 @@ import PaymentMethods from './PaymentMethods';
 import PaymentForm from './PaymentForm';
 import OrderSuccess from './OrderSuccess';
 import PaymentError from '@/components/error-states/PaymentError';
+import { PageLoader } from '@/components/ui/page-loader';
 import { IconArrowLeft, IconCheck } from '@tabler/icons-react';
-import Image from 'next/image';
 import { getStoredReferralCode, clearStoredReferralCode } from '@/hooks/useReferralTracking';
 
 type CheckoutCurrency = 'CAD' | 'USD';
@@ -64,11 +64,12 @@ interface CheckoutData {
     country: string;
     phone?: string;
   };
-  paymentMethod: 'stripe' | 'paypal' | 'polar' | 'reown' | 'shopify' | 'square' | null;
+  paymentMethod: 'paypal' | null;
   orderTotal: number;
 }
 
 type CheckoutStep = 'cart' | 'customer' | 'payment-method' | 'payment' | 'success' | 'error';
+type CheckoutErrorAction = 'payment' | 'cart' | 'return' | 'support';
 
 export default function CheckoutFlow() {
   const router = useRouter();
@@ -80,6 +81,8 @@ export default function CheckoutFlow() {
   const [preservedItems, setPreservedItems] = useState(items);
   const [preservedSubtotal, setPreservedSubtotal] = useState(0);
   const [currentStep, setCurrentStep] = useState<CheckoutStep>('cart');
+  const [isFinalizingPayment, setIsFinalizingPayment] = useState(false);
+  const [errorAction, setErrorAction] = useState<CheckoutErrorAction>('payment');
   const [checkoutData, setCheckoutData] = useState<CheckoutData>({
     customer: {
       email: '',
@@ -122,7 +125,7 @@ export default function CheckoutFlow() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Handle return from payment provider redirects (Stripe, PayPal, Polar, Shopify, Square)
+  // Handle return from PayPal.
   useEffect(() => {
     const handlePaymentReturn = async () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -130,26 +133,27 @@ export default function CheckoutFlow() {
       const status = urlParams.get('status');
 
       if (!paymentMethod) return;
+      if (paymentMethod !== 'paypal') {
+        window.history.replaceState({}, '', '/checkout');
+        setError('This payment method is no longer supported. Please use PayPal.');
+        setErrorAction('payment');
+        setCurrentStep('error');
+        return;
+      }
 
       // Handle cancellations
       if (status === 'cancelled') {
+        sessionStorage.removeItem('paypalCheckoutData');
         toast.info('Payment cancelled');
+        setCheckoutData(prev => ({ ...prev, paymentMethod: null }));
         setCurrentStep('payment-method');
         window.history.replaceState({}, '', '/checkout');
         return;
       }
 
-      // Map payment methods to sessionStorage keys
-      const storageKeys: Record<string, string> = {
-        stripe: 'stripeCheckoutData',
-        paypal: 'paypalCheckoutData',
-        polar: 'polarCheckoutData',
-        shopify: 'shopifyCheckoutData',
-        square: 'squareCheckoutData',
-      };
-
-      const storageKey = storageKeys[paymentMethod];
-      if (!storageKey) return;
+      const storageKey = 'paypalCheckoutData';
+      let paymentWasCaptured = false;
+      setIsFinalizingPayment(true);
 
       try {
         const checkoutDataStr = sessionStorage.getItem(storageKey);
@@ -157,6 +161,7 @@ export default function CheckoutFlow() {
           const missingDataMessage = 'Checkout data was not found after returning from payment. If PayPal charged the customer, contact support with the PayPal confirmation.';
           toast.error(missingDataMessage);
           setError(missingDataMessage);
+          setErrorAction('support');
           setCurrentStep('error');
           return;
         }
@@ -170,34 +175,24 @@ export default function CheckoutFlow() {
           status: 'paid',
         };
 
-        // Provider-specific capture/verification
-        if (paymentMethod === 'stripe') {
-          const sessionId = urlParams.get('session_id');
-          if (!sessionId) {
-            setCurrentStep('payment-method');
-            return;
-          }
-          paymentRecord.session_id = sessionId;
-        } else if (paymentMethod === 'paypal') {
-          // Capture the PayPal order via storefront API
-          const captureResult = await store.payments.capturePayPalOrder(savedData.orderId);
-          if (captureResult.status !== 'COMPLETED' && !captureResult.captureId) {
-            const paypalMessage = `PayPal payment was not completed. Status: ${captureResult.status || 'unknown'}`;
-            toast.error(paypalMessage);
-            setError(paypalMessage);
-            setCurrentStep('error');
-            return;
-          }
-          paymentRecord.captureID = captureResult.captureId;
-          paymentRecord.externalId = captureResult.captureId || savedData.orderId;
-          paymentRecord.orderId = savedData.orderId;
-        } else if (paymentMethod === 'polar') {
-          paymentRecord.checkoutId = savedData.checkoutId;
-        } else if (paymentMethod === 'shopify') {
-          paymentRecord.checkoutId = savedData.checkoutId;
-        } else if (paymentMethod === 'square') {
-          paymentRecord.orderId = savedData.orderId;
-          paymentRecord.paymentLinkId = savedData.paymentLinkId;
+        const captureResult = savedData.captureResult ||
+          await store.payments.capturePayPalOrder(savedData.orderId);
+        if (captureResult.status !== 'COMPLETED' && !captureResult.captureId) {
+          const paypalMessage = `PayPal payment was not completed. Status: ${captureResult.status || 'unknown'}`;
+          toast.error(paypalMessage);
+          setError(paypalMessage);
+          setErrorAction('return');
+          setCurrentStep('error');
+          return;
+        }
+        paymentWasCaptured = true;
+        paymentRecord.captureID = captureResult.captureId;
+        paymentRecord.externalId = captureResult.captureId || savedData.orderId;
+        paymentRecord.orderId = savedData.orderId;
+
+        if (!savedData.captureResult) {
+          savedData.captureResult = captureResult;
+          sessionStorage.setItem(storageKey, JSON.stringify(savedData));
         }
 
         // Create order via Quickdash storefront API
@@ -224,6 +219,8 @@ export default function CheckoutFlow() {
             price: item.price,
             quantity: item.quantity,
             productId: item.id,
+            variantId: item.variantId,
+            sku: item.sku,
             image: item.image,
           })),
           payment: paymentRecord,
@@ -237,8 +234,9 @@ export default function CheckoutFlow() {
           discountCode: savedData.appliedDiscount || null,
           metadata: {
             paymentProvider: paymentMethod,
-            paypalOrderId: paymentMethod === 'paypal' ? savedData.orderId : undefined,
+            paypalOrderId: savedData.orderId,
             paypalCaptureId: paymentRecord.captureID,
+            checkoutAttemptId: savedData.checkoutAttemptId,
           },
         });
 
@@ -270,7 +268,7 @@ export default function CheckoutFlow() {
         setCheckoutData(prev => ({
           ...prev,
           customer: savedData.customerData,
-          paymentMethod: paymentMethod as any,
+          paymentMethod: 'paypal',
         }));
         setAppliedDiscount(savedData.appliedDiscount || null);
 
@@ -297,7 +295,9 @@ export default function CheckoutFlow() {
       } catch (err) {
         console.error('Checkout error:', err);
         const detail = getCheckoutErrorMessage(err);
-        const supportMessage = `Your payment was successful but we had trouble recording the order. Please contact support with this detail: ${detail}`;
+        const supportMessage = paymentWasCaptured
+          ? `Your payment was successful, but we could not finish recording the order. It is safe to retry this confirmation. Detail: ${detail}`
+          : `We could not finish confirming the PayPal payment. No new payment will be started when you retry. Detail: ${detail}`;
         try {
           localStorage.setItem('lastCheckoutError', JSON.stringify({
             message: detail,
@@ -308,8 +308,11 @@ export default function CheckoutFlow() {
           // Ignore storage failures.
         }
         toast.error(supportMessage);
+        setErrorAction('return');
         setCurrentStep('error');
         setError(supportMessage);
+      } finally {
+        setIsFinalizingPayment(false);
       }
     };
 
@@ -320,10 +323,7 @@ export default function CheckoutFlow() {
   const [error, setError] = useState<string>('');
   const [paymentInfo, setPaymentInfo] = useState<{
     actualAmount: number;
-    cryptoAmount?: number;
     currency: string;
-    cryptoCurrency?: string;
-    cryptoNetwork?: string;
   } | null>(null);
   // TAX REMOVED
   // TAX REMOVED
@@ -360,70 +360,58 @@ export default function CheckoutFlow() {
   // Calculate shipping dynamically with fresh settings
   const [shipping, setShipping] = useState<number>(0); // Start at 0, will load properly
   const [shippingCurrency, setShippingCurrency] = useState<CheckoutCurrency>('CAD');
+  const [shippingError, setShippingError] = useState<string | null>(null);
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
 
   // Shipping calculation function (moved outside useEffect so it can be called manually)
-  const calculateShippingCost = async (forceRefresh = false) => {
+  const calculateShippingCost = async (
+    forceRefresh = false,
+    customer = checkoutData.customer
+  ): Promise<boolean> => {
     // Don't recalculate shipping once we're in payment step (unless forced)
     if (shippingLocked && !forceRefresh) {
-      return;
+      return true;
     }
 
     if (appliedDiscount?.free_shipping) {
       setShipping(0);
       setShippingCurrency(currentCurrency);
-      return;
+      setShippingError(null);
+      return true;
     }
 
     if (items.length === 0) {
       setShipping(0);
       setShippingCurrency(currentCurrency);
-      return;
+      setShippingError(null);
+      return true;
     }
 
+    setIsCalculatingShipping(true);
     try {
-      const country = getShippingCountryCode(checkoutData.customer.country || 'Canada');
+      const country = getShippingCountryCode(customer.country || 'Canada');
       const ratesResult = await store.shipping.getRates({
         country,
-        state: checkoutData.customer.state || undefined,
+        state: customer.state || undefined,
         subtotal,
       });
-      const cheapestRate = ratesResult.rates?.[0];
-      setShipping(cheapestRate?.price ?? 0);
+      const cheapestRate = ratesResult.rates
+        ?.filter(rate => Number.isFinite(rate.price) && rate.price >= 0)
+        .sort((a, b) => a.price - b.price)[0];
+      if (!cheapestRate) {
+        throw new Error('No shipping rate is available for this address');
+      }
+      setShipping(cheapestRate.price);
       setShippingCurrency('CAD');
+      setShippingError(null);
+      return true;
     } catch {
-      setShipping(0);
-      setShippingCurrency(currentCurrency);
+      setShippingError('Shipping could not be calculated. Check the address or try again.');
+      return false;
+    } finally {
+      setIsCalculatingShipping(false);
     }
   };
-
-  // Listen for settings updates
-  React.useEffect(() => {
-    const handleSettingsUpdate = () => {
-      // Reset cached settings and force refetch shipping settings when admin updates them
-      calculateShippingCost(true); // Force refresh even if shipping is locked
-    };
-
-    // Listen for custom events from Settings component
-    window.addEventListener('settings-updated', handleSettingsUpdate);
-
-    // Also listen for storage events (cross-tab updates)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'site-settings-updated') {
-        handleSettingsUpdate();
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('settings-updated', handleSettingsUpdate);
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
-  // UseEffect to trigger shipping calculation when dependencies change
-  React.useEffect(() => {
-    calculateShippingCost();
-  }, [appliedDiscount?.free_shipping, items.length, checkoutData.customer?.country]);
 
   const displaySubtotal = roundMoney(convertPrice(subtotal));
   const displayDiscount = roundMoney(convertPrice(discount));
@@ -525,12 +513,20 @@ export default function CheckoutFlow() {
         setCurrentStep('customer');
         break;
       case 'customer':
+        if (isCalculatingShipping) return;
         updateCheckoutData({ customer: data });
-        // Calculate shipping immediately after customer info is entered
-        await calculateShippingCost();
+        if (!(await calculateShippingCost(false, data))) {
+          toast.error('Shipping could not be calculated for this address');
+          return;
+        }
         setCurrentStep('payment-method');
         break;
       case 'payment-method':
+        if (shippingError) {
+          toast.error(shippingError);
+          setCurrentStep('customer');
+          return;
+        }
         updateCheckoutData({ paymentMethod: data });
         // Lock shipping calculation to prevent recalculation in payment step
         setShippingLocked(true);
@@ -540,10 +536,7 @@ export default function CheckoutFlow() {
         setOrderId(data.orderId);
         setPaymentInfo({
           actualAmount: data.actualAmount || total,
-          cryptoAmount: data.cryptoAmount,
           currency: data.currency || 'CAD',
-          cryptoCurrency: data.cryptoCurrency,
-          cryptoNetwork: data.cryptoNetwork,
         });
 
         // PRESERVE items, subtotal, tax, and shipping for OrderSuccess BEFORE clearing pouch
@@ -566,7 +559,32 @@ export default function CheckoutFlow() {
 
   const handleError = (errorMessage: string) => {
     setError(errorMessage);
+    setErrorAction(
+      /stock|sold out|changed price|price has changed|return to your cart/i.test(errorMessage)
+        ? 'cart'
+        : 'payment'
+    );
     setCurrentStep('error');
+  };
+
+  const handleErrorBack = () => {
+    if (errorAction === 'support' || errorAction === 'return') {
+      router.push('/contact-us');
+      return;
+    }
+    setCurrentStep(errorAction === 'cart' ? 'cart' : 'payment-method');
+  };
+
+  const handleErrorRetry = () => {
+    if (errorAction === 'return') {
+      window.location.reload();
+      return;
+    }
+    if (errorAction === 'support') {
+      router.push('/contact-us');
+      return;
+    }
+    setCurrentStep(errorAction === 'cart' ? 'cart' : 'payment');
   };
 
   const goBack = () => {
@@ -604,6 +622,9 @@ export default function CheckoutFlow() {
 
   // Don't redirect if we're completing a payment return, showing success, or showing an error
   const isPaymentReturn = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('payment_method');
+  if (isFinalizingPayment) {
+    return <PageLoader message="Confirming your PayPal payment and securing your order…" />;
+  }
   if (items.length === 0 && currentStep !== 'success' && currentStep !== 'error' && !isPaymentReturn && preservedItems.length === 0) {
     if (typeof window !== 'undefined') {
       window.location.href = '/gem-pouch';
@@ -613,19 +634,7 @@ export default function CheckoutFlow() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
-      {/* Background gem logo */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <Image
-          src="/logos/gem2.svg"
-          alt=""
-          width={800}
-          height={800}
-          className="h-[120vw] w-[120vw] animate-[spin_60s_linear_infinite] opacity-[0.06] drop-shadow-[0_0_80px_rgba(255,255,255,0.3)] sm:h-[600px] sm:w-[600px]"
-          aria-hidden="true"
-        />
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-20 xs:px-5 xs:pt-24 sm:px-6 md:px-12 md:pt-24 lg:px-24 lg:pb-20 lg:pt-28 xl:px-32">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-20 xs:px-5 xs:pt-24 sm:px-6 md:px-6 md:pt-24 lg:px-6 lg:pb-20 lg:pt-28 xl:px-6 3xl:px-6">
         {/* Back Button */}
         {currentStep !== 'success' && (
           <button
@@ -707,10 +716,11 @@ export default function CheckoutFlow() {
               <CustomerInfo
                 data={checkoutData.customer}
                 onContinue={customerData => handleStepComplete('customer', customerData)}
+                isCalculatingShipping={isCalculatingShipping}
+                shippingError={shippingError}
                 onAddressChange={customerData => {
                   updateCheckoutData({ customer: customerData });
-                  // TRIGGER SHIPPING RECALCULATION IMMEDIATELY
-                  calculateShippingCost();
+                  setShippingError(null);
                 }}
               />
             )}
@@ -726,6 +736,7 @@ export default function CheckoutFlow() {
                 currency={currentCurrency}
                 customerData={checkoutData.customer}
                 items={displayItems}
+                validationItems={items}
                 appliedDiscount={appliedDiscount ? { ...appliedDiscount, amount: displayDiscount } : null}
                 subtotal={displaySubtotal}
                 shipping={displayShipping}
@@ -742,13 +753,10 @@ export default function CheckoutFlow() {
                     customerEmail={checkoutData.customer.email}
                     customerName={`${checkoutData.customer.firstName} ${checkoutData.customer.lastName}`}
                     amount={paymentInfo?.actualAmount || total}
-                    cryptoAmount={paymentInfo?.cryptoAmount}
                     currency={paymentInfo?.currency || 'CAD'}
-                    cryptoCurrency={paymentInfo?.cryptoCurrency}
                     items={preservedItems}
                     subtotal={preservedSubtotal}
                     shipping={finalShipping || shipping}
-                    paymentMethod={checkoutData.paymentMethod || undefined}
                     appliedDiscount={appliedDiscount ? { ...appliedDiscount, amount: displayDiscount } : undefined}
                     shippingAddress={checkoutData.customer}
                   />
@@ -759,8 +767,11 @@ export default function CheckoutFlow() {
             {currentStep === 'error' && (
               <PaymentError
                 message={error}
-                onBack={() => setCurrentStep('payment-method')}
-                onRetry={() => setCurrentStep('payment')}
+                title={errorAction === 'return' ? 'Order Confirmation Interrupted' : undefined}
+                backLabel={errorAction === 'return' || errorAction === 'support' ? 'Contact Support' : errorAction === 'cart' ? 'Review Cart' : 'Back'}
+                retryLabel={errorAction === 'return' ? 'Retry Confirmation' : errorAction === 'support' ? 'Contact Support' : errorAction === 'cart' ? 'Review Cart' : 'Try Again'}
+                onBack={handleErrorBack}
+                onRetry={handleErrorRetry}
               />
             )}
           </div>
