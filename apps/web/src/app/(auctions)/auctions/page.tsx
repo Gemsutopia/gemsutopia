@@ -412,7 +412,7 @@ export default function AuctionsPage() {
                       src={
                         auction.images?.[auction.featuredImageIndex || 0] ||
                         auction.images?.[0] ||
-                        '/images/placeholder.jpg'
+                        '/images/products/gem.png'
                       }
                       alt={auction.title}
                       fill

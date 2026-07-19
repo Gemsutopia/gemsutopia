@@ -54,13 +54,7 @@ interface AuctionContentProps {
   auction: Auction;
 }
 
-const placeholderMedia = [
-  '/images/products/gem.png',
-  '/images/products/gem2.png',
-  '/images/products/gem3.png',
-  '/images/products/gem4.png',
-  '/images/products/gem5.png',
-];
+const fallbackImage = '/images/products/gem.png';
 
 export default function AuctionContent({ auction: initialAuction }: AuctionContentProps) {
   const { formatPrice } = useCurrency();
@@ -70,7 +64,7 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
   const { data: auctionData, update: updateAuction } = useRealtimeAuction(initialAuction.id);
 
   const rawAuction = (auctionData as Auction | null) || initialAuction;
-  const images = rawAuction.images?.length > 0 ? rawAuction.images : placeholderMedia;
+  const images = rawAuction.images?.length > 0 ? rawAuction.images : [fallbackImage];
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -657,8 +651,7 @@ export default function AuctionContent({ auction: initialAuction }: AuctionConte
             </h2>
             <div className="scrollbar-none -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 xs:-mx-5 xs:gap-4 xs:px-5 sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible md:px-0 lg:gap-5 xl:gap-6">
               {otherAuctions.map((auction) => {
-                const auctionImages =
-                  auction.images?.length > 0 ? auction.images : placeholderMedia;
+                const auctionImages = auction.images?.length > 0 ? auction.images : [fallbackImage];
                 const isEnded =
                   auction.status !== 'active' || new Date(auction.endTime) <= new Date();
                 return (

@@ -18,7 +18,6 @@ export default function robots(): MetadataRoute.Robots {
           '/gem-pouch',
           '/sign-in',
           '/sign-up',
-          '/signup',
         ],
       },
       // Block aggressive crawlers entirely

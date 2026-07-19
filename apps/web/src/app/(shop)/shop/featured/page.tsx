@@ -102,7 +102,7 @@ export default function FeaturedPage() {
         featured
           .filter((p) => {
             const img = p.thumbnail || (p.images && p.images[0]);
-            return img && img.trim() !== '' && img !== '/images/placeholder.jpg';
+            return img && img.trim() !== '';
           })
           .map((p) => ({
             id: p.id,

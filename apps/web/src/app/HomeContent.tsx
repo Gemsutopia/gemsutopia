@@ -236,9 +236,7 @@ export default function HomeContent({
   const reviewsTitle = getContent('reviews', 'title');
 
   const marqueeProducts = featuredProducts
-    .filter(
-      (p) => p.image_url && p.image_url.trim() !== '' && p.image_url !== '/images/placeholder.jpg'
-    )
+    .filter((p) => p.image_url && p.image_url.trim() !== '')
     .map((p) => ({
       id: p.id,
       name: p.name,
