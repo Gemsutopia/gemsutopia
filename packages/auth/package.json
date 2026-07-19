@@ -33,6 +33,6 @@
   "devDependencies": {
     "@gemsutopia/tsconfig": "workspace:*",
     "@types/jsonwebtoken": "^9.0.10",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   }
 }
