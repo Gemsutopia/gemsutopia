@@ -29,6 +29,6 @@
   "devDependencies": {
     "@gemsutopia/tsconfig": "workspace:*",
     "drizzle-kit": "^0.31.8",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   }
 }
