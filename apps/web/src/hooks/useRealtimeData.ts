@@ -1,11 +1,11 @@
 'use client';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  usePusherConnection,
-  useChannel,
   CHANNELS,
   EVENTS,
   getPusherClient,
+  useChannel,
+  usePusherConnection,
 } from '@/lib/pusher-client';
 
 // Connection status indicator
@@ -66,10 +66,10 @@ export function useRealtimeData<T>(
   useEffect(() => {
     if (!options?.channel || !options?.events || mode !== 'websocket') return;
 
-    const unbindFns = options.events.map(event => bind(event, () => fetchData()));
+    const unbindFns = options.events.map((event) => bind(event, () => fetchData()));
 
     return () => {
-      unbindFns.forEach(unbind => unbind());
+      unbindFns.forEach((unbind) => unbind());
     };
   }, [bind, options?.channel, options?.events, mode, fetchData]);
 
@@ -87,7 +87,7 @@ export function useRealtimeData<T>(
     }
 
     // Optimistic update
-    setData(prev => (prev ? { ...prev, ...updateData } : null));
+    setData((prev) => (prev ? { ...prev, ...updateData } : null));
     return true;
   };
 
@@ -145,7 +145,7 @@ export function useRealtimeAuction(id: string) {
       (bidData: { auctionId: string; amount: string; bidCount: number }) => {
         if (bidData.auctionId !== id) return;
         const bidAmount = Number(bidData.amount);
-        setData(prev =>
+        setData((prev) =>
           prev
             ? {
                 ...prev,
@@ -164,7 +164,7 @@ export function useRealtimeAuction(id: string) {
       EVENTS.AUCTION_ENDED,
       (endData: { auctionId: string; winningBid?: string; status: string }) => {
         if (endData.auctionId !== id) return;
-        setData(prev =>
+        setData((prev) =>
           prev
             ? {
                 ...prev,
@@ -192,7 +192,7 @@ export function useRealtimeAuction(id: string) {
   }, [mode, fetchAuction]);
 
   const update = async (updateData: Partial<Record<string, unknown>>) => {
-    setData(prev => (prev ? { ...prev, ...updateData } : null));
+    setData((prev) => (prev ? { ...prev, ...updateData } : null));
     return true;
   };
 
@@ -242,16 +242,17 @@ export function useRealtimeAuctions() {
     const unbindBid = bind(
       EVENTS.BID_PLACED,
       (bidData: { auctionId: string; amount: string; bidCount: number }) => {
-        setData(prev =>
-          prev?.map(auction =>
-            auction.id === bidData.auctionId
-              ? {
-                  ...auction,
-                  currentBid: bidData.amount,
-                  bidCount: bidData.bidCount,
-                }
-              : auction
-          ) || null
+        setData(
+          (prev) =>
+            prev?.map((auction) =>
+              auction.id === bidData.auctionId
+                ? {
+                    ...auction,
+                    currentBid: bidData.amount,
+                    bidCount: bidData.bidCount,
+                  }
+                : auction
+            ) || null
         );
       }
     );
@@ -324,21 +325,18 @@ export function useRealtimeProducts() {
   useEffect(() => {
     if (mode !== 'websocket') return;
 
-    const unbindInventory = bindInventory(
-      EVENTS.STOCK_UPDATED,
-      () => fetchProducts()
-    );
+    const unbindInventory = bindInventory(EVENTS.STOCK_UPDATED, () => fetchProducts());
     const productEvents = [
       EVENTS.PRODUCT_CREATED,
       EVENTS.PRODUCT_UPDATED,
       EVENTS.PRODUCT_DELETED,
       EVENTS.PRODUCT_BULK_UPDATED,
     ];
-    const unbindProducts = productEvents.map(event => bindProducts(event, fetchProducts));
+    const unbindProducts = productEvents.map((event) => bindProducts(event, fetchProducts));
 
     return () => {
       unbindInventory();
-      unbindProducts.forEach(unbind => unbind());
+      unbindProducts.forEach((unbind) => unbind());
     };
   }, [bindInventory, bindProducts, mode, fetchProducts]);
 
@@ -426,53 +424,5 @@ export function useRealtimeBidding(auctionId: string) {
     loading: auction.loading || bids.loading,
     placeBid,
     isConnected: auction.isConnected,
-  };
-}
-
-// Inventory hook with real-time updates
-export function useRealtimeInventory(productId?: string) {
-  const products = useRealtimeProducts();
-  const { mode } = useRealtimeConnection();
-
-  const updateInventory = async (_id: string, _newStock: number) => {
-    // TODO: Implement inventory update API call
-    return true;
-  };
-
-  const decreaseStock = async (id: string, amount: number = 1) => {
-    const product = Array.isArray(products.data)
-      ? products.data.find((p: Record<string, unknown>) => p.id === id)
-      : null;
-    if (product && (product.inventory as number) >= amount) {
-      return updateInventory(id, (product.inventory as number) - amount);
-    }
-    return false;
-  };
-
-  const increaseStock = async (id: string, amount: number = 1) => {
-    const product = Array.isArray(products.data)
-      ? products.data.find((p: Record<string, unknown>) => p.id === id)
-      : null;
-    if (product) {
-      return updateInventory(id, (product.inventory as number) + amount);
-    }
-    return false;
-  };
-
-  const getStock = (id: string) => {
-    const product = Array.isArray(products.data)
-      ? products.data.find((p: Record<string, unknown>) => p.id === id)
-      : null;
-    return (product?.inventory as number) || 0;
-  };
-
-  return {
-    products: products.data,
-    loading: products.loading,
-    updateInventory,
-    decreaseStock,
-    increaseStock,
-    getStock,
-    mode,
   };
 }

@@ -80,7 +80,7 @@ export default async function EndingSoonAuctions() {
                     )}
 
                     <Image
-                      src={auction.images?.[0] || '/images/placeholder.jpg'}
+                      src={auction.images?.[0] || '/images/products/gem.png'}
                       alt={auction.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"

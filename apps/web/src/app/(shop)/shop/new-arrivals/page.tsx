@@ -99,7 +99,7 @@ export default function NewArrivalsPage() {
             name: product.name,
             price: Number(product.price),
             originalPrice: Number(product.compareAtPrice || product.price),
-            image: product.thumbnail || product.images?.[0] || '/images/placeholder.jpg',
+            image: product.thumbnail || product.images?.[0] || '/images/products/gem.png',
             stock:
               product.stock?.reduce((total, item) => total + Math.max(0, item.quantity), 0) ?? 0,
           }))

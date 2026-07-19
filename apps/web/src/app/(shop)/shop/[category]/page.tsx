@@ -170,7 +170,7 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
           originalPrice: product.compareAtPrice
             ? parseFloat(product.compareAtPrice)
             : parseFloat(product.price),
-          image: product.thumbnail || product.images?.[0] || '/images/placeholder.jpg',
+          image: product.thumbnail || product.images?.[0] || '/images/products/gem.png',
           images: product.images || [],
           featuredImageIndex: 0,
           stock: product.stock?.reduce((total, item) => total + Math.max(0, item.quantity), 0) ?? 0,

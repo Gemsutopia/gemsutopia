@@ -57,22 +57,10 @@ interface ProductContentProps {
   product: Product;
 }
 
-const placeholderMedia = [
-  '/images/products/gem.png',
-  '/images/products/gem2.png',
-  '/images/products/gem3.png',
-  '/images/products/gem4.png',
-  '/images/products/gem5.png',
-  '/images/products/gem6.png',
-  '/images/products/gem7.png',
-  '/images/products/gem8.png',
-  '/images/products/gem9.png',
-  '/images/products/gem10.png',
-  '/images/products/gem11.png',
-];
+const fallbackImage = '/images/products/gem.png';
 
 export default function ProductContent({ product }: ProductContentProps) {
-  const images = product.images?.length ? product.images : placeholderMedia;
+  const images = product.images?.length ? product.images : [fallbackImage];
   const [selectedImage, setSelectedImage] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -102,7 +90,7 @@ export default function ProductContent({ product }: ProductContentProps) {
             type: p.category?.id || '',
             price: parseFloat(p.price),
             originalPrice: p.compareAtPrice ? parseFloat(p.compareAtPrice) : parseFloat(p.price),
-            image: p.thumbnail || p.images?.[0] || '/images/placeholder.jpg',
+            image: p.thumbnail || p.images?.[0] || fallbackImage,
             images: p.images || [],
             featuredImageIndex: 0,
             stock: p.stock?.reduce((total, item) => total + Math.max(0, item.quantity), 0) ?? 0,
@@ -131,7 +119,7 @@ export default function ProductContent({ product }: ProductContentProps) {
       id: product.id,
       name: product.name,
       price: Number(product.price) || 0,
-      image: product.images?.[0] || placeholderMedia[0],
+      image: product.images?.[0] || fallbackImage,
     });
   }, [product.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -712,7 +700,7 @@ export default function ProductContent({ product }: ProductContentProps) {
             </h2>
             <div className="scrollbar-none -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 xs:-mx-5 xs:gap-4 xs:px-5 sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible md:px-0 lg:gap-5 xl:gap-6">
               {similarProducts.map((item) => {
-                const itemImages = item.images?.length > 0 ? item.images : placeholderMedia;
+                const itemImages = item.images?.length > 0 ? item.images : [fallbackImage];
                 const isOnSale = item.onSale || item.on_sale;
                 const displayPrice =
                   isOnSale && (item.salePrice || item.sale_price)
